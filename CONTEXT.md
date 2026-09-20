@@ -6,7 +6,7 @@ Monkobra is a 3D vertical upward-scrolling game: a monkey climbs an endless tree
 
 | Aspect | Value |
 | --- | --- |
-| Engine | Unity |
+| Engine | Unity 6 (`6000.3.22f1`), URP |
 | Genre | 3D obstacle-running (*Temple Run 2*, *Subway Surfers*, *Minion Rush*) |
 | Course | USC CSCI-526, Fall 2026 |
 | Team | Yuqing Lu, Yangyi Lu (Erik) |
@@ -15,17 +15,24 @@ Monkobra is a 3D vertical upward-scrolling game: a monkey climbs an endless tree
 
 ```text
 monkobra/
-├── .gitignore    Unity template ignore rules
-├── README.md     human onboarding
-├── AGENTS.md     agent rules
-└── CONTEXT.md    this file
+├── .gitignore         Unity template ignore rules
+├── README.md          human onboarding
+├── AGENTS.md          agent rules
+├── CONTEXT.md         this file
+├── Assets/
+│   ├── _Monkobra/     all authored assets, <Type>/<Module>/<asset>
+│   │   ├── Scenes/    SampleScene.unity (placeholder)
+│   │   └── Settings/_Shared/  URP renderer & pipeline assets, input actions
+│   └── Readme.asset   Unity template leftover
+├── Packages/          manifest & lock
+└── ProjectSettings/   Unity project settings
 ```
 
-No Unity project files (`Assets/`, `ProjectSettings/`) are committed yet.
+The repository root is the Unity project root. `Library/`, `Temp/`, `Logs/`, `UserSettings/`, `*.csproj`, and `*.slnx` are ignored.
 
 ## Gameplay Model
 
-Intended design, taken from the prototype document. Nothing is implemented in this repository yet.
+Intended design, taken from the prototype document. Only the Unity template scene and URP settings exist so far; no gameplay is implemented.
 
 | Element | Behavior |
 | --- | --- |
@@ -52,7 +59,7 @@ graph LR
 
 ## Known Gaps & Constraints
 
-- No Unity project, scripts, scenes, or tests exist yet
+- No gameplay scripts, prefabs, or tests exist yet; the scene is the template `SampleScene`
 - No build, run, or test commands are defined
 - The prototype's WebGL link, gameplay video, and contributions belong to a different team's submission and do not describe this repository
 
