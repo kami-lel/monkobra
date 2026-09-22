@@ -1,16 +1,23 @@
 using UnityEngine;
 
-public class MonkeyPrefabRoot : MonoBehaviour
-{
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
+public class MonkeyPrefabRoot: MonoBehaviour {
+    // Inspector Fields  #######################################################
+    [SerializeField]
+    private Transform treeParent;
+
+    // MonoBehaviour Lifecycle  ################################################
+    private void Awake() {
+        // Inspector Assignment Guard  -----------------------------------------
+        if (treeParent == null) {
+            Debug.LogWarning("must assign Inspector Field: treeParent", this);
+        }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+    private void Start() {
+
+    }
+
+    private void Update() {
+
     }
 }
