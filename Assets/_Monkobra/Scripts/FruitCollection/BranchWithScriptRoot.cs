@@ -33,7 +33,8 @@ public class BranchWithScriptRoot: MonoBehaviour {
     // Constants  ###############################################################
     private const float BANANA_SPAWN_PROBABILITY = 0.5f;
     private const float STEM_Y_SCALE_MIN = 0.5f;
-    private const float STEM_Y_SCALE_MAX = 1.5f;
+    private const float STEM_Y_SCALE_MAX = 2.0f;
+    private const float BANANA_Y_OFFSET = -.2f;
 
     // Private Methods  #########################################################
     private void AttachBanana() {
@@ -47,6 +48,9 @@ public class BranchWithScriptRoot: MonoBehaviour {
             new Vector3(stemScale.x, stemScale.y * stemYScale, stemScale.z);
 
         banana.transform.localPosition =
-            stemBasePosition + bananaBaseOffset * stemYScale;
+            stemBasePosition + bananaBaseOffset * stemYScale +
+            Vector3.up * BANANA_Y_OFFSET;
+        banana.transform.localRotation =
+            Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
     }
 }
