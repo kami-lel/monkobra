@@ -13,6 +13,9 @@ public class BranchWithScriptRoot: MonoBehaviour {
     [SerializeField]
     private GameObject bananaStem;
 
+    [SerializeField]
+    private float bananaSpawnProbability = 0.5f;
+
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
         // Inspector Assignment Guard  -----------------------------------------
@@ -22,7 +25,7 @@ public class BranchWithScriptRoot: MonoBehaviour {
             return;
         }
 
-        if (Random.value <= BANANA_SPAWN_PROBABILITY) {
+        if (Random.value <= bananaSpawnProbability) {
             AttachBanana();
         } else {
             banana.SetActive(false);
@@ -31,7 +34,6 @@ public class BranchWithScriptRoot: MonoBehaviour {
     }
 
     // Constants  ###############################################################
-    private const float BANANA_SPAWN_PROBABILITY = 0.5f;
     private const float STEM_Y_SCALE_MIN = 0.5f;
     private const float STEM_Y_SCALE_MAX = 2.0f;
     private const float BANANA_Y_OFFSET = -.2f;

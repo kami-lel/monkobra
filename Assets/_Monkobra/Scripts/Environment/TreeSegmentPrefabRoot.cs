@@ -1,6 +1,9 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-// BUG true randomness generate cluster of branches
+
+// fixme improve branch placement randomness
+//
 
 /// <summary>
 /// Prefab root for one tree segment. Registers itself with the
@@ -33,6 +36,9 @@ public class TreeSegmentPrefabRoot: MonoBehaviour {
     [SerializeField]
     private float branchRadius = 6.6f;
 
+    [SerializeField]
+    private float minBranchSeparation = 3f;
+
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
         // Inspector Assignment Guard  -----------------------------------------
@@ -62,25 +68,50 @@ public class TreeSegmentPrefabRoot: MonoBehaviour {
         }
     }
 
+    // Constants  ###############################################################
+    private const int MAX_PLACEMENT_ATTEMPTS = 30;
+
     // Private Methods  #########################################################
     private void GenerateBranches() {
         float segmentHeight = GetHeight();
+        List<Vector3> placedPositions = new();
 
         int branchCount = Random.Range(minBranchCount, maxBranchCount + 1);
         for (int i = 0; i < branchCount; i++) {
-            SpawnBranch(segmentHeight);
+            SpawnBranch(segmentHeight, placedPositions);
         }
     }
 
-    private void SpawnBranch(float segmentHeight) {
-        Quaternion branchRotation =
-            Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
-        float branchHeight = Random.Range(0f, segmentHeight);
-        Vector3 branchPosition = branchRotation * Vector3.forward *
-                                  branchRadius + Vector3.up * branchHeight;
+    private void SpawnBranch(float segmentHeight,
+                              List<Vector3> placedPositions) {
+        Quaternion branchRotation = Quaternion.identity;
+        Vector3 branchPosition = Vector3.zero;
+
+        for (int attempt = 0; attempt < MAX_PLACEMENT_ATTEMPTS; attempt++) {
+            branchRotation = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
+            float branchHeight = Random.Range(0f, segmentHeight);
+            branchPosition = branchRotation * Vector3.forward *
+                              branchRadius + Vector3.up * branchHeight;
+
+            if (IsFarEnoughFromExisting(branchPosition, placedPositions)) {
+                break;
+            }
+        }
+
+        placedPositions.Add(branchPosition);
 
         GameObject branch = Instantiate(branchWithFruitPrefab, transform);
         branch.transform.SetLocalPositionAndRotation(branchPosition,
                                                         branchRotation);
+    }
+
+    private bool IsFarEnoughFromExisting(Vector3 candidate,
+                                          List<Vector3> placedPositions) {
+        foreach (Vector3 placed in placedPositions) {
+            if (Vector3.Distance(candidate, placed) < minBranchSeparation) {
+                return false;
+            }
+        }
+        return true;
     }
 }
