@@ -6,9 +6,10 @@ using UnityEngine.InputSystem;
 /// Owns the 3 camera views under the monkey's <c>CameraRig</c> and swaps
 /// which one is live. Defaults to behind. While the interact action is
 /// held, switches to look-left/look-right based on
-/// <see cref="UpwardFruitDetection"/> (left wins if both sides are
-/// reachable); releasing it, or holding it with no fruit reachable,
-/// returns to behind. Swap is done by raising the live camera's
+/// <see cref="UpwardFruitDetection"/> (right only if fruit is reachable
+/// there and not on the left; left otherwise, including when neither side
+/// has reachable fruit). Releasing the action returns to behind. Swap is
+/// done by raising the live camera's
 /// <see cref="CinemachineCamera.Priority"/> above the other two. The
 /// <c>CinemachineBrain</c> on the main camera handles the actual blend.
 /// </summary>
@@ -106,9 +107,9 @@ public class CameraRigManager: MonoBehaviour {
     // private methods  ########################################################
     private void UpdateActiveView() {
         CameraView desiredView = !isInteractHeld ? CameraView.Behind
-            : fruitDetection.ReachForLeft ? CameraView.Left
-            : fruitDetection.ReachForRight ? CameraView.Right
-            : CameraView.Behind;
+            : fruitDetection.ReachForRight && !fruitDetection.ReachForLeft
+                ? CameraView.Right
+                : CameraView.Left;
 
         if (desiredView == activeView) {
             return;
@@ -116,6 +117,12 @@ public class CameraRigManager: MonoBehaviour {
 
         activeView = desiredView;
         ApplyPriorities();
+
+        if (activeView == CameraView.Left) {
+            Debug.Log("look-left camera activated", this);
+        } else if (activeView == CameraView.Right) {
+            Debug.Log("look-right camera activated", this);
+        }
 
         if (Debug.isDebugBuild) {
             Debug.Log($"camera view switched, activeView={activeView}");

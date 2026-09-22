@@ -141,7 +141,7 @@ MonoBehaviour:
   lookLeftCamera: {fileID: 6339010546189930993}
   lookRightCamera: {fileID: 5849836870128490279}
   fruitDetection: {fileID: 9198043481806832196}
-  interactAction: {fileID: 1120369429361536294, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  interactAction: {fileID: 1781555164194001046, guid: 052faaac586de48259a63d0c4782560b, type: 3}
 --- !u!1 &1602697259893314259
 GameObject:
   m_ObjectHideFlags: 0
