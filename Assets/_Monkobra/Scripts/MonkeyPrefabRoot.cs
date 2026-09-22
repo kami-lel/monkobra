@@ -7,8 +7,7 @@ using UnityEngine.InputSystem;
 /// it around this object's own parent's root at a fixed radius, so
 /// motion stays relative to wherever the prefab is parented.
 /// </summary>
-public class MonkeyPrefabRoot : MonoBehaviour
-{
+public class MonkeyPrefabRoot: MonoBehaviour {
     // Inspector Fields  #######################################################
     [Tooltip("climb speed along world Y, in units/s")]
     [SerializeField]
@@ -22,40 +21,34 @@ public class MonkeyPrefabRoot : MonoBehaviour
     private InputActionReference moveAction;
 
     // MonoBehaviour Lifecycle  ################################################
-    private void Awake()
-    {
+    private void Awake() {
         // Inspector Assignment Guard  -----------------------------------------
-        if (moveAction == null)
-        {
+        if (moveAction == null) {
             Debug.LogWarning("must assign Inspector Field: moveAction", this);
         }
 
-        if (transform.parent == null)
-        {
+        if (transform.parent == null) {
             Debug.LogError("fail to get Transform: parent", this);
         }
 
         body = GetComponent<Rigidbody>();
-        if (body == null)
-        {
+        if (body == null) {
             Debug.LogError("fail to get Component: Rigidbody", this);
         }
 
         orbitAngleDeg = CalcCurrentOrbitAngle();
+        orbitRadius = CalcCurrentOrbitRadius();
     }
 
-    private void OnEnable()
-    {
+    private void OnEnable() {
         moveAction.action.Enable();
     }
 
-    private void OnDisable()
-    {
+    private void OnDisable() {
         moveAction.action.Disable();
     }
 
-    private void FixedUpdate()
-    {
+    private void FixedUpdate() {
         Vector2 directionalInput = moveAction.action.ReadValue<Vector2>();
 
         orbitAngleDeg -= directionalInput.x * rotationSpeed * Time.fixedDeltaTime;
@@ -69,28 +62,30 @@ public class MonkeyPrefabRoot : MonoBehaviour
         velocity.y = directionalInput.y * verticalSpeed;
 
         body.linearVelocity = velocity;
+        body.MoveRotation(Quaternion.Euler(0f, orbitAngleDeg, 0f));
     }
-
-    // constants  ##############################################################
-    private const float ORBIT_RADIUS = 20.0f;  // fixed dist kept from parent's root
 
     // private members  ########################################################
     private float orbitAngleDeg;
+    private float orbitRadius;  // dist kept from parent's root, set once in Awake
 
     // cached references  ------------------------------------------------------
     private Rigidbody body;
 
     // private methods  ########################################################
-    private Vector3 CalcOrbitOffset(float angleDeg)
-    {
+    private Vector3 CalcOrbitOffset(float angleDeg) {
         float angleRad = angleDeg * Mathf.Deg2Rad;
         return new Vector3(Mathf.Sin(angleRad), 0f, Mathf.Cos(angleRad))
-               * ORBIT_RADIUS;
+               * orbitRadius;
     }
 
-    private float CalcCurrentOrbitAngle()
-    {
+    private float CalcCurrentOrbitAngle() {
         Vector3 toSelf = transform.position - transform.parent.position;
         return Mathf.Atan2(toSelf.x, toSelf.z) * Mathf.Rad2Deg;
+    }
+
+    private float CalcCurrentOrbitRadius() {
+        Vector3 toSelf = transform.position - transform.parent.position;
+        return new Vector2(toSelf.x, toSelf.z).magnitude;
     }
 }

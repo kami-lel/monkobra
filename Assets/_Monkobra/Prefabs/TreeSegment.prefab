@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 1787845887736348007}
   - component: {fileID: 1222433148748121222}
   - component: {fileID: 4450513656053953933}
-  - component: {fileID: 498932959143861197}
   m_Layer: 0
   m_Name: TreeSegment
   m_TagString: Untagged
@@ -91,29 +90,6 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &498932959143861197
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1763299981051592615}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5000001
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
 --- !u!1 &3529785499225971715
 GameObject:
   m_ObjectHideFlags: 0
@@ -125,7 +101,7 @@ GameObject:
   - component: {fileID: 3361511428925275310}
   - component: {fileID: 8621619024428150369}
   - component: {fileID: 6203606343771423161}
-  - component: {fileID: 4079463036866179664}
+  - component: {fileID: 4926362654466408456}
   m_Layer: 0
   m_Name: Branch3
   m_TagString: Untagged
@@ -205,7 +181,7 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &4079463036866179664
+--- !u!65 &4926362654466408456
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -224,8 +200,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 0.99999976, y: 1.0000001, z: 0.9999998}
+  m_Center: {x: 0, y: -0.00000023841858, z: -0.00000011920929}
 --- !u!1 &3901212355714663758
 GameObject:
   m_ObjectHideFlags: 0
@@ -237,7 +213,7 @@ GameObject:
   - component: {fileID: 3790217573334957100}
   - component: {fileID: 1839682526176144713}
   - component: {fileID: 5237671409105880192}
-  - component: {fileID: 5347302662571327962}
+  - component: {fileID: 7262990408980128276}
   m_Layer: 0
   m_Name: Branch1
   m_TagString: Untagged
@@ -317,7 +293,7 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &5347302662571327962
+--- !u!65 &7262990408980128276
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -336,7 +312,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
+  m_Size: {x: 1.0000001, y: 1, z: 1.0000001}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &4686650129105050031
 GameObject:
@@ -429,7 +405,7 @@ GameObject:
   - component: {fileID: 8220344753626128085}
   - component: {fileID: 8198010195386031603}
   - component: {fileID: 3423032978607045192}
-  - component: {fileID: 8086989429500110267}
+  - component: {fileID: 5837946385572644753}
   m_Layer: 0
   m_Name: Branch2
   m_TagString: Untagged
@@ -509,7 +485,7 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &8086989429500110267
+--- !u!65 &5837946385572644753
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -528,5 +504,5 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 1, y: 1, z: 0.99999994}
+  m_Center: {x: 0.00000023841858, y: 0, z: 0.0000009536743}
