@@ -27,14 +27,14 @@ public class TreeSegmentPrefabRoot: MonoBehaviour {
     }
 
     private void OnEnable() {
-        if (TreeSegmentPoolManager.Instance != null) {
-            TreeSegmentPoolManager.Instance.RegisterSegment(this);
+        if (TreeSegmentPoolManager.I != null) {
+            TreeSegmentPoolManager.I.RegisterSegment(this);
         }
     }
 
     private void OnDisable() {
-        if (TreeSegmentPoolManager.Instance != null) {
-            TreeSegmentPoolManager.Instance.UnregisterSegment(this);
+        if (TreeSegmentPoolManager.I != null) {
+            TreeSegmentPoolManager.I.UnregisterSegment(this);
         }
     }
 }

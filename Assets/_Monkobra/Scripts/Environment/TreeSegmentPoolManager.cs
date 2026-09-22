@@ -8,7 +8,7 @@ using UnityEngine;
 /// </summary>
 public class TreeSegmentPoolManager: MonoBehaviour {
     // Public Members  #########################################################
-    public static TreeSegmentPoolManager Instance { get; private set; }
+    public static TreeSegmentPoolManager I { get; private set; }
 
     // Public Methods  #########################################################
     /// <summary>Adds a segment to the tracked pool.</summary>
@@ -45,7 +45,7 @@ public class TreeSegmentPoolManager: MonoBehaviour {
                               this);
         }
 
-        Instance = this;
+        I = this;
     }
 
     private void Start() {
@@ -57,8 +57,8 @@ public class TreeSegmentPoolManager: MonoBehaviour {
     }
 
     private void OnDestroy() {
-        if (Instance == this) {
-            Instance = null;
+        if (I == this) {
+            I = null;
         }
     }
 
