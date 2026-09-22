@@ -1,0 +1,52 @@
+using UnityEngine;
+
+/// <summary>
+/// Prefab root for one branch. Decides on initialization whether this
+/// branch bears a banana, disabling the Banana + Banana Stem children when
+/// it does not, or scaling/repositioning them into place when it does.
+/// </summary>
+public class BranchWithScriptRoot: MonoBehaviour {
+    // Inspector Fields  #######################################################
+    [SerializeField]
+    private GameObject banana;
+
+    [SerializeField]
+    private GameObject bananaStem;
+
+    // MonoBehaviour Lifecycle  ################################################
+    private void Awake() {
+        // Inspector Assignment Guard  -----------------------------------------
+        if (banana == null || bananaStem == null) {
+            Debug.LogWarning(
+                "must assign Inspector Fields: Banana, Banana Stem", this);
+            return;
+        }
+
+        if (Random.value <= BANANA_SPAWN_PROBABILITY) {
+            AttachBanana();
+        } else {
+            banana.SetActive(false);
+            bananaStem.SetActive(false);
+        }
+    }
+
+    // Constants  ###############################################################
+    private const float BANANA_SPAWN_PROBABILITY = 0.5f;
+    private const float STEM_Y_SCALE_MIN = 0.5f;
+    private const float STEM_Y_SCALE_MAX = 1.5f;
+
+    // Private Methods  #########################################################
+    private void AttachBanana() {
+        Vector3 stemBasePosition = bananaStem.transform.localPosition;
+        Vector3 bananaBaseOffset =
+            banana.transform.localPosition - stemBasePosition;
+
+        float stemYScale = Random.Range(STEM_Y_SCALE_MIN, STEM_Y_SCALE_MAX);
+        Vector3 stemScale = bananaStem.transform.localScale;
+        bananaStem.transform.localScale =
+            new Vector3(stemScale.x, stemScale.y * stemYScale, stemScale.z);
+
+        banana.transform.localPosition =
+            stemBasePosition + bananaBaseOffset * stemYScale;
+    }
+}

@@ -1,11 +1,13 @@
 using UnityEngine;
 
+// BUG true randomness generate cluster of branches
+
 /// <summary>
 /// Prefab root for one tree segment. Registers itself with the
 /// <see cref="TreeSegmentPoolManager"/> while enabled, so the pool tracks
 /// every live instance without needing to know spawn order. Also
-/// procedurally decorates itself with Branch prefabs on creation, each
-/// optionally bearing a Banana Stem + Banana bunch.
+/// procedurally decorates itself with Branch With Fruit prefabs on
+/// creation.
 /// </summary>
 public class TreeSegmentPrefabRoot: MonoBehaviour {
     // Public Methods  #########################################################
@@ -20,13 +22,7 @@ public class TreeSegmentPrefabRoot: MonoBehaviour {
     private Collider segmentCollider;
 
     [SerializeField]
-    private GameObject branchPrefab;
-
-    [SerializeField]
-    private GameObject bananaStemPrefab;
-
-    [SerializeField]
-    private GameObject bananaPrefab;
+    private GameObject branchWithFruitPrefab;
 
     [SerializeField]
     private int minBranchCount = 1;
@@ -44,10 +40,10 @@ public class TreeSegmentPrefabRoot: MonoBehaviour {
             Debug.LogWarning("must assign Inspector Field: Segment Collider",
                               this);
         }
-        if (branchPrefab == null || bananaStemPrefab == null ||
-            bananaPrefab == null) {
-            Debug.LogWarning("must assign Inspector Fields: Branch Prefab, " +
-                              "Banana Stem Prefab, Banana Prefab", this);
+        if (branchWithFruitPrefab == null) {
+            Debug.LogWarning(
+                "must assign Inspector Field: Branch With Fruit Prefab",
+                this);
             return;
         }
 
@@ -66,12 +62,6 @@ public class TreeSegmentPrefabRoot: MonoBehaviour {
         }
     }
 
-    // Constants  ###############################################################
-    private const float BANANA_SPAWN_PROBABILITY = 0.5f;
-    private const float STEM_PLACEMENT_RANGE = 0.4f;
-    private const float STEM_Y_SCALE_MIN = 0.5f;
-    private const float STEM_Y_SCALE_MAX = 1.5f;
-
     // Private Methods  #########################################################
     private void GenerateBranches() {
         float segmentHeight = GetHeight();
@@ -89,31 +79,8 @@ public class TreeSegmentPrefabRoot: MonoBehaviour {
         Vector3 branchPosition = branchRotation * Vector3.forward *
                                   branchRadius + Vector3.up * branchHeight;
 
-        GameObject branch = Instantiate(branchPrefab, transform);
+        GameObject branch = Instantiate(branchWithFruitPrefab, transform);
         branch.transform.SetLocalPositionAndRotation(branchPosition,
                                                         branchRotation);
-
-        if (Random.value <= BANANA_SPAWN_PROBABILITY) {
-            SpawnBanana(branch.transform);
-        }
-    }
-
-    private void SpawnBanana(Transform branch) {
-        float stemOffset =
-            Random.Range(-STEM_PLACEMENT_RANGE, STEM_PLACEMENT_RANGE);
-        Vector3 stemPosition = new Vector3(stemOffset, 0.5f, 0f);
-
-        GameObject stem = Instantiate(bananaStemPrefab, branch);
-        stem.transform.SetLocalPositionAndRotation(stemPosition,
-                                                      Quaternion.identity);
-
-        // float stemYScale = Random.Range(STEM_Y_SCALE_MIN, STEM_Y_SCALE_MAX);
-        // Vector3 stemScale = bananaStemPrefab.transform.localScale;
-        // stem.transform.localScale =
-        //     new Vector3(stemScale.x, stemScale.y * stemYScale, stemScale.z);
-
-        GameObject banana = Instantiate(bananaPrefab, branch);
-        banana.transform.SetLocalPositionAndRotation(
-            stemPosition + Vector3.up, Quaternion.identity);
     }
 }
