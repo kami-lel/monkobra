@@ -46,6 +46,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   segmentCollider: {fileID: 3938361225300413944}
+  branchPrefab: {fileID: 7489113642335787035, guid: 771736caec87a83469b9cde77ba9bcf4, type: 3}
+  bananaStemPrefab: {fileID: 1676612713500220418, guid: 8c3bcd98a502968448cb7fc4ff4e8a27, type: 3}
+  bananaPrefab: {fileID: 6188994621234006140, guid: 7dab877b840eefa4d9798030807725c9, type: 3}
+  minBranchCount: 1
+  maxBranchCount: 5
+  branchRadius: 6.6
 --- !u!1 &7493626317960707379
 GameObject:
   m_ObjectHideFlags: 0

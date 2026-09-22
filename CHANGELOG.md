@@ -6,3 +6,5 @@ Todo win screen
 
 Todo cobra kill
 Todo kill screen
+
+Todo minimap
