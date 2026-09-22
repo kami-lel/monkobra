@@ -84,7 +84,10 @@ public class TreeSegmentPoolManager: MonoBehaviour {
             Vector3 spawnPosition = transform.position;
             spawnPosition.y =
                 trackingTransform.position.y + i * segmentHeight;
-            instance.transform.position = spawnPosition;
+            Quaternion spawnRotation =
+                Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
+            instance.transform.SetPositionAndRotation(spawnPosition,
+                                                        spawnRotation);
         }
     }
 
