@@ -3,10 +3,13 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Owns the 2 camera views under the monkey's <c>CameraRig</c> and swaps
-/// which one is live while the interact action is held, by raising its
-/// <see cref="CinemachineCamera.Priority"/> above the other. Side view is
-/// live only while held, releasing returns to behind. The
+/// Owns the 3 camera views under the monkey's <c>CameraRig</c> and swaps
+/// which one is live. Defaults to behind. While the interact action is
+/// held, switches to look-left/look-right based on
+/// <see cref="UpwardFruitDetection"/> (left wins if both sides are
+/// reachable); releasing it, or holding it with no fruit reachable,
+/// returns to behind. Swap is done by raising the live camera's
+/// <see cref="CinemachineCamera.Priority"/> above the other two. The
 /// <c>CinemachineBrain</c> on the main camera handles the actual blend.
 /// </summary>
 public class CameraRigManager: MonoBehaviour {
@@ -14,10 +17,16 @@ public class CameraRigManager: MonoBehaviour {
     [Tooltip("view tracking the monkey from behind")]
     [SerializeField]
     private CinemachineCamera behindCamera;
-    [Tooltip("view tracking the monkey from the side")]
+    [Tooltip("view tracking the monkey while fruit is reachable on the left")]
     [SerializeField]
-    private CinemachineCamera sideCamera;
-    [Tooltip("action that toggles which camera view is live")]
+    private CinemachineCamera lookLeftCamera;
+    [Tooltip("view tracking the monkey while fruit is reachable on the right")]
+    [SerializeField]
+    private CinemachineCamera lookRightCamera;
+    [Tooltip("source of ReachForLeft/ReachForRight driving the camera swap")]
+    [SerializeField]
+    private UpwardFruitDetection fruitDetection;
+    [Tooltip("action that must be held for the camera to leave behind view")]
     [SerializeField]
     private InputActionReference interactAction;
 
@@ -28,14 +37,24 @@ public class CameraRigManager: MonoBehaviour {
             Debug.LogWarning("must assign Inspector Field: behindCamera",
                               this);
         }
-        if (sideCamera == null) {
-            Debug.LogWarning("must assign Inspector Field: sideCamera", this);
+        if (lookLeftCamera == null) {
+            Debug.LogWarning("must assign Inspector Field: lookLeftCamera",
+                              this);
+        }
+        if (lookRightCamera == null) {
+            Debug.LogWarning("must assign Inspector Field: lookRightCamera",
+                              this);
+        }
+        if (fruitDetection == null) {
+            Debug.LogWarning("must assign Inspector Field: fruitDetection",
+                              this);
         }
         if (interactAction == null) {
             Debug.LogWarning("must assign Inspector Field: interactAction",
                               this);
         }
 
+        activeView = CameraView.Behind;
         ApplyPriorities();
     }
 
@@ -51,13 +70,23 @@ public class CameraRigManager: MonoBehaviour {
         interactAction.action.Disable();
     }
 
+    private void Update() {
+        if (!isInteractHeld) {
+            return;
+        }
+
+        UpdateActiveView();
+    }
+
     // Event Handlers  #########################################################
     private void OnInteractPerformed(InputAction.CallbackContext context) {
-        SetSideActive(true);
+        isInteractHeld = true;
+        UpdateActiveView();
     }
 
     private void OnInteractCanceled(InputAction.CallbackContext context) {
-        SetSideActive(false);
+        isInteractHeld = false;
+        UpdateActiveView();
     }
 
     // constants  ##############################################################
@@ -65,26 +94,52 @@ public class CameraRigManager: MonoBehaviour {
     private const int STANDBY_PRIORITY = 10;
 
     // private members  ########################################################
-    private bool isSideActive;
+    private enum CameraView {
+        Behind,
+        Left,
+        Right
+    }
+
+    private CameraView activeView;
+    private bool isInteractHeld;
 
     // private methods  ########################################################
-    private void SetSideActive(bool active) {
-        isSideActive = active;
+    private void UpdateActiveView() {
+        CameraView desiredView = !isInteractHeld ? CameraView.Behind
+            : fruitDetection.ReachForLeft ? CameraView.Left
+            : fruitDetection.ReachForRight ? CameraView.Right
+            : CameraView.Behind;
+
+        if (desiredView == activeView) {
+            return;
+        }
+
+        activeView = desiredView;
         ApplyPriorities();
 
         if (Debug.isDebugBuild) {
-            Debug.Log($"camera view switched, isSideActive={isSideActive}");
+            Debug.Log($"camera view switched, activeView={activeView}");
         }
     }
 
     private void ApplyPriorities() {
         behindCamera.Priority = new PrioritySettings {
             Enabled = true,
-            Value = isSideActive ? STANDBY_PRIORITY : LIVE_PRIORITY,
+            Value = activeView == CameraView.Behind
+                ? LIVE_PRIORITY
+                : STANDBY_PRIORITY,
         };
-        sideCamera.Priority = new PrioritySettings {
+        lookLeftCamera.Priority = new PrioritySettings {
             Enabled = true,
-            Value = isSideActive ? LIVE_PRIORITY : STANDBY_PRIORITY,
+            Value = activeView == CameraView.Left
+                ? LIVE_PRIORITY
+                : STANDBY_PRIORITY,
+        };
+        lookRightCamera.Priority = new PrioritySettings {
+            Enabled = true,
+            Value = activeView == CameraView.Right
+                ? LIVE_PRIORITY
+                : STANDBY_PRIORITY,
         };
     }
 }
