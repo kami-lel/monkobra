@@ -9,12 +9,22 @@ using UnityEngine.InputSystem;
 /// </summary>
 public class MonkeyPrefabRoot: MonoBehaviour {
     // Inspector Fields  #######################################################
-    [Tooltip("climb speed along world Y, in units/s")]
+    [Tooltip("climb speed while moving up, in units/s")]
     [SerializeField]
-    private float verticalSpeed;
+    private float upSpeed;
+    [Tooltip("climb speed while moving down, in units/s")]
+    [SerializeField]
+    private float downSpeed;
     [Tooltip("orbit speed around this object's parent, in deg/s")]
     [SerializeField]
     private float rotationSpeed;
+    [Tooltip("ramp rate toward target velocity while input is held, in "
+             + "units/s²")]
+    [SerializeField]
+    private float acceleration;
+    [Tooltip("ramp rate toward target velocity while idle, in units/s²")]
+    [SerializeField]
+    private float deceleration;
     [Tooltip("directional input action driving climb and orbit, a Vector2 "
              + "of horizontal (orbit) and vertical (climb) axes")]
     [SerializeField]
@@ -50,6 +60,7 @@ public class MonkeyPrefabRoot: MonoBehaviour {
 
     private void FixedUpdate() {
         Vector2 directionalInput = moveAction.action.ReadValue<Vector2>();
+        bool hasInput = directionalInput.sqrMagnitude > INPUT_DEADZONE_SQR;
 
         orbitAngleDeg -= directionalInput.x * rotationSpeed * Time.fixedDeltaTime;
 
@@ -58,12 +69,21 @@ public class MonkeyPrefabRoot: MonoBehaviour {
         Vector3 towardOrbit = orbitTarget - transform.position;
         towardOrbit.y = 0f;
 
-        Vector3 velocity = towardOrbit / Time.fixedDeltaTime;
-        velocity.y = directionalInput.y * verticalSpeed;
+        float climbSpeed = directionalInput.y >= 0f ? upSpeed : downSpeed;
+        Vector3 targetVelocity = towardOrbit / Time.fixedDeltaTime;
+        targetVelocity.y = directionalInput.y * climbSpeed;
 
-        body.linearVelocity = velocity;
+        float rampRate = hasInput ? acceleration : deceleration;
+        body.linearVelocity = Vector3.MoveTowards(body.linearVelocity,
+                                                    targetVelocity,
+                                                    rampRate
+                                                    * Time.fixedDeltaTime);
         body.MoveRotation(Quaternion.Euler(0f, orbitAngleDeg, 0f));
     }
+
+    // constants  ##############################################################
+    private const float INPUT_DEADZONE = 0.1f;
+    private const float INPUT_DEADZONE_SQR = INPUT_DEADZONE * INPUT_DEADZONE;
 
     // private members  ########################################################
     private float orbitAngleDeg;
