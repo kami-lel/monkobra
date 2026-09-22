@@ -137,7 +137,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40d2671f4fa409b44ac361eb1739dd9d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonkeyPrefabRoot
-  upSpeed: 5
+  upSpeed: 8
   downSpeed: 12
   rotationSpeed: 50
   acceleration: 20
