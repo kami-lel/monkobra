@@ -705,4 +705,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   banana: {fileID: 1759736754899777978}
   bananaStem: {fileID: 7275201964349085657}
-  bananaSpawnProbability: 0.8
+  bananaSpawnProbability: 0.15

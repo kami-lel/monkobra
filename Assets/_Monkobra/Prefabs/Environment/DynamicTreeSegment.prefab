@@ -47,10 +47,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   segmentCollider: {fileID: 3938361225300413944}
   branchWithFruitPrefab: {fileID: 7489113642335787035, guid: f22e4b5a7e7928042aa31c5673576f77, type: 3}
-  minBranchCount: 1
-  maxBranchCount: 5
+  minBranchCount: 3
+  maxBranchCount: 8
   branchRadius: 6.6
-  minBranchSeparation: 3
+  minBranchSeparation: 5
 --- !u!1001 &6749698255446215196
 PrefabInstance:
   m_ObjectHideFlags: 0

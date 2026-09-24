@@ -2,17 +2,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-// Fixme improve branch placement randomness
-//
 
 /// <summary>
-/// Prefab root for one tree segment. Registers itself with the
-/// <see cref="TreeSegmentPoolManager"/> while enabled, so the pool tracks
-/// every live instance without needing to know spawn order. Also
-/// procedurally decorates itself with Branch With Fruit prefabs on
-/// creation.
+/// Prefab root for one dynamic tree segment. Procedurally decorates itself
+/// with Branch With Fruit prefabs on creation.
 /// </summary>
-public class TreeSegmentPrefabRoot: MonoBehaviour {
+public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
     // Public Methods  #########################################################
     /// <returns>the segment's world-space height, read from its Collider
     /// bounds</returns>
@@ -22,44 +17,56 @@ public class TreeSegmentPrefabRoot: MonoBehaviour {
 
     // Inspector Fields  #######################################################
     [SerializeField]
+    [Tooltip("collider measuring segment height")]
     private Collider segmentCollider;
 
     [SerializeField]
+    [Tooltip("branch prefab spawned on segment")]
     private GameObject branchWithFruitPrefab;
 
+    [Header("Branch Placement")]
     [SerializeField]
+    [Tooltip("min branches per segment")]
     private int minBranchCount = 1;
 
     [SerializeField]
+    [Tooltip("max branches per segment")]
     private int maxBranchCount = 5;
 
     [SerializeField]
+    [Tooltip("branch distance fr trunk axis; u")]
     private float branchRadius = 6.6f;
 
     [SerializeField]
+    [Tooltip("min distance b/t branches; u")]
     private float minBranchSeparation = 3f;
 
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
         // Inspector Assignment Guard  -----------------------------------------
         if (segmentCollider == null) {
-            Debug.LogWarning("must assign Inspector Field: Segment Collider",
-                              this);
+            Debug.LogWarning(
+                "DynamicTreeSegmentPrefabRoot:\t"
+                + "must assign Inspector Field: segmentCollider",
+                this);
         }
         if (branchWithFruitPrefab == null) {
             Debug.LogWarning(
-                "must assign Inspector Field: Branch With Fruit Prefab",
+                "DynamicTreeSegmentPrefabRoot:\t"
+                + "must assign Inspector Field: branchWithFruitPrefab",
                 this);
-            return;
         }
 
+        if (segmentCollider == null || branchWithFruitPrefab == null) {
+            return;
+        }
         GenerateBranches();
     }
 
-    // Constants  ###############################################################
+    // constants  ##############################################################
     private const int MAX_PLACEMENT_ATTEMPTS = 30;
 
-    // Private Methods  #########################################################
+    // private methods  ########################################################
     private void GenerateBranches() {
         float segmentHeight = GetHeight();
         List<Vector3> placedPositions = new();
