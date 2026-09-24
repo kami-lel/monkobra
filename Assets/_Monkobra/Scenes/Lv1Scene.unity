@@ -603,8 +603,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5e9d07d67ea3874db87b7af18560afb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  minY: 0
-  maxY: 100
 --- !u!4 &332351311 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7491037331942951093, guid: d7b7ba174e361a94b843e9a27ce78bba, type: 3}
@@ -869,6 +867,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 762143289}
+  - component: {fileID: 762143290}
   m_Layer: 0
   m_Name: Tree
   m_TagString: Untagged
@@ -904,6 +903,20 @@ Transform:
   - {fileID: 2681368349956900717}
   m_Father: {fileID: 77920931}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &762143290
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 762143288}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 531d61abb0d3cd641be22a3cd34f7244, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  minY: 0
+  maxY: 100
 --- !u!1001 &763019835
 PrefabInstance:
   m_ObjectHideFlags: 0

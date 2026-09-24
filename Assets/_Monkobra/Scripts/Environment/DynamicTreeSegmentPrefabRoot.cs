@@ -24,27 +24,9 @@ public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
     [Tooltip("branch prefab spawned on segment")]
     private GameObject branchWithFruitPrefab;
 
-    [Header("Branch Placement")]
     [SerializeField]
-    [Tooltip("branches on segment at tree base")]
-    private int minBranchCount = 2;
-
-    [SerializeField]
-    [Tooltip("branches on segment at tree top")]
-    private int maxBranchCount = 9;
-
-    [SerializeField]
-    [Range(0f, 1f)]
-    [Tooltip("climb progress at/above which segment gets max branches")]
-    private float maxCountProgress = 0.6f;
-
-    [SerializeField]
-    [Tooltip("branch distance fr trunk axis; u")]
-    private float branchRadius = 6.6f;
-
-    [SerializeField]
-    [Tooltip("min distance b/t branches; u")]
-    private float minBranchSeparation = 3f;
+    [Tooltip("shared branch placement tuning")]
+    private BranchFruitPlacementConfig placementConfig;
 
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
@@ -62,7 +44,15 @@ public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
                 this);
         }
 
-        if (segmentCollider == null || branchWithFruitPrefab == null) {
+        if (placementConfig == null) {
+            Debug.LogWarning(
+                "DynamicTreeSegmentPrefabRoot:\t"
+                + "must assign Inspector Field: placementConfig",
+                this);
+        }
+
+        if (segmentCollider == null || branchWithFruitPrefab == null
+            || placementConfig == null) {
             enabled = false;
         }
     }
@@ -82,16 +72,17 @@ public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
         GenerateBranches();
     }
 
-    // constants  ##############################################################
-    private const int MAX_PLACEMENT_ATTEMPTS = 30;
-
     // private methods  ########################################################
     private void GenerateBranches() {
         float segmentHeight = GetHeight();
         List<Vector3> placedPositions = new();
 
         // higher segment in tree → more branches, max count reached at
-        // maxCountProgress of the climb and kept above it
+        // MaxCountProgress of the climb and kept above it
+        int minBranchCount = placementConfig.MinBranchCount;
+        int maxBranchCount = placementConfig.MaxBranchCount;
+        float maxCountProgress = placementConfig.MaxCountProgress;
+
         float segmentY = segmentCollider.bounds.center.y;
         float progress = Mathf.InverseLerp(
             TreeManager.I.MinY, TreeManager.I.MaxY, segmentY);
@@ -108,7 +99,8 @@ public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
         if (Debug.isDebugBuild) {
             Debug.Log(
                 $"DynamicTreeSegmentPrefabRoot:\tsegment y {segmentY} "
-                + $"(climb progress {progress:F2}), spawned {branchCount} branches "
+                + $"(climb progress {progress:F2}), "
+                + $"spawned {branchCount} branches "
                 + $"(range {minBranchCount}~{maxBranchCount})",
                 this);
         }
@@ -119,11 +111,13 @@ public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
         Quaternion branchRotation = Quaternion.identity;
         Vector3 branchPosition = Vector3.zero;
 
-        for (int attempt = 0; attempt < MAX_PLACEMENT_ATTEMPTS; attempt++) {
+        int maxAttempts = placementConfig.MaxPlacementAttempts;
+        for (int attempt = 0; attempt < maxAttempts; attempt++) {
             branchRotation = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
             float branchHeight = Random.Range(0f, segmentHeight);
             branchPosition = branchRotation * Vector3.forward *
-                              branchRadius + Vector3.up * branchHeight;
+                              placementConfig.BranchRadius
+                              + Vector3.up * branchHeight;
 
             if (IsFarEnoughFromExisting(branchPosition, placedPositions)) {
                 break;
@@ -140,7 +134,8 @@ public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
     private bool IsFarEnoughFromExisting(Vector3 candidate,
                                           List<Vector3> placedPositions) {
         foreach (Vector3 placed in placedPositions) {
-            if (Vector3.Distance(candidate, placed) < minBranchSeparation) {
+            if (Vector3.Distance(candidate, placed)
+                < placementConfig.MinBranchSeparation) {
                 return false;
             }
         }
