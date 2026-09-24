@@ -8,15 +8,6 @@ using UnityEngine.UI;
 /// </summary>
 [RequireComponent(typeof(Scrollbar))]
 public class ProgressBarRoot: MonoBehaviour {
-    [Header("Progress Source")]
-    [SerializeField]
-    [Tooltip("Player y at 0% progress; u")]
-    private float minY = 0f;
-
-    [SerializeField]
-    [Tooltip("Player y at 100% progress; u")]
-    private float maxY = 100f;
-
     private void Awake() {
         progressBar = GetComponent<Scrollbar>();
         if (progressBar == null) {
@@ -27,12 +18,21 @@ public class ProgressBarRoot: MonoBehaviour {
         }
         if (Debug.isDebugBuild) {
             Debug.Log(
-                $"ProgressBarRoot:\tready, range y {minY}~{maxY}, "
-                + $"handle size {progressBar.size}");
+                $"ProgressBarRoot:\tready, handle size {progressBar.size}");
         }
     }
 
     private void Update() {
+        if (TreeManager.I == null) {
+            if (!hasWarnedNoTreeManager) {
+                Debug.LogWarning(
+                    "ProgressBarRoot:\tno TreeManager in scene, "
+                    + "retrying each frame", this);
+                hasWarnedNoTreeManager = true;
+            }
+            return;
+        }
+
         // Player may spawn after this component, so retry until found
         if (player == null) {
             GameObject playerGO = GameObject.FindGameObjectWithTag(PLAYER_TAG);
@@ -53,23 +53,20 @@ public class ProgressBarRoot: MonoBehaviour {
             }
         }
 
-        float progress = Mathf.InverseLerp(minY, maxY, player.position.y);
+        float progress = Mathf.InverseLerp(
+            TreeManager.I.MinY, TreeManager.I.MaxY, player.position.y);
         progressBar.SetValueWithoutNotify(progress);
 
         // log per whole percent only, never per frame
         int percent = Mathf.RoundToInt(progress * 100f);
         if (percent != lastLoggedPercent) {
             lastLoggedPercent = percent;
-            if (Debug.isDebugBuild) {
-                Debug.Log(
-                    $"ProgressBarRoot:\tprogress {percent}% "
-                    + $"(player y {player.position.y})");
-            }
         }
     }
 
     private const string PLAYER_TAG = "Player";
 
+    private bool hasWarnedNoTreeManager;
     private bool hasWarnedNoPlayer;
     private int lastLoggedPercent = -1;
 

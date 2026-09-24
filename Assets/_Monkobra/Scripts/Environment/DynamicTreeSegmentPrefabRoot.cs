@@ -26,12 +26,17 @@ public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
 
     [Header("Branch Placement")]
     [SerializeField]
-    [Tooltip("min branches per segment")]
-    private int minBranchCount = 1;
+    [Tooltip("branches on segment at tree base")]
+    private int minBranchCount = 2;
 
     [SerializeField]
-    [Tooltip("max branches per segment")]
-    private int maxBranchCount = 5;
+    [Tooltip("branches on segment at tree top")]
+    private int maxBranchCount = 9;
+
+    [SerializeField]
+    [Range(0f, 1f)]
+    [Tooltip("climb progress at/above which segment gets max branches")]
+    private float maxCountProgress = 0.6f;
 
     [SerializeField]
     [Tooltip("branch distance fr trunk axis; u")]
@@ -58,6 +63,20 @@ public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
         }
 
         if (segmentCollider == null || branchWithFruitPrefab == null) {
+            enabled = false;
+        }
+    }
+
+    // wait for Start, so TreeManager.I is set whatever the Awake order
+    private void Start() {
+        if (!enabled) {
+            return;
+        }
+        if (TreeManager.I == null) {
+            Debug.LogWarning(
+                "DynamicTreeSegmentPrefabRoot:\tno TreeManager in scene, "
+                + "skip branch generation",
+                this);
             return;
         }
         GenerateBranches();
@@ -71,9 +90,27 @@ public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
         float segmentHeight = GetHeight();
         List<Vector3> placedPositions = new();
 
-        int branchCount = Random.Range(minBranchCount, maxBranchCount + 1);
+        // higher segment in tree → more branches, max count reached at
+        // maxCountProgress of the climb and kept above it
+        float segmentY = segmentCollider.bounds.center.y;
+        float progress = Mathf.InverseLerp(
+            TreeManager.I.MinY, TreeManager.I.MaxY, segmentY);
+        float countRatio = maxCountProgress <= 0f
+            ? 1f
+            : Mathf.Clamp01(progress / maxCountProgress);
+        int branchCount = Mathf.RoundToInt(
+            Mathf.Lerp(minBranchCount, maxBranchCount, countRatio));
+
         for (int i = 0; i < branchCount; i++) {
             SpawnBranch(segmentHeight, placedPositions);
+        }
+
+        if (Debug.isDebugBuild) {
+            Debug.Log(
+                $"DynamicTreeSegmentPrefabRoot:\tsegment y {segmentY} "
+                + $"(climb progress {progress:F2}), spawned {branchCount} branches "
+                + $"(range {minBranchCount}~{maxBranchCount})",
+                this);
         }
     }
 
