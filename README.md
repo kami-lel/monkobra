@@ -30,6 +30,6 @@ Banana grabbing and stamina balancing.
 
 - Movement and Climb: free up-down and around-the-tree movement, with stamina spent on every climb
 - Cobra Chase: a cobra tangles up the trunk from the bottom of the screen, and touching it ends the run
-- Branch Collision: hitting a branch leaves the monkey briefly dizzy
+- Branch Collision: hitting a branch shakes the camera, drops the monkey, and briefly takes away control
 - Banana Grab: hold-and-release timing sets how far the arm stretches, and a clean grab restores stamina
 - Stamina Bar: drains over time and is topped up only by grabbing bananas
