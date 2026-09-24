@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-// fixme improve branch placement randomness
+// Fixme improve branch placement randomness
 //
 
 /// <summary>
@@ -54,18 +54,6 @@ public class TreeSegmentPrefabRoot: MonoBehaviour {
         }
 
         GenerateBranches();
-    }
-
-    private void OnEnable() {
-        if (TreeSegmentPoolManager.I != null) {
-            TreeSegmentPoolManager.I.RegisterSegment(this);
-        }
-    }
-
-    private void OnDisable() {
-        if (TreeSegmentPoolManager.I != null) {
-            TreeSegmentPoolManager.I.UnregisterSegment(this);
-        }
     }
 
     // Constants  ###############################################################
