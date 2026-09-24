@@ -1,3 +1,4 @@
+using System;
 using Unity.Cinemachine;
 using UnityEngine;
 
@@ -8,6 +9,12 @@ using UnityEngine;
 /// </summary>
 [RequireComponent(typeof(CinemachineImpulseSource))]
 public class HitBranchDetection: MonoBehaviour {
+    // Public Members  #########################################################
+    /// <summary>
+    /// Raised with the branch collider whenever this trigger touches one.
+    /// </summary>
+    public event Action<Collider> BranchHit;
+
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
         impulseSource = GetComponent<CinemachineImpulseSource>();
@@ -15,7 +22,6 @@ public class HitBranchDetection: MonoBehaviour {
 
     // Event Handlers  #########################################################
     private void OnTriggerEnter(Collider other) {
-        Debug.Log($"touched {other.name}"); // HACK rm
         if (!other.CompareTag(BRANCH_TAG)) {
             return;
         }
@@ -24,6 +30,7 @@ public class HitBranchDetection: MonoBehaviour {
             Debug.Log($"HitBranchDetection:\thit branch {other.name}");
         }
         impulseSource.GenerateImpulse();
+        BranchHit?.Invoke(other);
     }
 
     // constants  ##############################################################

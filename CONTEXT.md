@@ -40,7 +40,7 @@ Intended design, taken from the prototype document. Only the Unity template scen
 | Tree | infinitely tall, with branches as obstacles and bananas hanging on branches |
 | Cobra | chases from the bottom of the screen, touching it kills the monkey |
 | Stamina | drains steadily while climbing, restored only by banana pickups |
-| Branch hit | temporary dizziness |
+| Branch hit | camera shake, then 0.5 s lost control while the monkey falls a set distance (`HitBranchDetection` raises `BranchHit`, `MonkeyPrefabRoot` handles it, all three values are inspector fields) |
 | Grab | hold space to stretch the arm, release to trigger the pickup, hold time sets reach |
 
 ```mermaid

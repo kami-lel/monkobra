@@ -458,6 +458,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40d2671f4fa409b44ac361eb1739dd9d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonkeyPrefabRoot
+  hitBranchDetection: {fileID: 6025946792045646429}
+  hitStunDuration: 0.75
+  hitDropDistance: 10
+  hitDropSpeed: 8
   upSpeed: 6
   downSpeed: 12
   rotationSpeed: 50
@@ -774,9 +778,9 @@ CapsuleCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.8
-  m_Height: 2.5
+  m_Height: 2
   m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 0.5, z: 0}
 --- !u!114 &8399523452754271020
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -798,8 +802,8 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    ImpulseDuration: 0.2
-    ImpulseType: 0
+    ImpulseDuration: 0.5
+    ImpulseType: 1
     DissipationRate: 0.25
     RawSignal: {fileID: 0}
     AmplitudeGain: 1
