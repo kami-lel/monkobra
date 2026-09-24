@@ -67,7 +67,7 @@ public class CameraRigManager: MonoBehaviour {
         activeView = CameraView.Behind;
         ApplyPriorities();
         if (Debug.isDebugBuild) {
-            Debug.Log($"CameraRigManager:\tready, activeView={activeView}");
+            Debug.Log($"CameraRigManager:\tactiveView changed: {activeView}");
         }
     }
 
