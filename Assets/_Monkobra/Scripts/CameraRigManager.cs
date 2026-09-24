@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 /// Owns the 3 camera views under the monkey's <c>CameraRig</c> and swaps
 /// which one is live. Defaults to behind. While the interact action is
 /// held, switches to look-left/look-right based on
-/// <see cref="UpwardFruitDetection"/> (right only if fruit is reachable
+/// <see cref="UpwardFruitDetection.I"/> (right only if fruit is reachable
 /// there and not on the left; left otherwise, including when neither side
 /// has reachable fruit). Releasing the action returns to behind. Swap is
 /// done by raising the live camera's
@@ -24,9 +24,6 @@ public class CameraRigManager: MonoBehaviour {
     [Tooltip("view tracking the monkey while fruit is reachable on the right")]
     [SerializeField]
     private CinemachineCamera lookRightCamera;
-    [Tooltip("source of ReachForLeft/ReachForRight driving the camera swap")]
-    [SerializeField]
-    private UpwardFruitDetection fruitDetection;
     [Tooltip("action that must be held for the camera to leave behind view")]
     [SerializeField]
     private InputActionReference interactAction;
@@ -49,12 +46,6 @@ public class CameraRigManager: MonoBehaviour {
             Debug.LogWarning(
                 "CameraRigManager:\tmust assign Inspector Field: "
                 + "lookRightCamera",
-                this);
-        }
-        if (fruitDetection == null) {
-            Debug.LogWarning(
-                "CameraRigManager:\tmust assign Inspector Field: "
-                + "fruitDetection",
                 this);
         }
         if (interactAction == null) {
@@ -118,6 +109,15 @@ public class CameraRigManager: MonoBehaviour {
 
     // private methods  ########################################################
     private void UpdateActiveView() {
+        UpwardFruitDetection fruitDetection = UpwardFruitDetection.I;
+        if (isInteractHeld && fruitDetection == null) {
+            Debug.LogError(
+                "CameraRigManager:\tfail to get singleton: "
+                + "UpwardFruitDetection",
+                this);
+            return;
+        }
+
         CameraView desiredView = !isInteractHeld ? CameraView.Behind
             : fruitDetection.ReachForRight && !fruitDetection.ReachForLeft
                 ? CameraView.Right

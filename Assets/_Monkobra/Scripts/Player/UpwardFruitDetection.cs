@@ -12,6 +12,8 @@ using UnityEngine;
 /// </summary>
 public class UpwardFruitDetection: MonoBehaviour {
     // Public Members  #########################################################
+    public static UpwardFruitDetection I { get; private set; }
+
     public bool ReachForLeft => leftFruits.Count > 0;
     public bool ReachForRight => rightFruits.Count > 0;
 
@@ -31,6 +33,21 @@ public class UpwardFruitDetection: MonoBehaviour {
                 "UpwardFruitDetection:\tmust assign Inspector Fields: "
                 + "leftZone, rightZone",
                 this);
+        }
+
+        // drop this duplicate component only, its GameObject may hold more
+        if (I != null && I != this) {
+            Debug.LogWarning(
+                "UpwardFruitDetection:\tduplicate instance, removing", this);
+            Destroy(this);
+            return;
+        }
+        I = this;
+    }
+
+    private void OnDestroy() {
+        if (I == this) {
+            I = null;
         }
     }
 
