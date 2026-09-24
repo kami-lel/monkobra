@@ -3,6 +3,4 @@
 <!--
 Todo grab mechanism
 
-Fixme merge 2 scenes
-
-Todo minimap -->
+Fixme merge 2 scenes -->
