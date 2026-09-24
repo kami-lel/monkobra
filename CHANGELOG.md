@@ -5,7 +5,6 @@ Todo grab mechanism
 Todo win screen
 Todo unpool
 
-Todo cobra kill
-Todo kill screen
+Fixme merge 2 scenes
 
 Todo minimap -->
