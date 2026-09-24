@@ -9,62 +9,72 @@ using UnityEngine.InputSystem;
 /// </summary>
 public class MonkeyPrefabRoot: MonoBehaviour {
     // Inspector Fields  #######################################################
-    [Tooltip("detector raising the branch hit event, knocks the monkey off "
-             + "its climb")]
+    [Header("Branch Hit")]
     [SerializeField]
+    [Tooltip("raises branch hit event, knocks monkey off climb")]
     private HitBranchDetection hitBranchDetection;
-    [Tooltip("duration of lost control after a branch hit, in s")]
     [SerializeField]
+    [Tooltip("control lost after branch hit; s")]
     private float hitStunDuration = 0.5f;
-    [Tooltip("distance fallen during a branch hit, in units")]
     [SerializeField]
+    [Tooltip("distance fallen on branch hit; units")]
     private float hitDropDistance = 2f;
-    [Tooltip("fall speed during a branch hit, in units/s")]
     [SerializeField]
+    [Tooltip("fall speed on branch hit; units/s")]
     private float hitDropSpeed = 8f;
-    [Tooltip("climb speed while moving up, in units/s")]
+
+    [Header("Movement")]
     [SerializeField]
+    [Tooltip("climb speed moving up; units/s")]
     private float upSpeed;
-    [Tooltip("climb speed while moving down, in units/s")]
     [SerializeField]
+    [Tooltip("climb speed moving down; units/s")]
     private float downSpeed;
-    [Tooltip("orbit speed around this object's parent, in deg/s")]
     [SerializeField]
+    [Tooltip("orbit speed around parent; deg/s")]
     private float rotationSpeed;
-    [Tooltip("ramp rate toward target velocity while input is held, in "
-             + "units/s²")]
     [SerializeField]
+    [Tooltip("ramp rate toward target velocity while input held; units/s²")]
     private float acceleration;
-    [Tooltip("ramp rate toward target velocity while idle, in units/s²")]
     [SerializeField]
+    [Tooltip("ramp rate toward target velocity while idle; units/s²")]
     private float deceleration;
-    [Tooltip("directional input action driving climb and orbit, a Vector2 "
-             + "of horizontal (orbit) and vertical (climb) axes")]
+
+    [Header("Input")]
     [SerializeField]
+    [Tooltip("Vector2 action: x orbit, y climb")]
     private InputActionReference moveAction;
 
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
         // Inspector Assignment Guard  -----------------------------------------
-        if (moveAction == null) {
-            Debug.LogWarning("must assign Inspector Field: moveAction", this);
-        }
         if (hitBranchDetection == null) {
+            Debug.LogWarning("MonkeyPrefabRoot:\tmust assign Inspector Field: "
+                             + "hitBranchDetection", this);
+        }
+        if (moveAction == null) {
             Debug.LogWarning(
-                "must assign Inspector Field: hitBranchDetection", this);
+                "MonkeyPrefabRoot:\tmust assign Inspector Field: moveAction",
+                this);
         }
 
         if (transform.parent == null) {
-            Debug.LogError("fail to get Transform: parent", this);
+            Debug.LogError("MonkeyPrefabRoot:\tfail to get Transform: parent",
+                           this);
         }
 
         body = GetComponent<Rigidbody>();
         if (body == null) {
-            Debug.LogError("fail to get Component: Rigidbody", this);
+            Debug.LogError("MonkeyPrefabRoot:\tfail to get Component: Rigidbody",
+                           this);
         }
 
         orbitAngleDeg = CalcCurrentOrbitAngle();
         orbitRadius = CalcCurrentOrbitRadius();
+        if (Debug.isDebugBuild) {
+            Debug.Log("MonkeyPrefabRoot:\tready, orbit radius "
+                      + $"{orbitRadius}");
+        }
     }
 
     private void OnEnable() {
@@ -89,7 +99,8 @@ public class MonkeyPrefabRoot: MonoBehaviour {
             : moveAction.action.ReadValue<Vector2>();
         bool hasInput = directionalInput.sqrMagnitude > INPUT_DEADZONE_SQR;
 
-        orbitAngleDeg -= directionalInput.x * rotationSpeed * Time.fixedDeltaTime;
+        orbitAngleDeg -= directionalInput.x * rotationSpeed
+                         * Time.fixedDeltaTime;
 
         Vector3 orbitTarget = transform.parent.position
                                + CalcOrbitOffset(orbitAngleDeg);
@@ -105,8 +116,8 @@ public class MonkeyPrefabRoot: MonoBehaviour {
                                                targetVelocity,
                                                rampRate * Time.fixedDeltaTime);
         if (isStunned) {
-            // set fall speed directly, clamped to the remaining distance so
-            // the drop neither lags behind the ramp nor overshoots its target
+            // set fall speed directly, clamp to remaining distance: drop
+            // neither lags behind ramp nor overshoots target
             float remaining = transform.position.y - dropTargetY;
             velocity.y = isDropping
                 ? -Mathf.Min(hitDropSpeed, remaining / Time.fixedDeltaTime)
@@ -117,10 +128,14 @@ public class MonkeyPrefabRoot: MonoBehaviour {
     }
 
     // Event Handlers  #########################################################
-    // knocks monkey off its climb: input ignored for hitStunDuration while it
-    // falls hitDropDistance. Ignored while a previous hit is in effect
+    // knock monkey off climb: ignore input for hitStunDuration, fall
+    // hitDropDistance. Ignore hit while previous one in effect
     private void OnBranchHit(Collider branch) {
         if (IsStunned) {
+            if (Debug.isDebugBuild) {
+                Debug.Log("MonkeyPrefabRoot:\tbranch hit ignored, "
+                          + "already stunned");
+            }
             return;
         }
 
@@ -138,9 +153,9 @@ public class MonkeyPrefabRoot: MonoBehaviour {
 
     // private members  ########################################################
     private float orbitAngleDeg;
-    private float orbitRadius;  // dist kept from parent's root, set once in Awake
+    private float orbitRadius;  // dist from parent root, set once in Awake
     private float stunEndTime;  // Time.time when control returns
-    private float dropTargetY;  // world Y where the hit fall stops
+    private float dropTargetY;  // world Y where hit fall stops
 
     private bool IsStunned => Time.time < stunEndTime;
 
