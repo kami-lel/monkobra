@@ -27,13 +27,15 @@ public class BranchWithScriptRoot: MonoBehaviour {
         if (banana == null) {
             Debug.LogWarning(
                 "BranchWithScriptRoot:\tmust assign Inspector Field: banana",
-                this);
+                this
+            );
         }
         if (bananaStem == null) {
             Debug.LogWarning(
                 "BranchWithScriptRoot:\t"
-                + "must assign Inspector Field: bananaStem",
-                this);
+                    + "must assign Inspector Field: bananaStem",
+                this
+            );
         }
 
         if (banana == null || bananaStem == null) {
@@ -61,13 +63,20 @@ public class BranchWithScriptRoot: MonoBehaviour {
 
         float stemYScale = Random.Range(STEM_Y_SCALE_MIN, STEM_Y_SCALE_MAX);
         Vector3 stemScale = bananaStem.transform.localScale;
-        bananaStem.transform.localScale =
-            new Vector3(stemScale.x, stemScale.y * stemYScale, stemScale.z);
+        bananaStem.transform.localScale = new Vector3(
+            stemScale.x,
+            stemScale.y * stemYScale,
+            stemScale.z
+        );
 
         banana.transform.localPosition =
-            stemBasePosition + bananaBaseOffset * stemYScale +
-            Vector3.up * BANANA_Y_OFFSET;
-        banana.transform.localRotation =
-            Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
+            stemBasePosition
+            + bananaBaseOffset * stemYScale
+            + Vector3.up * BANANA_Y_OFFSET;
+        banana.transform.localRotation = Quaternion.Euler(
+            0f,
+            Random.Range(0f, 360f),
+            0f
+        );
     }
 }

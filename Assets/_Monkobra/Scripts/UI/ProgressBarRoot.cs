@@ -12,13 +12,16 @@ public class ProgressBarRoot: MonoBehaviour {
         progressBar = GetComponent<Scrollbar>();
         if (progressBar == null) {
             Debug.LogError(
-                "ProgressBarRoot:\tfail to get Component: Scrollbar", this);
+                "ProgressBarRoot:\tfail to get Component: Scrollbar",
+                this
+            );
             enabled = false;
             return;
         }
         if (Debug.isDebugBuild) {
             Debug.Log(
-                $"ProgressBarRoot:\tready, handle size {progressBar.size}");
+                $"ProgressBarRoot:\tready, handle size {progressBar.size}"
+            );
         }
     }
 
@@ -27,7 +30,9 @@ public class ProgressBarRoot: MonoBehaviour {
             if (!hasWarnedNoTreeManager) {
                 Debug.LogWarning(
                     "ProgressBarRoot:\tno TreeManager in scene, "
-                    + "retrying each frame", this);
+                        + "retrying each frame",
+                    this
+                );
                 hasWarnedNoTreeManager = true;
             }
             return;
@@ -40,7 +45,9 @@ public class ProgressBarRoot: MonoBehaviour {
                 if (!hasWarnedNoPlayer) {
                     Debug.LogWarning(
                         "ProgressBarRoot:\tno GameObject tagged "
-                        + $"'{PLAYER_TAG}' found, retrying each frame", this);
+                            + $"'{PLAYER_TAG}' found, retrying each frame",
+                        this
+                    );
                     hasWarnedNoPlayer = true;
                 }
                 return;
@@ -49,12 +56,16 @@ public class ProgressBarRoot: MonoBehaviour {
             if (Debug.isDebugBuild) {
                 Debug.Log(
                     $"ProgressBarRoot:\tfound player '{playerGO.name}' "
-                    + $"at y {player.position.y}");
+                        + $"at y {player.position.y}"
+                );
             }
         }
 
         float progress = Mathf.InverseLerp(
-            TreeManager.I.MinY, TreeManager.I.MaxY, player.position.y);
+            TreeManager.I.MinY,
+            TreeManager.I.MaxY,
+            player.position.y
+        );
         progressBar.SetValueWithoutNotify(progress);
 
         // log per whole percent only, never per frame

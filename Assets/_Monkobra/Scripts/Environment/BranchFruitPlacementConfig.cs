@@ -4,8 +4,10 @@ using UnityEngine;
 /// Shared tuning for how Branch With Fruit prefabs are placed on a tree
 /// segment.
 /// </summary>
-[CreateAssetMenu(fileName = "BranchFruitPlacementConfig",
-                 menuName = "Scriptable Objects/BranchFruitPlacementConfig")]
+[CreateAssetMenu(
+    fileName = "BranchFruitPlacementConfig",
+    menuName = "Scriptable Objects/BranchFruitPlacementConfig"
+)]
 public class BranchFruitPlacementConfig: ScriptableObject {
     // Public Members  #########################################################
     /// <returns>branches on a segment at the tree base</returns>

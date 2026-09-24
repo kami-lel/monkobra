@@ -18,12 +18,15 @@ public class CameraRigManager: MonoBehaviour {
     [Tooltip("view tracking the monkey from behind")]
     [SerializeField]
     private CinemachineCamera behindCamera;
+
     [Tooltip("view tracking the monkey while fruit is reachable on the left")]
     [SerializeField]
     private CinemachineCamera lookLeftCamera;
+
     [Tooltip("view tracking the monkey while fruit is reachable on the right")]
     [SerializeField]
     private CinemachineCamera lookRightCamera;
+
     [Tooltip("action that must be held for the camera to leave behind view")]
     [SerializeField]
     private InputActionReference interactAction;
@@ -34,25 +37,29 @@ public class CameraRigManager: MonoBehaviour {
         if (behindCamera == null) {
             Debug.LogWarning(
                 "CameraRigManager:\tmust assign Inspector Field: behindCamera",
-                this);
+                this
+            );
         }
         if (lookLeftCamera == null) {
             Debug.LogWarning(
                 "CameraRigManager:\tmust assign Inspector Field: "
-                + "lookLeftCamera",
-                this);
+                    + "lookLeftCamera",
+                this
+            );
         }
         if (lookRightCamera == null) {
             Debug.LogWarning(
                 "CameraRigManager:\tmust assign Inspector Field: "
-                + "lookRightCamera",
-                this);
+                    + "lookRightCamera",
+                this
+            );
         }
         if (interactAction == null) {
             Debug.LogWarning(
                 "CameraRigManager:\tmust assign Inspector Field: "
-                + "interactAction",
-                this);
+                    + "interactAction",
+                this
+            );
         }
 
         activeView = CameraView.Behind;
@@ -101,7 +108,7 @@ public class CameraRigManager: MonoBehaviour {
     private enum CameraView {
         Behind,
         Left,
-        Right
+        Right,
     }
 
     private CameraView activeView;
@@ -113,15 +120,17 @@ public class CameraRigManager: MonoBehaviour {
         if (isInteractHeld && fruitDetection == null) {
             Debug.LogError(
                 "CameraRigManager:\tfail to get singleton: "
-                + "UpwardFruitDetection",
-                this);
+                    + "UpwardFruitDetection",
+                this
+            );
             return;
         }
 
-        CameraView desiredView = !isInteractHeld ? CameraView.Behind
+        CameraView desiredView =
+            !isInteractHeld ? CameraView.Behind
             : fruitDetection.ReachForRight && !fruitDetection.ReachForLeft
                 ? CameraView.Right
-                : CameraView.Left;
+            : CameraView.Left;
 
         if (desiredView == activeView) {
             return;
@@ -133,28 +142,32 @@ public class CameraRigManager: MonoBehaviour {
         if (Debug.isDebugBuild) {
             Debug.Log(
                 $"CameraRigManager:\tview switched, activeView={activeView}",
-                this);
+                this
+            );
         }
     }
 
     private void ApplyPriorities() {
         behindCamera.Priority = new PrioritySettings {
             Enabled = true,
-            Value = activeView == CameraView.Behind
-                ? LIVE_PRIORITY
-                : STANDBY_PRIORITY,
+            Value =
+                activeView == CameraView.Behind
+                    ? LIVE_PRIORITY
+                    : STANDBY_PRIORITY,
         };
         lookLeftCamera.Priority = new PrioritySettings {
             Enabled = true,
-            Value = activeView == CameraView.Left
-                ? LIVE_PRIORITY
-                : STANDBY_PRIORITY,
+            Value =
+                activeView == CameraView.Left
+                    ? LIVE_PRIORITY
+                    : STANDBY_PRIORITY,
         };
         lookRightCamera.Priority = new PrioritySettings {
             Enabled = true,
-            Value = activeView == CameraView.Right
-                ? LIVE_PRIORITY
-                : STANDBY_PRIORITY,
+            Value =
+                activeView == CameraView.Right
+                    ? LIVE_PRIORITY
+                    : STANDBY_PRIORITY,
         };
     }
 }

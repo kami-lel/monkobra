@@ -6,7 +6,9 @@ using UnityEngine;
 /// </summary>
 public class TreeManager: MonoBehaviour {
     // Public Members  #########################################################
-    public static TreeManager I { get; private set; }
+    public static TreeManager I {
+        get; private set;
+    }
 
     /// <returns>tree base world y; u</returns>
     public float MinY => minY;
@@ -29,7 +31,9 @@ public class TreeManager: MonoBehaviour {
         // drop this duplicate component only, its GameObject may hold more
         if (I != null && I != this) {
             Debug.LogWarning(
-                "TreeManager:\tduplicate instance, removing", this);
+                "TreeManager:\tduplicate instance, removing",
+                this
+            );
             Destroy(this);
             return;
         }

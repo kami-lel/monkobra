@@ -13,12 +13,15 @@ public class MonkeyPrefabRoot: MonoBehaviour {
     [SerializeField]
     [Tooltip("raises branch hit event, knocks monkey off climb")]
     private HitBranchDetection hitBranchDetection;
+
     [SerializeField]
     [Tooltip("control lost after branch hit; s")]
     private float hitStunDuration = 0.5f;
+
     [SerializeField]
     [Tooltip("distance fallen on branch hit; units")]
     private float hitDropDistance = 2f;
+
     [SerializeField]
     [Tooltip("fall speed on branch hit; units/s")]
     private float hitDropSpeed = 8f;
@@ -27,15 +30,19 @@ public class MonkeyPrefabRoot: MonoBehaviour {
     [SerializeField]
     [Tooltip("climb speed moving up; units/s")]
     private float upSpeed;
+
     [SerializeField]
     [Tooltip("climb speed moving down; units/s")]
     private float downSpeed;
+
     [SerializeField]
     [Tooltip("orbit speed around parent; deg/s")]
     private float rotationSpeed;
+
     [SerializeField]
     [Tooltip("ramp rate toward target velocity while input held; units/s²")]
     private float acceleration;
+
     [SerializeField]
     [Tooltip("ramp rate toward target velocity while idle; units/s²")]
     private float deceleration;
@@ -49,31 +56,40 @@ public class MonkeyPrefabRoot: MonoBehaviour {
     private void Awake() {
         // Inspector Assignment Guard  -----------------------------------------
         if (hitBranchDetection == null) {
-            Debug.LogWarning("MonkeyPrefabRoot:\tmust assign Inspector Field: "
-                             + "hitBranchDetection", this);
+            Debug.LogWarning(
+                "MonkeyPrefabRoot:\tmust assign Inspector Field: "
+                    + "hitBranchDetection",
+                this
+            );
         }
         if (moveAction == null) {
             Debug.LogWarning(
                 "MonkeyPrefabRoot:\tmust assign Inspector Field: moveAction",
-                this);
+                this
+            );
         }
 
         if (transform.parent == null) {
-            Debug.LogError("MonkeyPrefabRoot:\tfail to get Transform: parent",
-                           this);
+            Debug.LogError(
+                "MonkeyPrefabRoot:\tfail to get Transform: parent",
+                this
+            );
         }
 
         body = GetComponent<Rigidbody>();
         if (body == null) {
-            Debug.LogError("MonkeyPrefabRoot:\tfail to get Component: Rigidbody",
-                           this);
+            Debug.LogError(
+                "MonkeyPrefabRoot:\tfail to get Component: Rigidbody",
+                this
+            );
         }
 
         orbitAngleDeg = CalcCurrentOrbitAngle();
         orbitRadius = CalcCurrentOrbitRadius();
         if (Debug.isDebugBuild) {
-            Debug.Log("MonkeyPrefabRoot:\tready, orbit radius "
-                      + $"{orbitRadius}");
+            Debug.Log(
+                "MonkeyPrefabRoot:\tready, orbit radius " + $"{orbitRadius}"
+            );
         }
     }
 
@@ -99,11 +115,11 @@ public class MonkeyPrefabRoot: MonoBehaviour {
             : moveAction.action.ReadValue<Vector2>();
         bool hasInput = directionalInput.sqrMagnitude > INPUT_DEADZONE_SQR;
 
-        orbitAngleDeg -= directionalInput.x * rotationSpeed
-                         * Time.fixedDeltaTime;
+        orbitAngleDeg -=
+            directionalInput.x * rotationSpeed * Time.fixedDeltaTime;
 
-        Vector3 orbitTarget = transform.parent.position
-                               + CalcOrbitOffset(orbitAngleDeg);
+        Vector3 orbitTarget =
+            transform.parent.position + CalcOrbitOffset(orbitAngleDeg);
         Vector3 towardOrbit = orbitTarget - transform.position;
         towardOrbit.y = 0f;
 
@@ -112,9 +128,11 @@ public class MonkeyPrefabRoot: MonoBehaviour {
         targetVelocity.y = directionalInput.y * climbSpeed;
 
         float rampRate = hasInput ? acceleration : deceleration;
-        Vector3 velocity = Vector3.MoveTowards(body.linearVelocity,
-                                               targetVelocity,
-                                               rampRate * Time.fixedDeltaTime);
+        Vector3 velocity = Vector3.MoveTowards(
+            body.linearVelocity,
+            targetVelocity,
+            rampRate * Time.fixedDeltaTime
+        );
         if (isStunned) {
             // set fall speed directly, clamp to remaining distance: drop
             // neither lags behind ramp nor overshoots target
@@ -133,8 +151,10 @@ public class MonkeyPrefabRoot: MonoBehaviour {
     private void OnBranchHit(Collider branch) {
         if (IsStunned) {
             if (Debug.isDebugBuild) {
-                Debug.Log("MonkeyPrefabRoot:\tbranch hit ignored, "
-                          + "already stunned");
+                Debug.Log(
+                    "MonkeyPrefabRoot:\tbranch hit ignored, "
+                        + "already stunned"
+                );
             }
             return;
         }
@@ -142,8 +162,10 @@ public class MonkeyPrefabRoot: MonoBehaviour {
         stunEndTime = Time.time + hitStunDuration;
         dropTargetY = transform.position.y - hitDropDistance;
         if (Debug.isDebugBuild) {
-            Debug.Log("MonkeyPrefabRoot:\tbranch hit, control lost for "
-                      + $"{hitStunDuration}s");
+            Debug.Log(
+                "MonkeyPrefabRoot:\tbranch hit, control lost for "
+                    + $"{hitStunDuration}s"
+            );
         }
     }
 
@@ -153,9 +175,9 @@ public class MonkeyPrefabRoot: MonoBehaviour {
 
     // private members  ########################################################
     private float orbitAngleDeg;
-    private float orbitRadius;  // dist from parent root, set once in Awake
-    private float stunEndTime;  // Time.time when control returns
-    private float dropTargetY;  // world Y where hit fall stops
+    private float orbitRadius; // dist from parent root, set once in Awake
+    private float stunEndTime; // Time.time when control returns
+    private float dropTargetY; // world Y where hit fall stops
 
     private bool IsStunned => Time.time < stunEndTime;
 
@@ -166,7 +188,7 @@ public class MonkeyPrefabRoot: MonoBehaviour {
     private Vector3 CalcOrbitOffset(float angleDeg) {
         float angleRad = angleDeg * Mathf.Deg2Rad;
         return new Vector3(Mathf.Sin(angleRad), 0f, Mathf.Cos(angleRad))
-               * orbitRadius;
+            * orbitRadius;
     }
 
     private float CalcCurrentOrbitAngle() {

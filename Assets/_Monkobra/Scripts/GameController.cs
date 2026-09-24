@@ -31,7 +31,9 @@ public class GameController: MonoBehaviour {
         // Singleton Guard  ----------------------------------------------------
         if (Instance != null && Instance != this) {
             Debug.LogWarning(
-                "GameController:\tduplicate instance destroyed", this);
+                "GameController:\tduplicate instance destroyed",
+                this
+            );
             Destroy(gameObject);
             return;
         }
@@ -58,4 +60,3 @@ public class GameController: MonoBehaviour {
         Debug.Log($"GameController:\t{result}", this);
     }
 }
-

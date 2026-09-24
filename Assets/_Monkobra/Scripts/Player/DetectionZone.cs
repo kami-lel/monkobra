@@ -7,7 +7,7 @@ using UnityEngine;
 /// </summary>
 public enum DetectionSide {
     Left,
-    Right
+    Right,
 }
 
 /// <summary>

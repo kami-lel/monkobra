@@ -15,31 +15,44 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(ConfigurableJoint))]
 public class MonkeyArm: MonoBehaviour {
     // Inspector Fields  #######################################################
-    [Tooltip("whether this is the monkey's right arm, else the left arm, the "
-             + "left arm strokes half a cycle out of phase with the right and "
-             + "with every angle mirrored")]
+    [Tooltip(
+        "whether this is the monkey's right arm, else the left arm, the "
+            + "left arm strokes half a cycle out of phase with the right and "
+            + "with every angle mirrored"
+    )]
     [SerializeField]
     private bool isRightArm;
-    [Tooltip("directional input action, arm climbs only while it is held, a "
-             + "Vector2 like the one driving MonkeyPrefabRoot")]
+
+    [Tooltip(
+        "directional input action, arm climbs only while it is held, a "
+            + "Vector2 like the one driving MonkeyPrefabRoot"
+    )]
     [SerializeField]
     private InputActionReference moveAction;
+
     [Tooltip("bottom of the stroke, arm fully pulled down, in deg")]
     [SerializeField]
     private float minAngleDeg = -15f;
+
     [Tooltip("top of the stroke, arm fully reached up, in deg")]
     [SerializeField]
     private float maxAngleDeg = 30f;
-    [Tooltip("amplitude of each extra free axis as a fraction of the main "
-             + "stroke, 0 keeps the hand on a straight line")]
+
+    [Tooltip(
+        "amplitude of each extra free axis as a fraction of the main "
+            + "stroke, 0 keeps the hand on a straight line"
+    )]
     [SerializeField]
     private float sideSwingRatio = 0.1f;
+
     [Tooltip("stroke phase speed, in deg/s, 360 is one full stroke per second")]
     [SerializeField]
     private float strokeSpeedDeg = 240f;
+
     [Tooltip("angular drive stiffness pulling the arm to its target angle")]
     [SerializeField]
     private float driveSpring = 200f;
+
     [Tooltip("angular drive damping, curbs oscillation around the target")]
     [SerializeField]
     private float driveDamper = 20f;
@@ -49,13 +62,17 @@ public class MonkeyArm: MonoBehaviour {
         // Inspector Assignment Guard  -----------------------------------------
         if (moveAction == null) {
             Debug.LogWarning(
-                "MonkeyArm:\tmust assign Inspector Field: moveAction", this);
+                "MonkeyArm:\tmust assign Inspector Field: moveAction",
+                this
+            );
         }
 
         joint = GetComponent<ConfigurableJoint>();
         if (joint == null) {
-            Debug.LogError("MonkeyArm:\tfail to get Component: "
-                           + "ConfigurableJoint", this);
+            Debug.LogError(
+                "MonkeyArm:\tfail to get Component: " + "ConfigurableJoint",
+                this
+            );
         }
 
         // slerp drive rotates the free angular axes toward targetRotation
@@ -83,9 +100,10 @@ public class MonkeyArm: MonoBehaviour {
     }
 
     private void FixedUpdate() {
-        Vector2 directionalInput = moveAction != null
-            ? moveAction.action.ReadValue<Vector2>()
-            : Vector2.zero;
+        Vector2 directionalInput =
+            moveAction != null
+                ? moveAction.action.ReadValue<Vector2>()
+                : Vector2.zero;
         bool isMoving = directionalInput.sqrMagnitude > INPUT_DEADZONE_SQR;
 
         // no input: leave targetRotation untouched so the arm holds its pose
@@ -97,7 +115,8 @@ public class MonkeyArm: MonoBehaviour {
         float direction = directionalInput.y < -INPUT_DEADZONE ? -1f : 1f;
         strokePhaseDeg = Mathf.Repeat(
             strokePhaseDeg + direction * strokeSpeedDeg * Time.fixedDeltaTime,
-            360f);
+            360f
+        );
 
         int freeAxisIdx = 0;
         Vector3 anglesDeg = Vector3.zero;
@@ -106,7 +125,8 @@ public class MonkeyArm: MonoBehaviour {
         anglesDeg.z = CalcAxisAngleDeg(joint.angularZMotion, ref freeAxisIdx);
         // left arm mirrors the right, so every angle flips sign
         joint.targetRotation = Quaternion.Euler(
-            isRightArm ? anglesDeg : -anglesDeg);
+            isRightArm ? anglesDeg : -anglesDeg
+        );
     }
 
     // constants  ##############################################################
@@ -115,7 +135,7 @@ public class MonkeyArm: MonoBehaviour {
     private const float SIDE_SWING_LAG_DEG = 90f;
 
     // private members  ########################################################
-    private float strokePhaseDeg;  // advances only while moving
+    private float strokePhaseDeg; // advances only while moving
 
     // cached references  ------------------------------------------------------
     private ConfigurableJoint joint;
@@ -123,8 +143,10 @@ public class MonkeyArm: MonoBehaviour {
     // private methods  ########################################################
     // locked axis stays at 0; 1st free axis is the main stroke, the rest are
     // a quarter cycle behind at a reduced amplitude
-    private float CalcAxisAngleDeg(ConfigurableJointMotion motion,
-                                   ref int freeAxisIdx) {
+    private float CalcAxisAngleDeg(
+        ConfigurableJointMotion motion,
+        ref int freeAxisIdx
+    ) {
         if (motion == ConfigurableJointMotion.Locked) {
             return 0f;
         }

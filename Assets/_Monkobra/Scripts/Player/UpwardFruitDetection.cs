@@ -12,7 +12,9 @@ using UnityEngine;
 /// </summary>
 public class UpwardFruitDetection: MonoBehaviour {
     // Public Members  #########################################################
-    public static UpwardFruitDetection I { get; private set; }
+    public static UpwardFruitDetection I {
+        get; private set;
+    }
 
     public bool ReachForLeft => leftFruits.Count > 0;
     public bool ReachForRight => rightFruits.Count > 0;
@@ -21,6 +23,7 @@ public class UpwardFruitDetection: MonoBehaviour {
     [Tooltip("left-side detection zone, must report Side == Left")]
     [SerializeField]
     private DetectionZone leftZone;
+
     [Tooltip("right-side detection zone, must report Side == Right")]
     [SerializeField]
     private DetectionZone rightZone;
@@ -31,14 +34,17 @@ public class UpwardFruitDetection: MonoBehaviour {
         if (leftZone == null || rightZone == null) {
             Debug.LogWarning(
                 "UpwardFruitDetection:\tmust assign Inspector Fields: "
-                + "leftZone, rightZone",
-                this);
+                    + "leftZone, rightZone",
+                this
+            );
         }
 
         // drop this duplicate component only, its GameObject may hold more
         if (I != null && I != this) {
             Debug.LogWarning(
-                "UpwardFruitDetection:\tduplicate instance, removing", this);
+                "UpwardFruitDetection:\tduplicate instance, removing",
+                this
+            );
             Destroy(this);
             return;
         }
@@ -81,18 +87,16 @@ public class UpwardFruitDetection: MonoBehaviour {
             return;
         }
 
-        HashSet<Collider> fruits = side == DetectionSide.Left
-            ? leftFruits
-            : rightFruits;
+        HashSet<Collider> fruits =
+            side == DetectionSide.Left ? leftFruits : rightFruits;
         if (fruits.Add(other) && fruits.Count == 1) {
             LogReachChanged(side);
         }
     }
 
     private void OnZoneExited(DetectionSide side, Collider other) {
-        HashSet<Collider> fruits = side == DetectionSide.Left
-            ? leftFruits
-            : rightFruits;
+        HashSet<Collider> fruits =
+            side == DetectionSide.Left ? leftFruits : rightFruits;
         if (fruits.Remove(other) && fruits.Count == 0) {
             LogReachChanged(side);
         }
@@ -111,7 +115,8 @@ public class UpwardFruitDetection: MonoBehaviour {
         if (Debug.isDebugBuild) {
             Debug.Log(
                 $"UpwardFruitDetection:\treachFor{side} changed: {reach}",
-                this);
+                this
+            );
         }
     }
 }
