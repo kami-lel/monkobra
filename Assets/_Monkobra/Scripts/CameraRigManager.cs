@@ -35,28 +35,40 @@ public class CameraRigManager: MonoBehaviour {
     private void Awake() {
         // Inspector Assignment Guard  -----------------------------------------
         if (behindCamera == null) {
-            Debug.LogWarning("must assign Inspector Field: behindCamera",
-                              this);
+            Debug.LogWarning(
+                "CameraRigManager:\tmust assign Inspector Field: behindCamera",
+                this);
         }
         if (lookLeftCamera == null) {
-            Debug.LogWarning("must assign Inspector Field: lookLeftCamera",
-                              this);
+            Debug.LogWarning(
+                "CameraRigManager:\tmust assign Inspector Field: "
+                + "lookLeftCamera",
+                this);
         }
         if (lookRightCamera == null) {
-            Debug.LogWarning("must assign Inspector Field: lookRightCamera",
-                              this);
+            Debug.LogWarning(
+                "CameraRigManager:\tmust assign Inspector Field: "
+                + "lookRightCamera",
+                this);
         }
         if (fruitDetection == null) {
-            Debug.LogWarning("must assign Inspector Field: fruitDetection",
-                              this);
+            Debug.LogWarning(
+                "CameraRigManager:\tmust assign Inspector Field: "
+                + "fruitDetection",
+                this);
         }
         if (interactAction == null) {
-            Debug.LogWarning("must assign Inspector Field: interactAction",
-                              this);
+            Debug.LogWarning(
+                "CameraRigManager:\tmust assign Inspector Field: "
+                + "interactAction",
+                this);
         }
 
         activeView = CameraView.Behind;
         ApplyPriorities();
+        if (Debug.isDebugBuild) {
+            Debug.Log($"CameraRigManager:\tready, activeView={activeView}");
+        }
     }
 
     private void OnEnable() {
@@ -118,14 +130,10 @@ public class CameraRigManager: MonoBehaviour {
         activeView = desiredView;
         ApplyPriorities();
 
-        if (activeView == CameraView.Left) {
-            Debug.Log("look-left camera activated", this);
-        } else if (activeView == CameraView.Right) {
-            Debug.Log("look-right camera activated", this);
-        }
-
         if (Debug.isDebugBuild) {
-            Debug.Log($"camera view switched, activeView={activeView}");
+            Debug.Log(
+                $"CameraRigManager:\tview switched, activeView={activeView}",
+                this);
         }
     }
 

@@ -28,7 +28,9 @@ public class UpwardFruitDetection: MonoBehaviour {
         // Inspector Assignment Guard  -----------------------------------------
         if (leftZone == null || rightZone == null) {
             Debug.LogWarning(
-                "must assign Inspector Fields: leftZone, rightZone", this);
+                "UpwardFruitDetection:\tmust assign Inspector Fields: "
+                + "leftZone, rightZone",
+                this);
         }
     }
 
@@ -89,6 +91,10 @@ public class UpwardFruitDetection: MonoBehaviour {
     // Private Methods  ########################################################
     private void LogReachChanged(DetectionSide side) {
         bool reach = side == DetectionSide.Left ? ReachForLeft : ReachForRight;
-        Debug.Log($"reachFor{side} changed: {reach}", this);
+        if (Debug.isDebugBuild) {
+            Debug.Log(
+                $"UpwardFruitDetection:\treachFor{side} changed: {reach}",
+                this);
+        }
     }
 }
