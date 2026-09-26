@@ -1,87 +1,135 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-// Todo progressbar add snake
-
-/// <summary>
-/// Drives a Canvas <see cref="Scrollbar"/> from the Player's y position.
-/// </summary>
 [RequireComponent(typeof(Scrollbar))]
-public class ProgressBarRoot: MonoBehaviour {
-    private void Awake() {
-        progressBar = GetComponent<Scrollbar>();
-        if (progressBar == null) {
-            Debug.LogError(
-                "ProgressBarRoot:\tfail to get Component: Scrollbar",
-                this
-            );
-            enabled = false;
-            return;
-        }
-        if (Debug.isDebugBuild) {
-            Debug.Log(
-                $"ProgressBarRoot:\tready, handle size {progressBar.size}"
-            );
-        }
-    }
-
-    private void Update() {
-        if (TreeManager.I == null) {
-            if (!hasWarnedNoTreeManager) {
-                Debug.LogWarning(
-                    "ProgressBarRoot:\tno TreeManager in scene, "
-                        + "retrying each frame",
-                    this
-                );
-                hasWarnedNoTreeManager = true;
-            }
-            return;
-        }
-
-        // Player may spawn after this component, so retry until found
-        if (player == null) {
-            GameObject playerGO = GameObject.FindGameObjectWithTag(PLAYER_TAG);
-            if (playerGO == null) {
-                if (!hasWarnedNoPlayer) {
-                    Debug.LogWarning(
-                        "ProgressBarRoot:\tno GameObject tagged "
-                            + $"'{PLAYER_TAG}' found, retrying each frame",
-                        this
-                    );
-                    hasWarnedNoPlayer = true;
-                }
-                return;
-            }
-            player = playerGO.transform;
-            if (Debug.isDebugBuild) {
-                Debug.Log(
-                    $"ProgressBarRoot:\tfound player '{playerGO.name}' "
-                        + $"at y {player.position.y}"
-                );
-            }
-        }
-
-        float progress = Mathf.InverseLerp(
-            TreeManager.I.MinY,
-            TreeManager.I.MaxY,
-            player.position.y
-        );
-        progressBar.SetValueWithoutNotify(progress);
-
-        // log per whole percent only, never per frame
-        int percent = Mathf.RoundToInt(progress * 100f);
-        if (percent != lastLoggedPercent) {
-            lastLoggedPercent = percent;
-        }
-    }
+public class ProgressBarRoot : MonoBehaviour
+{
+    [Header("Cobra Marker")]
+    [SerializeField] private Transform cobraHead;
+    [SerializeField] private RectTransform cobraMarker;
 
     private const string PLAYER_TAG = "Player";
+
+    private Scrollbar progressBar;
+    private Transform player;
 
     private bool hasWarnedNoTreeManager;
     private bool hasWarnedNoPlayer;
     private int lastLoggedPercent = -1;
 
-    // cached references  ------------------------------------------------------
-    private Scrollbar progressBar;
-    private Transform player;
+    private void Awake()
+    {
+        progressBar = GetComponent<Scrollbar>();
+
+        if (progressBar == null)
+        {
+            Debug.LogError(
+                "ProgressBarRoot: failed to get Scrollbar.",
+                this
+            );
+
+            enabled = false;
+        }
+    }
+
+    private void Update()
+    {
+        if (TreeManager.I == null)
+        {
+            if (!hasWarnedNoTreeManager)
+            {
+                Debug.LogWarning(
+                    "ProgressBarRoot: no TreeManager in scene.",
+                    this
+                );
+
+                hasWarnedNoTreeManager = true;
+            }
+
+            return;
+        }
+
+        UpdatePlayerProgress();
+        UpdateCobraProgress();
+    }
+
+    private void UpdatePlayerProgress()
+    {
+        if (player == null)
+        {
+            GameObject playerObject =
+                GameObject.FindGameObjectWithTag(PLAYER_TAG);
+
+            if (playerObject == null)
+            {
+                if (!hasWarnedNoPlayer)
+                {
+                    Debug.LogWarning(
+                        "ProgressBarRoot: no Player found.",
+                        this
+                    );
+
+                    hasWarnedNoPlayer = true;
+                }
+
+                return;
+            }
+
+            player = playerObject.transform;
+        }
+
+        float playerProgress = Mathf.InverseLerp(
+            TreeManager.I.MinY,
+            TreeManager.I.MaxY,
+            player.position.y
+        );
+
+        progressBar.SetValueWithoutNotify(playerProgress);
+
+        int percent = Mathf.RoundToInt(playerProgress * 100f);
+
+        if (percent != lastLoggedPercent)
+        {
+            lastLoggedPercent = percent;
+        }
+    }
+
+    private void UpdateCobraProgress()
+{
+    if (cobraHead == null || cobraMarker == null)
+    {
+        return;
+    }
+
+    float cobraProgress = Mathf.InverseLerp(
+        TreeManager.I.MinY,
+        TreeManager.I.MaxY,
+        cobraHead.position.y
+    );
+
+    Vector2 anchor = new Vector2(0.5f, 0.5f);
+
+    switch (progressBar.direction)
+    {
+        case Scrollbar.Direction.LeftToRight:
+            anchor.x = cobraProgress;
+            break;
+
+        case Scrollbar.Direction.RightToLeft:
+            anchor.x = 1f - cobraProgress;
+            break;
+
+        case Scrollbar.Direction.BottomToTop:
+            anchor.y = cobraProgress;
+            break;
+
+        case Scrollbar.Direction.TopToBottom:
+            anchor.y = 1f - cobraProgress;
+            break;
+    }
+
+    cobraMarker.anchorMin = anchor;
+    cobraMarker.anchorMax = anchor;
+    cobraMarker.anchoredPosition = Vector2.zero;
+}
 }

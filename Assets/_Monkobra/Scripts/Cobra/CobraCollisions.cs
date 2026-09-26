@@ -1,14 +1,17 @@
 using UnityEngine;
 
-public class CobraCollision: MonoBehaviour {
-    [SerializeField]
-    private GameOverController gameOverController;
-
-    private void OnTriggerEnter(Collider other) {
-        if (!other.CompareTag("Player")) {
+public class CobraCollision : MonoBehaviour
+{
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!other.CompareTag("Player"))
+        {
             return;
         }
 
-        gameOverController.ShowGameOver();
+        if (GameController.Instance != null)
+        {
+            GameController.Instance.LoseGame();
+        }
     }
 }

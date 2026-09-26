@@ -1,34 +1,39 @@
+using TMPro;
 using UnityEngine;
 
-public class GameOverController: MonoBehaviour {
-    [SerializeField]
-    private GameObject gameOverPanel;
+public class GameOverController : MonoBehaviour
+{
+    [SerializeField] private GameObject resultPanel;
+    [SerializeField] private TMP_Text resultText;
 
-    private bool isGameOver;
-
-    private void Start() {
-        Time.timeScale = 1f;
-
-        if (gameOverPanel != null) {
-            gameOverPanel.SetActive(false);
+    private void Start()
+    {
+        if (resultPanel != null)
+        {
+            resultPanel.SetActive(false);
         }
     }
 
-    public void ShowGameOver() {
-        if (isGameOver) {
-            return;
-        }
-
-        isGameOver = true;
-
-        if (gameOverPanel != null) {
-            gameOverPanel.SetActive(true);
-        }
-
-        Time.timeScale = 0f;
+    public void ShowLose()
+    {
+        ShowResult("Game Over\nYou Lose");
     }
 
-    private void OnDestroy() {
-        Time.timeScale = 1f;
+    public void ShowWin()
+    {
+        ShowResult("Congratulations!\nYou Win");
+    }
+
+    private void ShowResult(string message)
+    {
+        if (resultText != null)
+        {
+            resultText.text = message;
+        }
+
+        if (resultPanel != null)
+        {
+            resultPanel.SetActive(true);
+        }
     }
 }

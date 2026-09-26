@@ -34,6 +34,13 @@ public class CobraClimb: MonoBehaviour {
     private float headAngle;
     private float headHeight;
 
+    [Header("Player Tracking")]
+    [SerializeField] private bool limitToPlayerHeight = true;
+    [SerializeField] private float slowDownDistance = 2f;
+    [SerializeField] private float minimumHeightGap = 0f;
+
+private Transform player;
+
     private void Start() {
         if (pathCenter == null) {
             Debug.LogError("CobraClimb requires a Path Center.", this);
@@ -46,10 +53,64 @@ public class CobraClimb: MonoBehaviour {
     }
 
     private void Update() {
+        if (player == null)
+        {
+            GameObject playerObject =
+                GameObject.FindGameObjectWithTag("Player");
+
+            if (playerObject != null)
+            {
+                player = playerObject.transform;
+            }
+        }
+
         float direction = clockwise ? -1f : 1f;
 
+        
         headAngle += direction * orbitSpeedDegrees * Time.deltaTime;
-        headHeight += climbSpeed * Time.deltaTime;
+
+        float currentClimbSpeed = climbSpeed;
+
+        if (limitToPlayerHeight && player != null)
+        {
+            float maximumWorldHeight =
+                player.position.y - minimumHeightGap;
+
+            float maximumLocalHeight =
+                maximumWorldHeight - pathCenter.position.y;
+
+            float remainingDistance =
+                maximumLocalHeight - headHeight;
+
+            if (remainingDistance <= 0f)
+            {
+                // reach monkey, stop
+                currentClimbSpeed = 0f;
+            }
+            else if (remainingDistance < slowDownDistance)
+            {
+                // approcah monkey, speed decrease
+                float speedMultiplier = Mathf.Lerp(
+                    0.15f,
+                    1f,
+                    remainingDistance / slowDownDistance
+                );
+
+                currentClimbSpeed *= speedMultiplier;
+            }
+
+            headHeight += currentClimbSpeed * Time.deltaTime;
+
+            // No exceed monkey
+            headHeight = Mathf.Min(
+                headHeight,
+                maximumLocalHeight
+            );
+        }
+        else
+        {
+            headHeight += currentClimbSpeed * Time.deltaTime;
+        }
 
         UpdateBody();
     }
