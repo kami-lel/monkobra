@@ -35,11 +35,16 @@ public class CobraClimb: MonoBehaviour {
     private float headHeight;
 
     [Header("Player Tracking")]
-    [SerializeField] private bool limitToPlayerHeight = true;
-    [SerializeField] private float slowDownDistance = 2f;
-    [SerializeField] private float minimumHeightGap = 0f;
+    [SerializeField]
+    private bool limitToPlayerHeight = true;
 
-private Transform player;
+    [SerializeField]
+    private float slowDownDistance = 2f;
+
+    [SerializeField]
+    private float minimumHeightGap = 0f;
+
+    private Transform player;
 
     private void Start() {
         if (pathCenter == null) {
@@ -53,42 +58,34 @@ private Transform player;
     }
 
     private void Update() {
-        if (player == null)
-        {
-            GameObject playerObject =
-                GameObject.FindGameObjectWithTag("Player");
+        if (player == null) {
+            GameObject playerObject = GameObject.FindGameObjectWithTag(
+                "Player"
+            );
 
-            if (playerObject != null)
-            {
+            if (playerObject != null) {
                 player = playerObject.transform;
             }
         }
 
         float direction = clockwise ? -1f : 1f;
 
-        
         headAngle += direction * orbitSpeedDegrees * Time.deltaTime;
 
         float currentClimbSpeed = climbSpeed;
 
-        if (limitToPlayerHeight && player != null)
-        {
-            float maximumWorldHeight =
-                player.position.y - minimumHeightGap;
+        if (limitToPlayerHeight && player != null) {
+            float maximumWorldHeight = player.position.y - minimumHeightGap;
 
             float maximumLocalHeight =
                 maximumWorldHeight - pathCenter.position.y;
 
-            float remainingDistance =
-                maximumLocalHeight - headHeight;
+            float remainingDistance = maximumLocalHeight - headHeight;
 
-            if (remainingDistance <= 0f)
-            {
+            if (remainingDistance <= 0f) {
                 // reach monkey, stop
                 currentClimbSpeed = 0f;
-            }
-            else if (remainingDistance < slowDownDistance)
-            {
+            } else if (remainingDistance < slowDownDistance) {
                 // approcah monkey, speed decrease
                 float speedMultiplier = Mathf.Lerp(
                     0.15f,
@@ -102,13 +99,8 @@ private Transform player;
             headHeight += currentClimbSpeed * Time.deltaTime;
 
             // No exceed monkey
-            headHeight = Mathf.Min(
-                headHeight,
-                maximumLocalHeight
-            );
-        }
-        else
-        {
+            headHeight = Mathf.Min(headHeight, maximumLocalHeight);
+        } else {
             headHeight += currentClimbSpeed * Time.deltaTime;
         }
 
