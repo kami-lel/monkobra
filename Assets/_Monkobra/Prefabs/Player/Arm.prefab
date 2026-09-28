@@ -90,6 +90,59 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &6418288379023115892
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1463825270069169548}
+  - component: {fileID: 9025548625086386042}
+  m_Layer: 0
+  m_Name: Hand
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1463825270069169548
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6418288379023115892}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5953618974871489581}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!135 &9025548625086386042
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6418288379023115892}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.5
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8587813781772342673
 GameObject:
   m_ObjectHideFlags: 0
@@ -101,7 +154,7 @@ GameObject:
   - component: {fileID: 5953618974871489581}
   - component: {fileID: 1035399268115924458}
   - component: {fileID: 2291510936226178180}
-  - component: {fileID: 3206051325666002471}
+  - component: {fileID: 5859380064246551772}
   m_Layer: 0
   m_Name: Arm
   m_TagString: Untagged
@@ -123,6 +176,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7356365617691678713}
+  - {fileID: 1463825270069169548}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &1035399268115924458
@@ -147,7 +201,7 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
@@ -254,7 +308,7 @@ ConfigurableJoint:
   m_EnablePreprocessing: 1
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &3206051325666002471
+--- !u!114 &5859380064246551772
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -263,23 +317,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 8587813781772342673}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fc86ae7ad387fa22f72f7e342590afb1, type: 3}
+  m_Script: {fileID: 11500000, guid: b11d10d766d4c38409812d7c866154f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ArmRoot
   bodyRigidbody: {fileID: 0}
   shoulder: {fileID: 0}
-  armVisual: {fileID: 0}
-  handCollider: {fileID: 0}
+  armVisual: {fileID: 7356365617691678713}
+  handCollider: {fileID: 9025548625086386042}
+  config: {fileID: 11400000, guid: 807cabe9104f1f948afe0b58847b456f, type: 2}
   isRightArm: 0
-  moveAction: {fileID: 0}
-  maxReachDistanceU: 3
-  overshootAllowanceU: 0.5
-  reachSpring: 400
-  reachDamper: 15
-  invertDriveAxis: 1
-  cycleSpeed: 1.2
-  cycleReachU: 0.6
-  cycleSwingDeg: 25
-  splayDeg: 20
-  aimSpring: 200
-  aimDamper: 20

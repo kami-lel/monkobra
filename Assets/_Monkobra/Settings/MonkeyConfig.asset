@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29851f42b5414a22b79aa4808627e31b, type: 3}
+  m_Name: MonkeyConfig
+  m_EditorClassIdentifier: Assembly-CSharp::MonkeyConfig
+  minAngleDeg: -15
+  maxAngleDeg: 30
+  sideSwingRatio: 0.1
+  strokeSpeedDeg: 240
+  driveSpring: 200
+  driveDamper: 20
+  maxReachDistanceU: 3
+  reachSpring: 400
+  reachDamper: 40
+  overshootAllowanceU: 0.5
+  invertDriveAxis: 1
+  cycleReachU: 0.6
+  splayDeg: 20
+  upSpeedU: 6
+  downSpeedU: 12
+  rotationSpeedDeg: 50
+  accelerationU: 20
+  decelerationU: 30
+  hitStunDurationS: 0.75
+  hitDropDistanceU: 10
+  hitDropSpeedU: 8
+  moveAction: {fileID: -1680190386980627800, guid: 052faaac586de48259a63d0c4782560b, type: 3}

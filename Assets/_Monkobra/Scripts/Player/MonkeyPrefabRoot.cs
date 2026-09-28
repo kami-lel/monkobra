@@ -6,51 +6,24 @@ using UnityEngine.InputSystem;
 /// moves the object directly along world Y; horizontal input orbits
 /// it around this object's own parent's root at a fixed radius, so
 /// motion stays relative to wherever the prefab is parented.
+/// <para>
+/// Every speed, ramp rate and branch-hit number, plus the input action
+/// itself, comes from the shared <see cref="MonkeyConfig"/> asset, the same
+/// one the arms read, so the body and its arms cannot drift out of tune.
+/// </para>
 /// </summary>
 public class MonkeyPrefabRoot: MonoBehaviour {
     // Inspector Fields  #######################################################
-    [Header("Branch Hit")]
     [SerializeField]
     [Tooltip("raises branch hit event, knocks monkey off climb")]
     private HitBranchDetection hitBranchDetection;
 
     [SerializeField]
-    [Tooltip("control lost after branch hit; s")]
-    private float hitStunDuration = 0.5f;
-
-    [SerializeField]
-    [Tooltip("distance fallen on branch hit; units")]
-    private float hitDropDistance = 2f;
-
-    [SerializeField]
-    [Tooltip("fall speed on branch hit; units/s")]
-    private float hitDropSpeed = 8f;
-
-    [Header("Movement")]
-    [SerializeField]
-    [Tooltip("climb speed moving up; units/s")]
-    private float upSpeed;
-
-    [SerializeField]
-    [Tooltip("climb speed moving down; units/s")]
-    private float downSpeed;
-
-    [SerializeField]
-    [Tooltip("orbit speed around parent; deg/s")]
-    private float rotationSpeed;
-
-    [SerializeField]
-    [Tooltip("ramp rate toward target velocity while input held; units/s²")]
-    private float acceleration;
-
-    [SerializeField]
-    [Tooltip("ramp rate toward target velocity while idle; units/s²")]
-    private float deceleration;
-
-    [Header("Input")]
-    [SerializeField]
-    [Tooltip("Vector2 action: x orbit, y climb")]
-    private InputActionReference moveAction;
+    [Tooltip(
+        "shared movement, branch-hit and input tuning, the same asset the "
+            + "arms use"
+    )]
+    private MonkeyConfig config;
 
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
@@ -62,10 +35,17 @@ public class MonkeyPrefabRoot: MonoBehaviour {
                 this
             );
         }
-        if (moveAction == null) {
+        if (config == null) {
             Debug.LogWarning(
-                "MonkeyPrefabRoot:\tmust assign Inspector Field: moveAction",
+                "MonkeyPrefabRoot:\tmust assign Inspector Field: config",
                 this
+            );
+        }
+        else if (config.MoveAction == null) {
+            Debug.LogWarning(
+                "MonkeyPrefabRoot:\tmust assign MonkeyConfig field: "
+                    + "moveAction",
+                config
             );
         }
 
@@ -94,40 +74,53 @@ public class MonkeyPrefabRoot: MonoBehaviour {
     }
 
     private void OnEnable() {
-        moveAction.action.Enable();
+        if (MoveAction != null) {
+            MoveAction.action.Enable();
+        }
         if (hitBranchDetection != null) {
             hitBranchDetection.BranchHit += OnBranchHit;
         }
     }
 
     private void OnDisable() {
-        moveAction.action.Disable();
+        if (MoveAction != null) {
+            MoveAction.action.Disable();
+        }
         if (hitBranchDetection != null) {
             hitBranchDetection.BranchHit -= OnBranchHit;
         }
     }
 
     private void FixedUpdate() {
+        if (config == null) {
+            return;
+        }
+
         bool isStunned = IsStunned;
         bool isDropping = isStunned && transform.position.y > dropTargetY;
-        Vector2 directionalInput = isStunned
+        Vector2 directionalInput = isStunned || MoveAction == null
             ? Vector2.zero
-            : moveAction.action.ReadValue<Vector2>();
+            : MoveAction.action.ReadValue<Vector2>();
         bool hasInput = directionalInput.sqrMagnitude > INPUT_DEADZONE_SQR;
 
-        orbitAngleDeg -=
-            directionalInput.x * rotationSpeed * Time.fixedDeltaTime;
+        orbitAngleDeg -= directionalInput.x
+            * config.RotationSpeedDeg
+            * Time.fixedDeltaTime;
 
         Vector3 orbitTarget =
             transform.parent.position + CalcOrbitOffset(orbitAngleDeg);
         Vector3 towardOrbit = orbitTarget - transform.position;
         towardOrbit.y = 0f;
 
-        float climbSpeed = directionalInput.y >= 0f ? upSpeed : downSpeed;
+        float climbSpeed = directionalInput.y >= 0f
+            ? config.UpSpeedU
+            : config.DownSpeedU;
         Vector3 targetVelocity = towardOrbit / Time.fixedDeltaTime;
         targetVelocity.y = directionalInput.y * climbSpeed;
 
-        float rampRate = hasInput ? acceleration : deceleration;
+        float rampRate = hasInput
+            ? config.AccelerationU
+            : config.DecelerationU;
         Vector3 velocity = Vector3.MoveTowards(
             body.linearVelocity,
             targetVelocity,
@@ -138,17 +131,26 @@ public class MonkeyPrefabRoot: MonoBehaviour {
             // neither lags behind ramp nor overshoots target
             float remaining = transform.position.y - dropTargetY;
             velocity.y = isDropping
-                ? -Mathf.Min(hitDropSpeed, remaining / Time.fixedDeltaTime)
+                ? -Mathf.Min(
+                    config.HitDropSpeedU, remaining / Time.fixedDeltaTime
+                )
                 : 0f;
         }
         body.linearVelocity = velocity;
+        // this script owns the body's orientation outright, so clear whatever
+        // spin the arm joints fed back into it, else MoveRotation fights it
+        body.angularVelocity = Vector3.zero;
         body.MoveRotation(Quaternion.Euler(0f, orbitAngleDeg, 0f));
     }
 
     // Event Handlers  #########################################################
-    // knock monkey off climb: ignore input for hitStunDuration, fall
-    // hitDropDistance. Ignore hit while previous one in effect
+    // knock monkey off climb: ignore input for the config's stun duration,
+    // fall its drop distance. Ignore hit while previous one in effect
     private void OnBranchHit(Collider branch) {
+        if (config == null) {
+            return;
+        }
+
         if (IsStunned) {
             if (Debug.isDebugBuild) {
                 Debug.Log(
@@ -159,12 +161,12 @@ public class MonkeyPrefabRoot: MonoBehaviour {
             return;
         }
 
-        stunEndTime = Time.time + hitStunDuration;
-        dropTargetY = transform.position.y - hitDropDistance;
+        stunEndTime = Time.time + config.HitStunDurationS;
+        dropTargetY = transform.position.y - config.HitDropDistanceU;
         if (Debug.isDebugBuild) {
             Debug.Log(
                 "MonkeyPrefabRoot:\tbranch hit, control lost for "
-                    + $"{hitStunDuration}s"
+                    + $"{config.HitStunDurationS}s"
             );
         }
     }
@@ -180,6 +182,10 @@ public class MonkeyPrefabRoot: MonoBehaviour {
     private float dropTargetY; // world Y where hit fall stops
 
     private bool IsStunned => Time.time < stunEndTime;
+
+    // body and arms share one action, held on the config asset
+    private InputActionReference MoveAction =>
+        config != null ? config.MoveAction : null;
 
     // cached references  ------------------------------------------------------
     private Rigidbody body;

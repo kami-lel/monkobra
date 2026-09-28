@@ -41,7 +41,7 @@ The repository root is the Unity project root. `Library/`, `Temp/`, `Logs/`, `Us
 | Monkey | vertical input moves along world Y, horizontal input orbits the trunk at a fixed radius | implemented |
 | Arms | `ArmRoot` drives a `ConfigurableJoint` per arm: an alternating hand-over-hand stroke while move input is held, or a spring-driven reach that can overshoot its target, with the hand reporting its own contacts | implemented, two arm scripts coexist |
 | Tree | stack of static and dynamic trunk segments under a `TreeTop`, each dynamic segment decorated with branches | implemented, finite height |
-| Branch hit | camera shake, then stun (input ignored) while the monkey drops a set distance, all inspector fields | implemented |
+| Branch hit | camera shake, then stun (input ignored) while the monkey drops a set distance, all tuned in `MonkeyConfig` | implemented |
 | Cobra | orbits and climbs the trunk on its own, trigger contact shows the game-over panel | implemented |
 | Stamina | `StaminaBar` slider drains on a timer, `AddStamina` restores it | bar exists, not yet tied to hits or grabs |
 | Grab | hold the interact action: camera swaps to a side view, chosen by which side has fruit in reach | camera and reach detection only, no pickup yet |
@@ -51,7 +51,8 @@ The repository root is the Unity project root. `Library/`, `Temp/`, `Logs/`, `Us
 graph LR
   Input[Move input] --> Root[MonkeyPrefabRoot]
   Input --> Arm[ArmRoot x2]
-  Cfg[MonkeyConfig] --> Arm
+  Cfg[MonkeyConfig] --> Root
+  Cfg --> Arm
   Root --> Hit[HitBranchDetection]
   Hit -->|BranchHit| Root
   Hit --> Shake[Cinemachine impulse]
@@ -74,7 +75,7 @@ All under `Assets/_Monkobra/Scripts/`.
 | `Player/MonkeyPrefabRoot` | movement, branch-hit stun and drop |
 | `Player/ArmRoot` | one arm's Rigidbody and `ConfigurableJoint`, sitting at the hand end: climbs a stroke cycle on move input, or reaches a tracked target on a spring that may overshoot, and reports the hand's live contacts |
 | `Player/MonkeyArm` | the earlier arm driver, angular stroke plus reach, superseded by `ArmRoot` but still present |
-| `Player/MonkeyConfig` | ScriptableObject of shared arm tuning: stroke and reach drives, overshoot allowance, and the move action both arms read |
+| `Player/MonkeyConfig` | ScriptableObject of all shared monkey tuning: arm stroke and reach drives, overshoot allowance, climb and orbit speeds, branch-hit stun, and the one move action the body and both arms read |
 | `Player/HitBranchDetection` | trigger on tag `Branch`, raises `BranchHit`, fires the camera impulse |
 | `Player/UpwardFruitDetection` | singleton (`I`), `ReachForLeft` and `ReachForRight` from tag `FruitCollider` overlaps |
 | `Player/DetectionZone` | side-tagged trigger volume that forwards enter and exit events |
@@ -87,11 +88,12 @@ All under `Assets/_Monkobra/Scripts/`.
 
 - Singletons are scene-scoped and self-destroy the duplicate component only: `GameController.Instance`, `TreeManager.I`, `UpwardFruitDetection.I`
 - A consumer that may start before its singleton reads it in `Start`, not `Awake`, so Awake order never matters
+- The body owns its own motion: `MonkeyPrefabRoot` writes velocity and rotation outright, and an `ArmRoot` keeps its joint from fighting that by scaling the connected body's apparent mass up, capping its drive force and torque, and ignoring collisions with the body's own colliders
 - Detection scripts forward trigger events (`Entered`, `Exited`, `BranchHit`) rather than calling their consumers directly
 - Trigger matching relies on tags: `Branch`, `FruitCollider`
 - Input arrives through `InputActionReference` fields, each script enables and disables its own action, and the arms take theirs from `MonkeyConfig` so both read one action
 - Scripts guard required inspector fields in `Awake` with a logged error naming the field
-- Tuning values stay in serialized fields, and shared tuning sits in a ScriptableObject: an `ArmRoot` holds only its wiring references and which side it is, every number comes from `MonkeyConfig`
+- Tuning values stay in serialized fields, and shared tuning sits in a ScriptableObject: `MonkeyPrefabRoot` and `ArmRoot` hold only wiring references and which side an arm is, every number and the input action come from `MonkeyConfig`
 - Two coding styles coexist: the newer scripts (`Environment/`, `Player/`, `GameController`) follow the house Unity style, while `Cobra/` and `UI/StaminaBar`, `UI/GameOverController` are older contributions still in the template style
 - The core tension is escape vs. sustain: grabbing slows the monkey's reactions, so every pickup risks a branch or cobra collision
 

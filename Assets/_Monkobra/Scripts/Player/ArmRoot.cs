@@ -196,6 +196,7 @@ public class ArmRoot: MonoBehaviour {
         cyclePhase = isRightArm ? 0.5f : 0f;
 
         ConfigureJoint();
+        IgnoreBodyCollisions();
 
         if (Debug.isDebugBuild) {
             Debug.Log(
@@ -300,8 +301,15 @@ public class ArmRoot: MonoBehaviour {
         joint.zDrive = new JointDrive {
             positionSpring = config.ReachSpring,
             positionDamper = config.ReachDamper,
-            maximumForce = float.MaxValue,
+            maximumForce = config.MaxReachForceN,
         };
+
+        // the arm is as heavy as the whole monkey, so at an even mass ratio
+        // every stroke and every overshoot shoves the body it hangs off.
+        // Scaling the connected mass up makes the solver treat the body as
+        // near-immovable: the body drives itself, the arm follows
+        joint.massScale = 1f;
+        joint.connectedMassScale = config.BodyMassScale;
 
         // slerp drive aims the whole arm in one shot, no per-axis bookkeeping
         joint.angularXMotion = ConfigurableJointMotion.Free;
@@ -311,8 +319,33 @@ public class ArmRoot: MonoBehaviour {
         joint.slerpDrive = new JointDrive {
             positionSpring = config.DriveSpring,
             positionDamper = config.DriveDamper,
-            maximumForce = float.MaxValue,
+            maximumForce = config.MaxAimTorqueNm,
         };
+    }
+
+    // an arm brushing its own torso would shove the body it is trying to
+    // climb with, and would report the monkey itself as a hand contact, so
+    // take the arm and the body out of each other's collision matrix
+    private void IgnoreBodyCollisions() {
+        if (bodyRigidbody == null) {
+            return;
+        }
+
+        Collider[] armColliders = GetComponentsInChildren<Collider>(true);
+        Collider[] bodyColliders =
+            bodyRigidbody.GetComponentsInChildren<Collider>(true);
+        foreach (Collider armCollider in armColliders) {
+            foreach (Collider bodyCollider in bodyColliders) {
+                // an arm parented under the body shows up in both lists
+                if (
+                    armCollider == bodyCollider
+                    || bodyCollider.attachedRigidbody == body
+                ) {
+                    continue;
+                }
+                Physics.IgnoreCollision(armCollider, bodyCollider, true);
+            }
+        }
     }
 
     // aim local Z at the tracked target and telescope out to close the gap,

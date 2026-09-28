@@ -2,10 +2,11 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Shared tuning for the monkey: the arm stroke and reach drives, plus the
-/// movement action both arms read their climb input from. Consumed by
-/// <see cref="ArmRoot"/>, and by the older <see cref="MonkeyArm"/>, which
-/// shares every drive value with it.
+/// Shared tuning for the monkey: the arm stroke and reach drives, the climb
+/// and orbit speeds, the branch-hit stun, and the one movement action every
+/// consumer reads its input from. Consumed by <see cref="ArmRoot"/> and
+/// <see cref="MonkeyPrefabRoot"/>, and by the older <see cref="MonkeyArm"/>,
+/// which shares the arm drive values.
 /// </summary>
 [CreateAssetMenu(
     fileName = "MonkeyConfig",
@@ -66,8 +67,46 @@ public class MonkeyConfig: ScriptableObject {
     /// other; deg</returns>
     public float SplayDeg => splayDeg;
 
-    /// <returns>directional input action the arms climb to, a Vector2 where x
-    /// orbits and y climbs</returns>
+    /// <returns>how much heavier the solver pretends the body is when an arm
+    /// pulls on it, 1 lets an arm throw the body around, high values let the
+    /// body drive itself and the arms follow</returns>
+    public float BodyMassScale => bodyMassScale;
+
+    /// <returns>cap on the linear reach drive's force, the most an arm can
+    /// shove its own body with; N</returns>
+    public float MaxReachForceN => maxReachForceN;
+
+    /// <returns>cap on the angular aim drive's torque, the most an arm can
+    /// spin its own body with; N·m</returns>
+    public float MaxAimTorqueNm => maxAimTorqueNm;
+
+    /// <returns>climb speed moving up; u/s</returns>
+    public float UpSpeedU => upSpeedU;
+
+    /// <returns>climb speed moving down; u/s</returns>
+    public float DownSpeedU => downSpeedU;
+
+    /// <returns>orbit speed around the trunk; deg/s</returns>
+    public float RotationSpeedDeg => rotationSpeedDeg;
+
+    /// <returns>ramp rate toward target velocity while input is held; u/s²
+    /// </returns>
+    public float AccelerationU => accelerationU;
+
+    /// <returns>ramp rate toward target velocity while idle; u/s²</returns>
+    public float DecelerationU => decelerationU;
+
+    /// <returns>how long control is lost after a branch hit; s</returns>
+    public float HitStunDurationS => hitStunDurationS;
+
+    /// <returns>how far the monkey falls on a branch hit; u</returns>
+    public float HitDropDistanceU => hitDropDistanceU;
+
+    /// <returns>how fast the monkey falls on a branch hit; u/s</returns>
+    public float HitDropSpeedU => hitDropSpeedU;
+
+    /// <returns>directional input action every consumer reads, a Vector2
+    /// where x orbits and y climbs</returns>
     public InputActionReference MoveAction => moveAction;
 
     // Inspector Fields  #######################################################
@@ -137,11 +176,66 @@ public class MonkeyConfig: ScriptableObject {
     )]
     private float splayDeg = 20f;
 
-    [Header("Arm - Input")]
+    [Header("Arm - Body Isolation")]
     [SerializeField]
     [Tooltip(
-        "directional input action, arms climb only while it is held, the "
-            + "same Vector2 action driving MonkeyPrefabRoot"
+        "how much heavier the solver pretends the body is when an arm pulls "
+            + "on it, 1 lets an arm throw the body around, high values let "
+            + "the body drive itself and the arms follow"
+    )]
+    private float bodyMassScale = 100f;
+
+    [SerializeField]
+    [Tooltip(
+        "cap on reach drive force, the most an arm can shove its body by; N"
+    )]
+    private float maxReachForceN = 1000f;
+
+    [SerializeField]
+    [Tooltip(
+        "cap on aim drive torque, the most an arm can spin its body by; N·m"
+    )]
+    private float maxAimTorqueNm = 1000f;
+
+    [Header("Movement")]
+    [SerializeField]
+    [Tooltip("climb speed moving up; u/s")]
+    private float upSpeedU = 6f;
+
+    [SerializeField]
+    [Tooltip("climb speed moving down; u/s")]
+    private float downSpeedU = 12f;
+
+    [SerializeField]
+    [Tooltip("orbit speed around the trunk; deg/s")]
+    private float rotationSpeedDeg = 50f;
+
+    [SerializeField]
+    [Tooltip("ramp rate toward target velocity while input held; u/s²")]
+    private float accelerationU = 20f;
+
+    [SerializeField]
+    [Tooltip("ramp rate toward target velocity while idle; u/s²")]
+    private float decelerationU = 30f;
+
+    [Header("Branch Hit")]
+    [SerializeField]
+    [Tooltip("control lost after a branch hit; s")]
+    private float hitStunDurationS = 0.75f;
+
+    [SerializeField]
+    [Tooltip("distance fallen on a branch hit; u")]
+    private float hitDropDistanceU = 10f;
+
+    [SerializeField]
+    [Tooltip("fall speed on a branch hit; u/s")]
+    private float hitDropSpeedU = 8f;
+
+    [Header("Input")]
+    [SerializeField]
+    [Tooltip(
+        "directional input action shared by the body and both arms, a "
+            + "Vector2 where x orbits the trunk and y climbs"
     )]
     private InputActionReference moveAction;
 
@@ -157,5 +251,16 @@ public class MonkeyConfig: ScriptableObject {
         reachDamper = Mathf.Max(0f, reachDamper);
         overshootAllowanceU = Mathf.Max(0f, overshootAllowanceU);
         cycleReachU = Mathf.Max(0f, cycleReachU);
+        bodyMassScale = Mathf.Max(1f, bodyMassScale);
+        maxReachForceN = Mathf.Max(0f, maxReachForceN);
+        maxAimTorqueNm = Mathf.Max(0f, maxAimTorqueNm);
+        upSpeedU = Mathf.Max(0f, upSpeedU);
+        downSpeedU = Mathf.Max(0f, downSpeedU);
+        rotationSpeedDeg = Mathf.Max(0f, rotationSpeedDeg);
+        accelerationU = Mathf.Max(0f, accelerationU);
+        decelerationU = Mathf.Max(0f, decelerationU);
+        hitStunDurationS = Mathf.Max(0f, hitStunDurationS);
+        hitDropDistanceU = Mathf.Max(0f, hitDropDistanceU);
+        hitDropSpeedU = Mathf.Max(0f, hitDropSpeedU);
     }
 }
