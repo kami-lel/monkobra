@@ -5,7 +5,6 @@ public class GameController : MonoBehaviour
     public static GameController Instance { get; private set; }
 
     [Header("References")]
-    [SerializeField] private GameOverController resultUI;
     [SerializeField] private StaminaBar staminaBar;
     [SerializeField] private Transform finishPoint;
 
@@ -21,14 +20,14 @@ public class GameController : MonoBehaviour
 
         isGameOver = true;
 
-        if (resultUI != null)
+        if (ScreensManager.I != null)
         {
-            resultUI.ShowWin();
+            ScreensManager.I.ShowWinScreen();
         }
         else
         {
             Debug.LogError(
-                "GameController: Result UI has not been assigned.",
+                "GameController:\tScreensManager instance not found",
                 this
             );
         }
@@ -46,14 +45,14 @@ public class GameController : MonoBehaviour
 
         isGameOver = true;
 
-        if (resultUI != null)
+        if (ScreensManager.I != null)
         {
-            resultUI.ShowLose();
+            ScreensManager.I.ShowLoseScreen();
         }
         else
         {
             Debug.LogError(
-                "GameController: Result UI has not been assigned.",
+                "GameController:\tScreensManager instance not found",
                 this
             );
         }
