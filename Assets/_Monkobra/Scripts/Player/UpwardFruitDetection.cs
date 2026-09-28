@@ -19,6 +19,12 @@ public class UpwardFruitDetection: MonoBehaviour {
     public bool ReachForLeft => leftFruits.Count > 0;
     public bool ReachForRight => rightFruits.Count > 0;
 
+    /// <summary>
+    /// most recently entered fruit still w/i reach; null iff none
+    /// </summary>
+    public Collider NewestFruit =>
+        fruitOrder.Count > 0 ? fruitOrder[fruitOrder.Count - 1] : null;
+
     // Inspector Fields  #######################################################
     [Tooltip("left-side detection zone, must report Side == Left")]
     [SerializeField]
@@ -89,16 +95,22 @@ public class UpwardFruitDetection: MonoBehaviour {
 
         HashSet<Collider> fruits =
             side == DetectionSide.Left ? leftFruits : rightFruits;
-        if (fruits.Add(other) && fruits.Count == 1) {
-            LogReachChanged(side);
+        if (fruits.Add(other)) {
+            fruitOrder.Add(other);
+            if (fruits.Count == 1) {
+                LogReachChanged(side);
+            }
         }
     }
 
     private void OnZoneExited(DetectionSide side, Collider other) {
         HashSet<Collider> fruits =
             side == DetectionSide.Left ? leftFruits : rightFruits;
-        if (fruits.Remove(other) && fruits.Count == 0) {
-            LogReachChanged(side);
+        if (fruits.Remove(other)) {
+            fruitOrder.Remove(other);
+            if (fruits.Count == 0) {
+                LogReachChanged(side);
+            }
         }
     }
 
@@ -108,6 +120,9 @@ public class UpwardFruitDetection: MonoBehaviour {
     // Private Members  ########################################################
     private readonly HashSet<Collider> leftFruits = new HashSet<Collider>();
     private readonly HashSet<Collider> rightFruits = new HashSet<Collider>();
+
+    // entry order across both sides; last elem is newest, drives NewestFruit
+    private readonly List<Collider> fruitOrder = new List<Collider>();
 
     // Private Methods  ########################################################
     private void LogReachChanged(DetectionSide side) {

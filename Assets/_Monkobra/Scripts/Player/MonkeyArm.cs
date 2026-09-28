@@ -2,15 +2,19 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Drives the arm's <see cref="ConfigurableJoint"/> by angular drive to mimic
-/// hand-over-hand climbing. While the move action has input, the first free
-/// angular axis strokes between the min and max angles (reach up, pull down),
-/// and any further free axis swings a quarter cycle behind at a reduced
-/// amplitude, so the hand traces a loop. The right arm runs half a cycle
-/// ahead of the left, so the two alternate, and the left arm's angles are
-/// mirrored (sign flipped) from the right's. Downward input plays the stroke
-/// in reverse. With no input, the arm holds its current pose and resumes from
-/// there on the next input.
+/// Drives the arm's <see cref="ConfigurableJoint"/> in one of two modes.
+/// Normal mode mimics hand-over-hand climbing by angular drive: while the
+/// move action has input, the first free angular axis strokes between the
+/// min and max angles (reach up, pull down), and any further free axis
+/// swings a quarter cycle behind at a reduced amplitude, so the hand traces
+/// a loop. The right arm runs half a cycle ahead of the left, so the two
+/// alternate, and the left arm's angles are mirrored (sign flipped) from the
+/// right's. Downward input plays the stroke in reverse. With no input, the
+/// arm holds its current pose and resumes from there on the next input.
+/// Reach mode, entered via <see cref="SetReachTarget"/>, aims the shoulder
+/// at a world position and drives the joint's local Z linear axis to
+/// telescope the arm toward it, up to
+/// <see cref="MonkeyConfig.MaxReachDistanceU"/> past its rest length.
 /// </summary>
 [RequireComponent(typeof(ConfigurableJoint))]
 public class MonkeyArm: MonoBehaviour {
@@ -30,32 +34,38 @@ public class MonkeyArm: MonoBehaviour {
     [SerializeField]
     private InputActionReference moveAction;
 
-    [Tooltip("bottom of the stroke, arm fully pulled down, in deg")]
+    [Tooltip("shared stroke and reach tuning")]
     [SerializeField]
-    private float minAngleDeg = -15f;
-
-    [Tooltip("top of the stroke, arm fully reached up, in deg")]
-    [SerializeField]
-    private float maxAngleDeg = 30f;
+    private MonkeyConfig config;
 
     [Tooltip(
-        "amplitude of each extra free axis as a fraction of the main "
-            + "stroke, 0 keeps the hand on a straight line"
+        "child Transform to scale along its local Z axis for the "
+            + "telescoping reach visual, unassigned skips the visual stretch"
     )]
     [SerializeField]
-    private float sideSwingRatio = 0.1f;
+    private Transform armVisual;
 
-    [Tooltip("stroke phase speed, in deg/s, 360 is one full stroke per second")]
+    [Tooltip(
+        "child Transform marking the hand's tip, its start distance from "
+            + "the shoulder is read once at Awake as the arm's rest length"
+    )]
     [SerializeField]
-    private float strokeSpeedDeg = 240f;
+    private Transform handTip;
 
-    [Tooltip("angular drive stiffness pulling the arm to its target angle")]
-    [SerializeField]
-    private float driveSpring = 200f;
+    // public API  #############################################################
+    public bool IsReaching => isReaching;
 
-    [Tooltip("angular drive damping, curbs oscillation around the target")]
-    [SerializeField]
-    private float driveDamper = 20f;
+    // switches the arm into reach mode and aims it at a world position,
+    // call every frame the target should track (eg. a moving grab point)
+    public void SetReachTarget(Vector3 targetWorldPos) {
+        isReaching = true;
+        reachTargetWorld = targetWorldPos;
+    }
+
+    // switches the arm back to normal hand-over-hand climbing
+    public void CancelReach() {
+        isReaching = false;
+    }
 
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
@@ -63,6 +73,24 @@ public class MonkeyArm: MonoBehaviour {
         if (moveAction == null) {
             Debug.LogWarning(
                 "MonkeyArm:\tmust assign Inspector Field: moveAction",
+                this
+            );
+        }
+        if (handTip == null) {
+            Debug.LogWarning(
+                "MonkeyArm:\tmust assign Inspector Field: handTip",
+                this
+            );
+        }
+        if (config == null) {
+            Debug.LogError(
+                "MonkeyArm:\tmust assign Inspector Field: config",
+                this
+            );
+        }
+        if (config == null) {
+            Debug.LogWarning(
+                "MonkeyArm:\tmust assign Inspector Field: config",
                 this
             );
         }
@@ -78,10 +106,27 @@ public class MonkeyArm: MonoBehaviour {
         // slerp drive rotates the free angular axes toward targetRotation
         joint.rotationDriveMode = RotationDriveMode.Slerp;
         joint.slerpDrive = new JointDrive {
-            positionSpring = driveSpring,
-            positionDamper = driveDamper,
+            positionSpring = config.DriveSpring,
+            positionDamper = config.DriveDamper,
             maximumForce = float.MaxValue,
         };
+
+        // local Z carries the reach: locked at rest, unlocked only while
+        // actually reaching so normal-mode stroking stays rigid
+        joint.zMotion = ConfigurableJointMotion.Locked;
+        joint.linearLimit = new SoftJointLimit {
+            limit = config.MaxReachDistanceU,
+        };
+        joint.zDrive = new JointDrive {
+            positionSpring = config.ReachSpring,
+            positionDamper = config.ReachDamper,
+            maximumForce = float.MaxValue,
+        };
+
+        restLengthU = handTip != null
+            ? Vector3.Distance(transform.position, handTip.position)
+            : 0f;
+        armVisualBaseScaleZ = armVisual != null ? armVisual.localScale.z : 1f;
 
         // arms alternate, so one starts half a stroke ahead of the other
         strokePhaseDeg = isRightArm ? 180f : 0f;
@@ -100,6 +145,45 @@ public class MonkeyArm: MonoBehaviour {
     }
 
     private void FixedUpdate() {
+        if (isReaching) {
+            // unlock Z only for the duration of the reach
+            joint.zMotion = ConfigurableJointMotion.Limited;
+            DriveReach();
+            return;
+        }
+
+        // not reaching: lock the linear axis back down, no spring slack
+        joint.zMotion = ConfigurableJointMotion.Locked;
+        joint.targetPosition = Vector3.zero;
+        if (armVisual != null) {
+            armVisual.localScale = new Vector3(
+                armVisual.localScale.x,
+                armVisual.localScale.y,
+                armVisualBaseScaleZ
+            );
+        }
+
+        DriveStroke();
+    }
+
+    // constants  ##############################################################
+    private const float INPUT_DEADZONE = 0.1f;
+    private const float INPUT_DEADZONE_SQR = INPUT_DEADZONE * INPUT_DEADZONE;
+    private const float SIDE_SWING_LAG_DEG = 90f;
+
+    // private members  ########################################################
+    private float strokePhaseDeg; // advances only while moving
+    private bool isReaching;
+    private Vector3 reachTargetWorld;
+    private float restLengthU;
+    private float armVisualBaseScaleZ;
+
+    // cached references  ------------------------------------------------------
+    private ConfigurableJoint joint;
+
+    // private methods  ########################################################
+    // hand-over-hand climb: angular drive strokes the free axes per input
+    private void DriveStroke() {
         Vector2 directionalInput =
             moveAction != null
                 ? moveAction.action.ReadValue<Vector2>()
@@ -114,7 +198,8 @@ public class MonkeyArm: MonoBehaviour {
         // moving down plays the stroke backward, a climb-down
         float direction = directionalInput.y < -INPUT_DEADZONE ? -1f : 1f;
         strokePhaseDeg = Mathf.Repeat(
-            strokePhaseDeg + direction * strokeSpeedDeg * Time.fixedDeltaTime,
+            strokePhaseDeg
+                + direction * config.StrokeSpeedDeg * Time.fixedDeltaTime,
             360f
         );
 
@@ -129,18 +214,38 @@ public class MonkeyArm: MonoBehaviour {
         );
     }
 
-    // constants  ##############################################################
-    private const float INPUT_DEADZONE = 0.1f;
-    private const float INPUT_DEADZONE_SQR = INPUT_DEADZONE * INPUT_DEADZONE;
-    private const float SIDE_SWING_LAG_DEG = 90f;
+    // reach: aim the shoulder at reachTargetWorld and telescope the local Z
+    // linear drive out to close the remaining distance, clamped to the max
+    private void DriveReach() {
+        Vector3 toTargetWorld = reachTargetWorld - transform.position;
+        float distanceU = toTargetWorld.magnitude;
+        float extensionU = Mathf.Clamp(
+            distanceU - restLengthU, 0f, config.MaxReachDistanceU
+        );
 
-    // private members  ########################################################
-    private float strokePhaseDeg; // advances only while moving
+        // targetRotation is relative to the connected body's rotation, so
+        // undo it here to express the aim as a world-space look direction
+        Quaternion connectedRotation = joint.connectedBody != null
+            ? joint.connectedBody.rotation
+            : Quaternion.identity;
+        Quaternion worldAim = Quaternion.LookRotation(
+            toTargetWorld.normalized
+        );
+        joint.targetRotation =
+            Quaternion.Inverse(connectedRotation) * worldAim;
 
-    // cached references  ------------------------------------------------------
-    private ConfigurableJoint joint;
+        joint.targetPosition = new Vector3(0f, 0f, extensionU);
 
-    // private methods  ########################################################
+        if (armVisual != null && restLengthU > 0f) {
+            float stretchFactor = (restLengthU + extensionU) / restLengthU;
+            armVisual.localScale = new Vector3(
+                armVisual.localScale.x,
+                armVisual.localScale.y,
+                armVisualBaseScaleZ * stretchFactor
+            );
+        }
+    }
+
     // locked axis stays at 0; 1st free axis is the main stroke, the rest are
     // a quarter cycle behind at a reduced amplitude
     private float CalcAxisAngleDeg(
@@ -151,8 +256,8 @@ public class MonkeyArm: MonoBehaviour {
             return 0f;
         }
 
-        float midDeg = (maxAngleDeg + minAngleDeg) * 0.5f;
-        float halfRangeDeg = (maxAngleDeg - minAngleDeg) * 0.5f;
+        float midDeg = (config.MaxAngleDeg + config.MinAngleDeg) * 0.5f;
+        float halfRangeDeg = (config.MaxAngleDeg - config.MinAngleDeg) * 0.5f;
         bool isMainStroke = freeAxisIdx == 0;
         freeAxisIdx++;
 
@@ -161,7 +266,7 @@ public class MonkeyArm: MonoBehaviour {
             : strokePhaseDeg - SIDE_SWING_LAG_DEG;
         float amplitudeDeg = isMainStroke
             ? halfRangeDeg
-            : halfRangeDeg * sideSwingRatio;
+            : halfRangeDeg * config.SideSwingRatio;
         return isMainStroke
             ? midDeg + amplitudeDeg * Mathf.Sin(phaseDeg * Mathf.Deg2Rad)
             : amplitudeDeg * Mathf.Sin(phaseDeg * Mathf.Deg2Rad);
