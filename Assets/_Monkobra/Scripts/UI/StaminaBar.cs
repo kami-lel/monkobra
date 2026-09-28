@@ -23,6 +23,11 @@ public class StaminaBar : MonoBehaviour
         staminaSlider.minValue = 0f;
         staminaSlider.maxValue = maxStamina;
         staminaSlider.value = currentStamina;
+
+        if (Debug.isDebugBuild)
+        {
+            Debug.Log("StaminaBar:\tready", this);
+        }
     }
 
     private void Start()
@@ -45,9 +50,24 @@ public class StaminaBar : MonoBehaviour
 
             if (currentStamina <= 0f)
             {
-                if (GameController.Instance != null)
+                if (GameController.I != null)
                 {
-                    GameController.Instance.LoseGame();
+                    if (Debug.isDebugBuild)
+                    {
+                        Debug.Log(
+                            "StaminaBar:\tstamina depleted, losing game",
+                            this
+                        );
+                    }
+
+                    GameController.I.LoseGame();
+                }
+                else
+                {
+                    Debug.LogWarning(
+                        "StaminaBar:\tGameController instance not found",
+                        this
+                    );
                 }
 
                 yield break;

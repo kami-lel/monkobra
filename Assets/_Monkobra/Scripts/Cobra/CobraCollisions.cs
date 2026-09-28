@@ -9,9 +9,21 @@ public class CobraCollision : MonoBehaviour
             return;
         }
 
-        if (GameController.Instance != null)
+        if (GameController.I != null)
         {
-            GameController.Instance.LoseGame();
+            if (Debug.isDebugBuild)
+            {
+                Debug.Log("CobraCollision:\tplayer caught, losing game", this);
+            }
+
+            GameController.I.LoseGame();
+        }
+        else
+        {
+            Debug.LogWarning(
+                "CobraCollision:\tGameController instance not found",
+                this
+            );
         }
     }
 }

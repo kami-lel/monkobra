@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class GameController: MonoBehaviour {
     // Public Members  #########################################################
-    public static GameController Instance {
+    public static GameController I {
         get; private set;
     }
 
@@ -63,7 +63,7 @@ public class GameController: MonoBehaviour {
             );
         }
 
-        if (Instance != null && Instance != this) {
+        if (I != null && I != this) {
             Debug.LogWarning(
                 "GameController:\tduplicate instance destroyed",
                 this
@@ -73,7 +73,7 @@ public class GameController: MonoBehaviour {
             return;
         }
 
-        Instance = this;
+        I = this;
         Time.timeScale = 1f;
     }
 
@@ -90,8 +90,8 @@ public class GameController: MonoBehaviour {
     }
 
     private void OnDestroy() {
-        if (Instance == this) {
-            Instance = null;
+        if (I == this) {
+            I = null;
             Time.timeScale = 1f;
         }
     }
