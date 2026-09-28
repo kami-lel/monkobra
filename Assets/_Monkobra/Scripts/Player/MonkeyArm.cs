@@ -14,9 +14,12 @@ using UnityEngine.InputSystem;
 /// right's. Downward input plays the stroke in reverse. With no input, the
 /// arm holds its current pose and resumes from there on the next input.
 /// Reach mode, entered via <see cref="SetReachTarget"/>, aims the shoulder
-/// at a world position and drives the joint's local Z linear axis to
-/// telescope the arm toward it, up to
-/// <see cref="MonkeyConfig.MaxReachDistanceU"/> past its rest length.
+/// at a tracked world Transform and drives the joint's local Z linear axis
+/// to telescope the arm toward it, up to
+/// <see cref="MonkeyConfig.MaxReachDistanceU"/> past its rest length. The
+/// tracked Transform is read fresh every FixedUpdate, so a moving grab
+/// point (eg. a swaying branch) is followed w/o the caller re-issuing
+/// SetReachTarget.
 /// </summary>
 [RequireComponent(typeof(ConfigurableJoint))]
 public class MonkeyArm: MonoBehaviour {
@@ -57,16 +60,17 @@ public class MonkeyArm: MonoBehaviour {
     // public API  #############################################################
     public bool IsReaching => isReaching;
 
-    // switches the arm into reach mode and aims it at a world position,
-    // call every frame the target should track (eg. a moving grab point)
-    public void SetReachTarget(Vector3 targetWorldPos) {
-        isReaching = true;
-        reachTargetWorld = targetWorldPos;
+    // switches the arm into reach mode and tracks target's world position
+    // every FixedUpdate until CancelReach
+    public void SetReachTarget(Transform target) {
+        isReaching = target != null;
+        reachTarget = target;
     }
 
     // switches the arm back to normal hand-over-hand climbing
     public void CancelReach() {
         isReaching = false;
+        reachTarget = null;
     }
 
     // MonoBehaviour Lifecycle  ################################################
@@ -181,7 +185,7 @@ public class MonkeyArm: MonoBehaviour {
     // private members  ########################################################
     private float strokePhaseDeg; // advances only while moving
     private bool isReaching;
-    private Vector3 reachTargetWorld;
+    private Transform reachTarget;
     private float restLengthU;
     private float armVisualBaseScaleZ;
 
@@ -221,10 +225,14 @@ public class MonkeyArm: MonoBehaviour {
         );
     }
 
-    // reach: aim the shoulder at reachTargetWorld and telescope the local Z
+    // reach: aim the shoulder at reachTarget and telescope the local Z
     // linear drive out to close the remaining distance, clamped to the max
     private void DriveReach() {
-        Vector3 toTargetWorld = reachTargetWorld - transform.position;
+        if (reachTarget == null) {
+            return;
+        }
+
+        Vector3 toTargetWorld = reachTarget.position - transform.position;
         float distanceU = toTargetWorld.magnitude;
         float extensionU = Mathf.Clamp(
             distanceU - restLengthU, 0f, config.MaxReachDistanceU
