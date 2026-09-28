@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+// BUG BUG arm
+
 /// <summary>
 /// Drives the arm's <see cref="ConfigurableJoint"/> in one of two modes.
 /// Normal mode mimics hand-over-hand climbing by angular drive: while the
@@ -76,21 +78,21 @@ public class MonkeyArm: MonoBehaviour {
                 this
             );
         }
+        if (config == null) {
+            Debug.LogWarning(
+                "MonkeyArm:\tmust assign Inspector Field: config",
+                this
+            );
+        }
+        if (armVisual == null) {
+            Debug.LogWarning(
+                "MonkeyArm:\tmust assign Inspector Field: armVisual",
+                this
+            );
+        }
         if (handTip == null) {
             Debug.LogWarning(
                 "MonkeyArm:\tmust assign Inspector Field: handTip",
-                this
-            );
-        }
-        if (config == null) {
-            Debug.LogError(
-                "MonkeyArm:\tmust assign Inspector Field: config",
-                this
-            );
-        }
-        if (config == null) {
-            Debug.LogWarning(
-                "MonkeyArm:\tmust assign Inspector Field: config",
                 this
             );
         }
@@ -146,14 +148,19 @@ public class MonkeyArm: MonoBehaviour {
 
     private void FixedUpdate() {
         if (isReaching) {
-            // unlock Z only for the duration of the reach
-            joint.zMotion = ConfigurableJointMotion.Limited;
+            // unlock Z only on the transition into a reach, re-assigning
+            // an unchanged joint motion every frame can jolt the solver
+            if (joint.zMotion != ConfigurableJointMotion.Limited) {
+                joint.zMotion = ConfigurableJointMotion.Limited;
+            }
             DriveReach();
             return;
         }
 
         // not reaching: lock the linear axis back down, no spring slack
-        joint.zMotion = ConfigurableJointMotion.Locked;
+        if (joint.zMotion != ConfigurableJointMotion.Locked) {
+            joint.zMotion = ConfigurableJointMotion.Locked;
+        }
         joint.targetPosition = Vector3.zero;
         if (armVisual != null) {
             armVisual.localScale = new Vector3(
