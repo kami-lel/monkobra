@@ -32,6 +32,12 @@ using UnityEngine.InputSystem;
 /// Downward input plays the stroke in reverse; w/o input the phase freezes and
 /// the arm holds its pose.
 /// </para>
+/// <para>
+/// Every tuning value and the move action itself come from the shared
+/// <see cref="MonkeyConfig"/> asset, so both arms are tuned in one place and
+/// read the same input; only the wiring references and
+/// <see cref="isRightArm"/> are per-arm.
+/// </para>
 /// </summary>
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(ConfigurableJoint))]
@@ -78,6 +84,10 @@ public class ArmRoot: MonoBehaviour {
     public void SetReachTarget(Transform target) {
         isReaching = target != null;
         reachTarget = target;
+        // a settled arm sleeps, and a new drive target alone will not wake it
+        if (body != null) {
+            body.WakeUp();
+        }
     }
 
     /// <summary>Switches the arm back to climbing.</summary>
@@ -112,6 +122,12 @@ public class ArmRoot: MonoBehaviour {
     )]
     private Collider handCollider;
 
+    [SerializeField]
+    [Tooltip(
+        "shared stroke, reach and input tuning, the same asset on both arms"
+    )]
+    private MonkeyConfig config;
+
     [Header("Identity")]
     [SerializeField]
     [Tooltip(
@@ -119,67 +135,6 @@ public class ArmRoot: MonoBehaviour {
             + "climb half a cycle out of phase and splay to opposite sides"
     )]
     private bool isRightArm;
-
-    [Header("Input")]
-    [SerializeField]
-    [Tooltip(
-        "directional input action, arm climbs only while it is held, a "
-            + "Vector2 like the one driving MonkeyPrefabRoot"
-    )]
-    private InputActionReference moveAction;
-
-    [Header("Reach")]
-    [SerializeField]
-    [Tooltip("farthest the arm aims past its rest length; u")]
-    private float maxReachDistanceU = 3f;
-
-    [SerializeField]
-    [Tooltip(
-        "extra travel past max reach the joint limit allows, the room the "
-            + "overshoot lives in; u"
-    )]
-    private float overshootAllowanceU = 0.5f;
-
-    [SerializeField]
-    [Tooltip("linear drive stiffness telescoping the arm toward its target")]
-    private float reachSpring = 400f;
-
-    [SerializeField]
-    [Tooltip("linear drive damping, lower overshoots the target further")]
-    private float reachDamper = 15f;
-
-    [SerializeField]
-    [Tooltip(
-        "flip if the arm telescopes inward instead of outward, the linear "
-            + "drive target reads inverted on some joint axis setups"
-    )]
-    private bool invertDriveAxis = true;
-
-    [Header("Climb Cycle")]
-    [SerializeField]
-    [Tooltip("stroke rate at full input; cycles/s")]
-    private float cycleSpeed = 1.2f;
-
-    [SerializeField]
-    [Tooltip("how far the hand pushes out at the top of a stroke; u")]
-    private float cycleReachU = 0.6f;
-
-    [SerializeField]
-    [Tooltip("how far the arm sweeps up and down over a stroke; deg")]
-    private float cycleSwingDeg = 25f;
-
-    [SerializeField]
-    [Tooltip("resting outward lean, keeps the two arms off each other; deg")]
-    private float splayDeg = 20f;
-
-    [Header("Aim")]
-    [SerializeField]
-    [Tooltip("angular drive stiffness pulling the arm to its target angle")]
-    private float aimSpring = 200f;
-
-    [SerializeField]
-    [Tooltip("angular drive damping, curbs oscillation around the target")]
-    private float aimDamper = 20f;
 
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
@@ -204,9 +159,15 @@ public class ArmRoot: MonoBehaviour {
                 "ArmRoot:\tmust assign Inspector Field: handCollider", this
             );
         }
-        if (moveAction == null) {
+        if (config == null) {
             Debug.LogWarning(
-                "ArmRoot:\tmust assign Inspector Field: moveAction", this
+                "ArmRoot:\tmust assign Inspector Field: config", this
+            );
+        }
+        else if (config.MoveAction == null) {
+            Debug.LogWarning(
+                "ArmRoot:\tmust assign MonkeyConfig field: moveAction",
+                config
             );
         }
 
@@ -246,14 +207,14 @@ public class ArmRoot: MonoBehaviour {
     }
 
     private void OnEnable() {
-        if (moveAction != null) {
-            moveAction.action.Enable();
+        if (MoveAction != null) {
+            MoveAction.action.Enable();
         }
     }
 
     private void OnDisable() {
-        if (moveAction != null) {
-            moveAction.action.Disable();
+        if (MoveAction != null) {
+            MoveAction.action.Disable();
         }
         // physics stops reporting while disabled, so stale contacts would
         // never clear on their own
@@ -261,7 +222,7 @@ public class ArmRoot: MonoBehaviour {
     }
 
     private void FixedUpdate() {
-        if (joint == null) {
+        if (joint == null || config == null) {
             return;
         }
 
@@ -302,6 +263,10 @@ public class ArmRoot: MonoBehaviour {
     // mirrors every side-dependent angle for the left arm
     private float SideSign => isRightArm ? 1f : -1f;
 
+    // both arms share one action, held on the config asset
+    private InputActionReference MoveAction =>
+        config != null ? config.MoveAction : null;
+
     // Cached References  ------------------------------------------------------
     private Rigidbody body;
     private ConfigurableJoint joint;
@@ -310,7 +275,7 @@ public class ArmRoot: MonoBehaviour {
     // shoulder pivot, local Z free to telescope, angular free for the slerp
     // drive to aim. Set once: re-assigning joint motion churns the solver
     private void ConfigureJoint() {
-        if (joint == null) {
+        if (joint == null || config == null) {
             return;
         }
 
@@ -330,11 +295,11 @@ public class ArmRoot: MonoBehaviour {
         joint.yMotion = ConfigurableJointMotion.Locked;
         joint.zMotion = ConfigurableJointMotion.Limited;
         joint.linearLimit = new SoftJointLimit {
-            limit = maxReachDistanceU + overshootAllowanceU,
+            limit = config.MaxReachDistanceU + config.OvershootAllowanceU,
         };
         joint.zDrive = new JointDrive {
-            positionSpring = reachSpring,
-            positionDamper = reachDamper,
+            positionSpring = config.ReachSpring,
+            positionDamper = config.ReachDamper,
             maximumForce = float.MaxValue,
         };
 
@@ -344,8 +309,8 @@ public class ArmRoot: MonoBehaviour {
         joint.angularZMotion = ConfigurableJointMotion.Free;
         joint.rotationDriveMode = RotationDriveMode.Slerp;
         joint.slerpDrive = new JointDrive {
-            positionSpring = aimSpring,
-            positionDamper = aimDamper,
+            positionSpring = config.DriveSpring,
+            positionDamper = config.DriveDamper,
             maximumForce = float.MaxValue,
         };
     }
@@ -359,7 +324,7 @@ public class ArmRoot: MonoBehaviour {
 
         Vector3 toTarget = reachTarget.position - shoulder.position;
         float extensionU = Mathf.Clamp(
-            toTarget.magnitude - restLengthU, 0f, maxReachDistanceU
+            toTarget.magnitude - restLengthU, 0f, config.MaxReachDistanceU
         );
 
         SetAimWorld(toTarget);
@@ -370,8 +335,8 @@ public class ArmRoot: MonoBehaviour {
     // in, the angular sweep runs a quarter cycle ahead so the hand traces a
     // loop rather than a straight line
     private void DriveClimb() {
-        Vector2 directionalInput = moveAction != null
-            ? moveAction.action.ReadValue<Vector2>()
+        Vector2 directionalInput = MoveAction != null
+            ? MoveAction.action.ReadValue<Vector2>()
             : Vector2.zero;
 
         // no input: hold the pose, leave the drive targets where they are
@@ -384,18 +349,32 @@ public class ArmRoot: MonoBehaviour {
         float inputScale = Mathf.Clamp01(directionalInput.magnitude);
         cyclePhase = Mathf.Repeat(
             cyclePhase
-                + direction * inputScale * cycleSpeed * Time.fixedDeltaTime,
+                + direction
+                    * inputScale
+                    * config.StrokeSpeedCycles
+                    * Time.fixedDeltaTime,
             1f
         );
 
         float phaseRad = cyclePhase * Mathf.PI * 2f;
         // sin is remapped to 0..1 so the arm never pulls inside its rest
         // length, cos puts the sweep a quarter cycle ahead of the push
-        float extensionU = cycleReachU * 0.5f * (1f + Mathf.Sin(phaseRad));
-        float swingDeg = cycleSwingDeg * Mathf.Cos(phaseRad);
+        float extensionU =
+            config.CycleReachU * 0.5f * (1f + Mathf.Sin(phaseRad));
 
-        SetAimLocal(Quaternion.Euler(-swingDeg, SideSign * splayDeg, 0f));
+        // the sweep rides the config's stroke range: its midpoint is the
+        // arm's neutral pitch, and half its span is the swing amplitude
+        float midDeg = (config.MaxAngleDeg + config.MinAngleDeg) * 0.5f;
+        float halfRangeDeg = (config.MaxAngleDeg - config.MinAngleDeg) * 0.5f;
+        float swingDeg = midDeg + halfRangeDeg * Mathf.Cos(phaseRad);
+
+        SetAimLocal(
+            Quaternion.Euler(-swingDeg, SideSign * config.SplayDeg, 0f)
+        );
         SetExtension(extensionU);
+        if (body != null) {
+            body.WakeUp();
+        }
     }
 
     // point local +Z along a world direction, expressed in the connected
@@ -419,8 +398,9 @@ public class ArmRoot: MonoBehaviour {
     }
 
     private void SetExtension(float extensionU) {
+        bool isInverted = config == null || config.InvertDriveAxis;
         joint.targetPosition = new Vector3(
-            0f, 0f, invertDriveAxis ? -extensionU : extensionU
+            0f, 0f, isInverted ? -extensionU : extensionU
         );
     }
 

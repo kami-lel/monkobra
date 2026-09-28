@@ -1,8 +1,11 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
-/// Shared tuning for the monkey. Currently covers only
-/// <see cref="MonkeyArm"/>'s stroke and reach drives.
+/// Shared tuning for the monkey: the arm stroke and reach drives, plus the
+/// movement action both arms read their climb input from. Consumed by
+/// <see cref="ArmRoot"/>, and by the older <see cref="MonkeyArm"/>, which
+/// shares every drive value with it.
 /// </summary>
 [CreateAssetMenu(
     fileName = "MonkeyConfig",
@@ -24,6 +27,11 @@ public class MonkeyConfig: ScriptableObject {
     /// second</returns>
     public float StrokeSpeedDeg => strokeSpeedDeg;
 
+    /// <returns>the same stroke speed as <see cref="StrokeSpeedDeg"/>, in
+    /// full strokes per second, for drives that track a 0..1 phase rather
+    /// than an angle</returns>
+    public float StrokeSpeedCycles => strokeSpeedDeg / 360f;
+
     /// <returns>angular drive stiffness pulling the arm to its target
     /// angle</returns>
     public float DriveSpring => driveSpring;
@@ -41,6 +49,26 @@ public class MonkeyConfig: ScriptableObject {
 
     /// <returns>linear drive damping, curbs oscillation on reach</returns>
     public float ReachDamper => reachDamper;
+
+    /// <returns>extra travel past <see cref="MaxReachDistanceU"/> the joint
+    /// limit allows, the room an overshoot lives in; u</returns>
+    public float OvershootAllowanceU => overshootAllowanceU;
+
+    /// <returns>whether the linear drive target has to be negated to push the
+    /// arm outward, true for the usual ConfigurableJoint axis setup</returns>
+    public bool InvertDriveAxis => invertDriveAxis;
+
+    /// <returns>how far the hand pushes out at the top of a climb stroke; u
+    /// </returns>
+    public float CycleReachU => cycleReachU;
+
+    /// <returns>resting outward lean of each arm, keeps the two off each
+    /// other; deg</returns>
+    public float SplayDeg => splayDeg;
+
+    /// <returns>directional input action the arms climb to, a Vector2 where x
+    /// orbits and y climbs</returns>
+    public InputActionReference MoveAction => moveAction;
 
     // Inspector Fields  #######################################################
     [Header("Arm - Stroke")]
@@ -84,6 +112,39 @@ public class MonkeyConfig: ScriptableObject {
     [Tooltip("linear drive damping, curbs oscillation on reach")]
     private float reachDamper = 40f;
 
+    [SerializeField]
+    [Tooltip(
+        "extra travel past max reach the joint limit allows, the room an "
+            + "overshoot lives in; u"
+    )]
+    private float overshootAllowanceU = 0.5f;
+
+    [SerializeField]
+    [Tooltip(
+        "uncheck if an arm telescopes inward instead of outward, the linear "
+            + "drive target reads inverted on some joint axis setups"
+    )]
+    private bool invertDriveAxis = true;
+
+    [Header("Arm - Climb Cycle")]
+    [SerializeField]
+    [Tooltip("how far the hand pushes out at the top of a stroke; u")]
+    private float cycleReachU = 0.6f;
+
+    [SerializeField]
+    [Tooltip(
+        "resting outward lean of each arm, keeps the 2 off each other; deg"
+    )]
+    private float splayDeg = 20f;
+
+    [Header("Arm - Input")]
+    [SerializeField]
+    [Tooltip(
+        "directional input action, arms climb only while it is held, the "
+            + "same Vector2 action driving MonkeyPrefabRoot"
+    )]
+    private InputActionReference moveAction;
+
     // Editor Validation  ######################################################
     private void OnValidate() {
         maxAngleDeg = Mathf.Max(minAngleDeg, maxAngleDeg);
@@ -94,5 +155,7 @@ public class MonkeyConfig: ScriptableObject {
         maxReachDistanceU = Mathf.Max(0f, maxReachDistanceU);
         reachSpring = Mathf.Max(0f, reachSpring);
         reachDamper = Mathf.Max(0f, reachDamper);
+        overshootAllowanceU = Mathf.Max(0f, overshootAllowanceU);
+        cycleReachU = Mathf.Max(0f, cycleReachU);
     }
 }

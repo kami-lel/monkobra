@@ -101,6 +101,7 @@ GameObject:
   - component: {fileID: 5953618974871489581}
   - component: {fileID: 1035399268115924458}
   - component: {fileID: 2291510936226178180}
+  - component: {fileID: 3206051325666002471}
   m_Layer: 0
   m_Name: Arm
   m_TagString: Untagged
@@ -253,3 +254,32 @@ ConfigurableJoint:
   m_EnablePreprocessing: 1
   m_MassScale: 1
   m_ConnectedMassScale: 1
+--- !u!114 &3206051325666002471
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8587813781772342673}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc86ae7ad387fa22f72f7e342590afb1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ArmRoot
+  bodyRigidbody: {fileID: 0}
+  shoulder: {fileID: 0}
+  armVisual: {fileID: 0}
+  handCollider: {fileID: 0}
+  isRightArm: 0
+  moveAction: {fileID: 0}
+  maxReachDistanceU: 3
+  overshootAllowanceU: 0.5
+  reachSpring: 400
+  reachDamper: 15
+  invertDriveAxis: 1
+  cycleSpeed: 1.2
+  cycleReachU: 0.6
+  cycleSwingDeg: 25
+  splayDeg: 20
+  aimSpring: 200
+  aimDamper: 20

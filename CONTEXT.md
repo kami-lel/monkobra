@@ -39,7 +39,7 @@ The repository root is the Unity project root. `Library/`, `Temp/`, `Logs/`, `Us
 | Element | Behavior | Status |
 | --- | --- | --- |
 | Monkey | vertical input moves along world Y, horizontal input orbits the trunk at a fixed radius | implemented |
-| Arms | `MonkeyArm` drives a `ConfigurableJoint` per arm for an alternating hand-over-hand stroke while move input is held | implemented |
+| Arms | `ArmRoot` drives a `ConfigurableJoint` per arm: an alternating hand-over-hand stroke while move input is held, or a spring-driven reach that can overshoot its target, with the hand reporting its own contacts | implemented, two arm scripts coexist |
 | Tree | stack of static and dynamic trunk segments under a `TreeTop`, each dynamic segment decorated with branches | implemented, finite height |
 | Branch hit | camera shake, then stun (input ignored) while the monkey drops a set distance, all inspector fields | implemented |
 | Cobra | orbits and climbs the trunk on its own, trigger contact shows the game-over panel | implemented |
@@ -50,7 +50,8 @@ The repository root is the Unity project root. `Library/`, `Temp/`, `Logs/`, `Us
 ```mermaid
 graph LR
   Input[Move input] --> Root[MonkeyPrefabRoot]
-  Input --> Arm[MonkeyArm]
+  Input --> Arm[ArmRoot x2]
+  Cfg[MonkeyConfig] --> Arm
   Root --> Hit[HitBranchDetection]
   Hit -->|BranchHit| Root
   Hit --> Shake[Cinemachine impulse]
@@ -71,6 +72,9 @@ All under `Assets/_Monkobra/Scripts/`.
 | `Environment/BranchFruitPlacementConfig` | ScriptableObject of shared placement tuning: branch counts, radius, separation, retry cap |
 | `Environment/BranchWithScriptRoot` | decides per branch whether it bears a banana, then shows or hides the fruit children |
 | `Player/MonkeyPrefabRoot` | movement, branch-hit stun and drop |
+| `Player/ArmRoot` | one arm's Rigidbody and `ConfigurableJoint`, sitting at the hand end: climbs a stroke cycle on move input, or reaches a tracked target on a spring that may overshoot, and reports the hand's live contacts |
+| `Player/MonkeyArm` | the earlier arm driver, angular stroke plus reach, superseded by `ArmRoot` but still present |
+| `Player/MonkeyConfig` | ScriptableObject of shared arm tuning: stroke and reach drives, overshoot allowance, and the move action both arms read |
 | `Player/HitBranchDetection` | trigger on tag `Branch`, raises `BranchHit`, fires the camera impulse |
 | `Player/UpwardFruitDetection` | singleton (`I`), `ReachForLeft` and `ReachForRight` from tag `FruitCollider` overlaps |
 | `Player/DetectionZone` | side-tagged trigger volume that forwards enter and exit events |
@@ -85,9 +89,9 @@ All under `Assets/_Monkobra/Scripts/`.
 - A consumer that may start before its singleton reads it in `Start`, not `Awake`, so Awake order never matters
 - Detection scripts forward trigger events (`Entered`, `Exited`, `BranchHit`) rather than calling their consumers directly
 - Trigger matching relies on tags: `Branch`, `FruitCollider`
-- Input arrives through `InputActionReference` fields, each script enables and disables its own action
+- Input arrives through `InputActionReference` fields, each script enables and disables its own action, and the arms take theirs from `MonkeyConfig` so both read one action
 - Scripts guard required inspector fields in `Awake` with a logged error naming the field
-- Tuning values stay in serialized fields, and shared tuning sits in a ScriptableObject
+- Tuning values stay in serialized fields, and shared tuning sits in a ScriptableObject: an `ArmRoot` holds only its wiring references and which side it is, every number comes from `MonkeyConfig`
 - Two coding styles coexist: the newer scripts (`Environment/`, `Player/`, `GameController`) follow the house Unity style, while `Cobra/` and `UI/StaminaBar`, `UI/GameOverController` are older contributions still in the template style
 - The core tension is escape vs. sustain: grabbing slows the monkey's reactions, so every pickup risks a branch or cobra collision
 
@@ -98,6 +102,7 @@ All under `Assets/_Monkobra/Scripts/`.
 - Stamina drains on a timer only: it is not linked to climb speed, branch hits, or a stamina-out lose condition
 - `GameController` win and lose screens are stubs, and the cobra path uses `GameOverController` instead of `LoseGame`
 - `CobraDemo` scene remains next to `Lv1Scene`, while recent history says the demo was merged into `Lv1Scene`
+- Two arm drivers coexist, `ArmRoot` and the older `MonkeyArm`: they share `MonkeyConfig`, so a tuning change moves both
 - The tree is finite (`TreeManager` min and max y), not the endless tree of the pitch
 - Difficulty does not scale with distance yet, apart from branch count per segment
 - The prototype's WebGL link, gameplay video, and contributions belong to a different team's submission and do not describe this repository
