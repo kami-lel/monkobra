@@ -451,6 +451,16 @@ public class ArmRoot: MonoBehaviour {
         if (fruitDetection != null) {
             fruitDetection.RemoveFruit(fruit);
         }
+
+        StaminaBar staminaBar = StaminaBar.I;
+        if (staminaBar != null) {
+            staminaBar.AddStaminaByFruit();
+        }
+        else {
+            Debug.LogError(
+                "ArmRoot:\tfail to get singleton: StaminaBar", this
+            );
+        }
         if (Debug.isDebugBuild) {
             Debug.Log($"ArmRoot:\tgrabbed {fruit.name}", this);
         }

@@ -43,8 +43,8 @@ The repository root is the Unity project root. `Library/`, `Temp/`, `Logs/`, `Us
 | Tree | stack of static and dynamic trunk segments under a `TreeTop`, each dynamic segment decorated with branches | implemented, finite height |
 | Branch hit | camera shake, then stun (input ignored) while the monkey drops a set distance, all tuned in `MonkeyConfig` | implemented |
 | Cobra | orbits and climbs the trunk on its own, trigger contact shows the game-over panel | implemented |
-| Stamina | `StaminaBar` slider drains on a timer, `AddStamina` restores it, budget and drain rate come from `GameConfig` | bar exists, not yet tied to hits or grabs |
-| Grab | hold the interact action: camera swaps to a side view and the arm stretches toward the newest fruit at `ReachExtendSpeedU`; release grabs it iff the hand collider overlaps the fruit at that instant, else a miss (too short, or stretched past it) | grab implemented, the fruit is switched off, stamina not yet restored |
+| Stamina | `StaminaBar` slider drains on a timer, `AddStaminaByFruit` restores a fixed amount, budget, drain rate and fruit restore come from `GameConfig` | grabs restore it, not yet tied to hits |
+| Grab | hold the interact action: camera swaps to a side view and the arm stretches toward the newest fruit at `ReachExtendSpeedU`; release grabs it iff the hand collider overlaps the fruit at that instant, else a miss (too short, or stretched past it) | grab implemented, the fruit is switched off and `ArmRoot` calls `StaminaBar.I.AddStaminaByFruit` |
 | Win, lose | `GameController.WinGame` and `LoseGame` end the run once | screens are stubs |
 
 ```mermaid
@@ -68,7 +68,7 @@ All under `Assets/_Monkobra/Scripts/`.
 | Script | Role |
 | --- | --- |
 | `GameController` | scene singleton (`Instance`), owns the win or lose end state |
-| `GameConfig` | ScriptableObject of game-wide tuning: max stamina, drain amount and interval. Asset at `Settings/_Shared/GameConfig.asset`, read by `StaminaBar` |
+| `GameConfig` | ScriptableObject of game-wide tuning: max stamina, drain amount and interval, stamina per fruit. Asset at `Settings/_Shared/GameConfig.asset`, read by `StaminaBar` |
 | `Environment/TreeManager` | singleton (`I`) exposing tree `MinY`, `MaxY` for height-to-progress mapping |
 | `Environment/DynamicTreeSegmentPrefabRoot` | on `Start`, places Branch With Fruit prefabs on itself, count scaled by climb progress |
 | `Environment/BranchFruitPlacementConfig` | ScriptableObject of shared placement tuning: branch counts, radius, separation, retry cap |
@@ -82,11 +82,12 @@ All under `Assets/_Monkobra/Scripts/`.
 | `Player/CameraRigManager` | swaps behind, look-left, look-right cameras by Cinemachine priority |
 | `Cobra/CobraClimb` | spiral path around `pathCenter`, body segments trail the head |
 | `Cobra/CobraCollisions` | trigger enter calls `GameOverController` |
-| `UI/StaminaBar`, `UI/ProgressBarRoot`, `UI/GameOverController` | stamina slider, player-height progress scrollbar, game-over panel |
+| `UI/StaminaBar` | singleton (`I`), slider drained on a timer, loses the game at 0, `AddStaminaByFruit` restores it on a grab |
+| `UI/ProgressBarRoot`, `UI/GameOverController` | player-height progress scrollbar, game-over panel |
 
 ## Patterns & Conventions
 
-- Singletons are scene-scoped and self-destroy the duplicate component only: `GameController.Instance`, `TreeManager.I`, `UpwardFruitDetection.I`
+- Singletons are scene-scoped and self-destroy the duplicate component only: `GameController.Instance`, `TreeManager.I`, `UpwardFruitDetection.I`, `StaminaBar.I`
 - A consumer that may start before its singleton reads it in `Start`, not `Awake`, so Awake order never matters
 - Nothing about the monkey is mass or gravity driven: the body is kinematic and `MonkeyPrefabRoot` writes its position and rotation outright, so no arm joint or collision can move it, while each `ArmRoot` is posed purely by its joint drives, forces gravity off on its own Rigidbody, and ignores collisions with the body's colliders so a hand never reports the monkey itself
 - Detection scripts forward trigger events (`Entered`, `Exited`, `BranchHit`) rather than calling their consumers directly
@@ -100,8 +101,7 @@ All under `Assets/_Monkobra/Scripts/`.
 ## Known Gaps & Constraints
 
 - No tests, build, or run commands exist: verification means opening `Lv1Scene` in the Editor
-- A grabbed banana is only switched off: nothing calls `StaminaBar.AddStamina` yet
-- Stamina drains on a timer only: it is not linked to climb speed, branch hits, or a stamina-out lose condition
+- Stamina drains on a timer only: it is not linked to climb speed or branch hits
 - `GameController` win and lose screens are stubs, and the cobra path uses `GameOverController` instead of `LoseGame`
 - `CobraDemo` scene remains next to `Lv1Scene`, while recent history says the demo was merged into `Lv1Scene`
 - The tree is finite (`TreeManager` min and max y), not the endless tree of the pitch

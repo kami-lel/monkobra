@@ -1,8 +1,8 @@
 using UnityEngine;
 
 /// <summary>
-/// Game-wide tuning shared by every level: the stamina budget and how fast it
-/// drains. Consumed by <see cref="StaminaBar"/>.
+/// Game-wide tuning shared by every level: the stamina budget, how fast it
+/// drains and what a fruit restores. Consumed by <see cref="StaminaBar"/>.
 /// </summary>
 [CreateAssetMenu(
     fileName = "GameConfig",
@@ -19,6 +19,9 @@ public class GameConfig: ScriptableObject {
     /// <returns>time between drain ticks; s</returns>
     public float StaminaDecreaseIntervalS => staminaDecreaseIntervalS;
 
+    /// <returns>stamina restored per grabbed fruit</returns>
+    public float FruitStaminaRestore => fruitStaminaRestore;
+
     // Inspector Fields  #######################################################
     [Header("Stamina")]
     [SerializeField]
@@ -33,10 +36,15 @@ public class GameConfig: ScriptableObject {
     [Tooltip("time between drain ticks; s")]
     private float staminaDecreaseIntervalS = 30f;
 
+    [SerializeField]
+    [Tooltip("stamina restored per grabbed fruit, capped at max stamina")]
+    private float fruitStaminaRestore = 30f;
+
     // Editor Validation  ######################################################
     private void OnValidate() {
         maxStamina = Mathf.Max(1f, maxStamina);
         staminaDecreaseAmount = Mathf.Max(0f, staminaDecreaseAmount);
         staminaDecreaseIntervalS = Mathf.Max(0.01f, staminaDecreaseIntervalS);
+        fruitStaminaRestore = Mathf.Max(0f, fruitStaminaRestore);
     }
 }

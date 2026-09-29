@@ -1,7 +1,7 @@
 # Monkobra CHANGELOG
 
 <!--
-FIXME connect health bar w/ hit tree & grab mechanism
+FIXME connect health bar w/ hit tree
 TODO changelog
 Todo audio BGM
 Todo audio SFX
