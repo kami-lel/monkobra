@@ -38,7 +38,7 @@ The repository root is the Unity project root. `Library/`, `Temp/`, `Logs/`, `Us
 
 | Element | Behavior | Status |
 | --- | --- | --- |
-| Monkey | vertical input moves along world Y, horizontal input orbits the trunk at a fixed radius | implemented |
+| Monkey | kinematic body: vertical input ramps a climb speed along world Y, horizontal input orbits the trunk at a fixed radius | implemented |
 | Arms | `ArmRoot` drives a `ConfigurableJoint` per arm: an alternating hand-over-hand stroke while move input is held, or a spring-driven reach that can overshoot its target, with the hand reporting its own contacts | implemented, two arm scripts coexist |
 | Tree | stack of static and dynamic trunk segments under a `TreeTop`, each dynamic segment decorated with branches | implemented, finite height |
 | Branch hit | camera shake, then stun (input ignored) while the monkey drops a set distance, all tuned in `MonkeyConfig` | implemented |
@@ -88,7 +88,7 @@ All under `Assets/_Monkobra/Scripts/`.
 
 - Singletons are scene-scoped and self-destroy the duplicate component only: `GameController.Instance`, `TreeManager.I`, `UpwardFruitDetection.I`
 - A consumer that may start before its singleton reads it in `Start`, not `Awake`, so Awake order never matters
-- The body owns its own motion: `MonkeyPrefabRoot` writes velocity and rotation outright, and an `ArmRoot` keeps its joint from fighting that by scaling the connected body's apparent mass up, capping its drive force and torque, and ignoring collisions with the body's own colliders
+- Nothing about the monkey is mass or gravity driven: the body is kinematic and `MonkeyPrefabRoot` writes its position and rotation outright, so no arm joint or collision can move it, while each `ArmRoot` is posed purely by its joint drives, forces gravity off on its own Rigidbody, and ignores collisions with the body's colliders so a hand never reports the monkey itself
 - Detection scripts forward trigger events (`Entered`, `Exited`, `BranchHit`) rather than calling their consumers directly
 - Trigger matching relies on tags: `Branch`, `FruitCollider`
 - Input arrives through `InputActionReference` fields, each script enables and disables its own action, and the arms take theirs from `MonkeyConfig` so both read one action

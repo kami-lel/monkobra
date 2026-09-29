@@ -7,6 +7,13 @@ using UnityEngine.InputSystem;
 /// it around this object's own parent's root at a fixed radius, so
 /// motion stays relative to wherever the prefab is parented.
 /// <para>
+/// The body is kinematic and its path is authored here outright, so nothing
+/// in the simulation, least of all the arms hanging off it, can push it off
+/// course. The orbit angle is the only horizontal state and the climb speed
+/// the only vertical one, both written straight into
+/// <see cref="Rigidbody.MovePosition"/>; mass and gravity never enter into it.
+/// </para>
+/// <para>
 /// Every speed, ramp rate and branch-hit number, plus the input action
 /// itself, comes from the shared <see cref="MonkeyConfig"/> asset, the same
 /// one the arms read, so the body and its arms cannot drift out of tune.
@@ -64,6 +71,13 @@ public class MonkeyPrefabRoot: MonoBehaviour {
             );
         }
 
+        // the body's motion is authored here, not simulated: kinematic means
+        // no arm joint, collision or weight can ever move it off its path
+        if (body != null) {
+            body.isKinematic = true;
+            body.useGravity = false;
+        }
+
         orbitAngleDeg = CalcCurrentOrbitAngle();
         orbitRadius = CalcCurrentOrbitRadius();
         if (Debug.isDebugBuild) {
@@ -97,49 +111,45 @@ public class MonkeyPrefabRoot: MonoBehaviour {
         }
 
         bool isStunned = IsStunned;
-        bool isDropping = isStunned && transform.position.y > dropTargetY;
         Vector2 directionalInput = isStunned || MoveAction == null
             ? Vector2.zero
             : MoveAction.action.ReadValue<Vector2>();
         bool hasInput = directionalInput.sqrMagnitude > INPUT_DEADZONE_SQR;
 
+        // the orbit angle is the only horizontal state, so the body sits
+        // exactly on its ring every step rather than chasing it
         orbitAngleDeg -= directionalInput.x
             * config.RotationSpeedDeg
             * Time.fixedDeltaTime;
 
-        Vector3 orbitTarget =
-            transform.parent.position + CalcOrbitOffset(orbitAngleDeg);
-        Vector3 towardOrbit = orbitTarget - transform.position;
-        towardOrbit.y = 0f;
-
-        float climbSpeed = directionalInput.y >= 0f
+        float maxClimbSpeed = directionalInput.y >= 0f
             ? config.UpSpeedU
             : config.DownSpeedU;
-        Vector3 targetVelocity = towardOrbit / Time.fixedDeltaTime;
-        targetVelocity.y = directionalInput.y * climbSpeed;
-
         float rampRate = hasInput
             ? config.AccelerationU
             : config.DecelerationU;
-        Vector3 velocity = Vector3.MoveTowards(
-            body.linearVelocity,
-            targetVelocity,
+        climbSpeedU = Mathf.MoveTowards(
+            climbSpeedU,
+            directionalInput.y * maxClimbSpeed,
             rampRate * Time.fixedDeltaTime
         );
+
+        float nextY = transform.position.y + climbSpeedU * Time.fixedDeltaTime;
         if (isStunned) {
-            // set fall speed directly, clamp to remaining distance: drop
-            // neither lags behind ramp nor overshoots target
-            float remaining = transform.position.y - dropTargetY;
-            velocity.y = isDropping
-                ? -Mathf.Min(
-                    config.HitDropSpeedU, remaining / Time.fixedDeltaTime
-                )
-                : 0f;
+            // knocked off the climb: the ramp is bypassed, fall at a set
+            // speed and stop dead on the drop target
+            climbSpeedU = 0f;
+            nextY = Mathf.Max(
+                dropTargetY,
+                transform.position.y
+                    - config.HitDropSpeedU * Time.fixedDeltaTime
+            );
         }
-        body.linearVelocity = velocity;
-        // this script owns the body's orientation outright, so clear whatever
-        // spin the arm joints fed back into it, else MoveRotation fights it
-        body.angularVelocity = Vector3.zero;
+
+        Vector3 next =
+            transform.parent.position + CalcOrbitOffset(orbitAngleDeg);
+        next.y = nextY;
+        body.MovePosition(next);
         body.MoveRotation(Quaternion.Euler(0f, orbitAngleDeg, 0f));
     }
 
@@ -178,6 +188,7 @@ public class MonkeyPrefabRoot: MonoBehaviour {
     // private members  ########################################################
     private float orbitAngleDeg;
     private float orbitRadius; // dist from parent root, set once in Awake
+    private float climbSpeedU; // ramped vertical speed, this script's own
     private float stunEndTime; // Time.time when control returns
     private float dropTargetY; // world Y where hit fall stops
 

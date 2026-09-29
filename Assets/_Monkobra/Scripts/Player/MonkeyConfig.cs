@@ -67,19 +67,6 @@ public class MonkeyConfig: ScriptableObject {
     /// other; deg</returns>
     public float SplayDeg => splayDeg;
 
-    /// <returns>how much heavier the solver pretends the body is when an arm
-    /// pulls on it, 1 lets an arm throw the body around, high values let the
-    /// body drive itself and the arms follow</returns>
-    public float BodyMassScale => bodyMassScale;
-
-    /// <returns>cap on the linear reach drive's force, the most an arm can
-    /// shove its own body with; N</returns>
-    public float MaxReachForceN => maxReachForceN;
-
-    /// <returns>cap on the angular aim drive's torque, the most an arm can
-    /// spin its own body with; N·m</returns>
-    public float MaxAimTorqueNm => maxAimTorqueNm;
-
     /// <returns>climb speed moving up; u/s</returns>
     public float UpSpeedU => upSpeedU;
 
@@ -176,27 +163,6 @@ public class MonkeyConfig: ScriptableObject {
     )]
     private float splayDeg = 20f;
 
-    [Header("Arm - Body Isolation")]
-    [SerializeField]
-    [Tooltip(
-        "how much heavier the solver pretends the body is when an arm pulls "
-            + "on it, 1 lets an arm throw the body around, high values let "
-            + "the body drive itself and the arms follow"
-    )]
-    private float bodyMassScale = 100f;
-
-    [SerializeField]
-    [Tooltip(
-        "cap on reach drive force, the most an arm can shove its body by; N"
-    )]
-    private float maxReachForceN = 1000f;
-
-    [SerializeField]
-    [Tooltip(
-        "cap on aim drive torque, the most an arm can spin its body by; N·m"
-    )]
-    private float maxAimTorqueNm = 1000f;
-
     [Header("Movement")]
     [SerializeField]
     [Tooltip("climb speed moving up; u/s")]
@@ -251,9 +217,6 @@ public class MonkeyConfig: ScriptableObject {
         reachDamper = Mathf.Max(0f, reachDamper);
         overshootAllowanceU = Mathf.Max(0f, overshootAllowanceU);
         cycleReachU = Mathf.Max(0f, cycleReachU);
-        bodyMassScale = Mathf.Max(1f, bodyMassScale);
-        maxReachForceN = Mathf.Max(0f, maxReachForceN);
-        maxAimTorqueNm = Mathf.Max(0f, maxAimTorqueNm);
         upSpeedU = Mathf.Max(0f, upSpeedU);
         downSpeedU = Mathf.Max(0f, downSpeedU);
         rotationSpeedDeg = Mathf.Max(0f, rotationSpeedDeg);

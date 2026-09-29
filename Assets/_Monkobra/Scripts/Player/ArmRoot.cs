@@ -183,6 +183,12 @@ public class ArmRoot: MonoBehaviour {
             );
         }
 
+        // the arm is posed by its drives alone, never by weight, and a prefab
+        // override can quietly switch gravity back on, so settle it here
+        if (body != null) {
+            body.useGravity = false;
+        }
+
         restLengthU = shoulder != null
             ? Vector3.Distance(shoulder.position, transform.position)
             : 0f;
@@ -301,15 +307,8 @@ public class ArmRoot: MonoBehaviour {
         joint.zDrive = new JointDrive {
             positionSpring = config.ReachSpring,
             positionDamper = config.ReachDamper,
-            maximumForce = config.MaxReachForceN,
+            maximumForce = float.MaxValue,
         };
-
-        // the arm is as heavy as the whole monkey, so at an even mass ratio
-        // every stroke and every overshoot shoves the body it hangs off.
-        // Scaling the connected mass up makes the solver treat the body as
-        // near-immovable: the body drives itself, the arm follows
-        joint.massScale = 1f;
-        joint.connectedMassScale = config.BodyMassScale;
 
         // slerp drive aims the whole arm in one shot, no per-axis bookkeeping
         joint.angularXMotion = ConfigurableJointMotion.Free;
@@ -319,7 +318,7 @@ public class ArmRoot: MonoBehaviour {
         joint.slerpDrive = new JointDrive {
             positionSpring = config.DriveSpring,
             positionDamper = config.DriveDamper,
-            maximumForce = config.MaxAimTorqueNm,
+            maximumForce = float.MaxValue,
         };
     }
 
