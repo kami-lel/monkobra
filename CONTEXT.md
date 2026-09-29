@@ -73,7 +73,7 @@ All under `Assets/_Monkobra/Scripts/`.
 | `Environment/BranchFruitPlacementConfig` | ScriptableObject of shared placement tuning: branch counts, radius, separation, retry cap |
 | `Environment/BranchWithScriptRoot` | decides per branch whether it bears a banana, then shows or hides the fruit children |
 | `Player/MonkeyPrefabRoot` | movement, branch-hit stun and drop |
-| `Player/ArmRoot` | one arm's Rigidbody and `ConfigurableJoint`, sitting at the hand end: climbs a stroke cycle on move input, or reaches a tracked target on a spring that may overshoot, and reports the hand's live contacts |
+| `Player/ArmRoot` | one arm's Rigidbody and `ConfigurableJoint`, sitting at the hand end: climbs a stroke cycle on move input, or reaches a tracked target on a spring that may overshoot, and reports the hand's live contacts. Writes only the joint's drive targets, never its configuration |
 | `Player/MonkeyArm` | the earlier arm driver, angular stroke plus reach, superseded by `ArmRoot` but still present |
 | `Player/MonkeyConfig` | ScriptableObject of all shared monkey tuning: arm stroke and reach drives, overshoot allowance, climb and orbit speeds, branch-hit stun, and the one move action the body and both arms read |
 | `Player/HitBranchDetection` | trigger on tag `Branch`, raises `BranchHit`, fires the camera impulse |

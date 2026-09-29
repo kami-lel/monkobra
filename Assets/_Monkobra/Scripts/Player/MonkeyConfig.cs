@@ -7,6 +7,13 @@ using UnityEngine.InputSystem;
 /// consumer reads its input from. Consumed by <see cref="ArmRoot"/> and
 /// <see cref="MonkeyPrefabRoot"/>, and by the older <see cref="MonkeyArm"/>,
 /// which shares the arm drive values.
+/// <para>
+/// <see cref="ArmRoot"/> takes nothing physical from here: its springs,
+/// dampers, force limits, reach distance, anchors and axes are all authored on
+/// its own <see cref="ConfigurableJoint"/>. The reach and drive spring fields
+/// below therefore serve only <see cref="MonkeyArm"/>, which still configures
+/// its joint from script.
+/// </para>
 /// </summary>
 [CreateAssetMenu(
     fileName = "MonkeyConfig",
@@ -50,10 +57,6 @@ public class MonkeyConfig: ScriptableObject {
 
     /// <returns>linear drive damping, curbs oscillation on reach</returns>
     public float ReachDamper => reachDamper;
-
-    /// <returns>extra travel past <see cref="MaxReachDistanceU"/> the joint
-    /// limit allows, the room an overshoot lives in; u</returns>
-    public float OvershootAllowanceU => overshootAllowanceU;
 
     /// <returns>whether the linear drive target has to be negated to push the
     /// arm outward, true for the usual ConfigurableJoint axis setup</returns>
@@ -140,13 +143,6 @@ public class MonkeyConfig: ScriptableObject {
 
     [SerializeField]
     [Tooltip(
-        "extra travel past max reach the joint limit allows, the room an "
-            + "overshoot lives in; u"
-    )]
-    private float overshootAllowanceU = 0.5f;
-
-    [SerializeField]
-    [Tooltip(
         "uncheck if an arm telescopes inward instead of outward, the linear "
             + "drive target reads inverted on some joint axis setups"
     )]
@@ -219,7 +215,6 @@ public class MonkeyConfig: ScriptableObject {
         maxReachDistanceU = Mathf.Max(0f, maxReachDistanceU);
         reachSpring = Mathf.Max(0f, reachSpring);
         reachDamper = Mathf.Max(0f, reachDamper);
-        overshootAllowanceU = Mathf.Max(0f, overshootAllowanceU);
         armWidthU = Mathf.Max(0.001f, armWidthU);
         upSpeedU = Mathf.Max(0f, upSpeedU);
         downSpeedU = Mathf.Max(0f, downSpeedU);

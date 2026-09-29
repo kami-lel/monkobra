@@ -946,10 +946,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4110963030490547102}
     m_Modifications:
-    - target: {fileID: 1035399268115924458, guid: df684a5863d57ac4ba8cb3cb2954619a, type: 3}
-      propertyPath: m_UseGravity
+    - target: {fileID: 2291510936226178180, guid: df684a5863d57ac4ba8cb3cb2954619a, type: 3}
+      propertyPath: m_Anchor.x
+      value: -0.45
+      objectReference: {fileID: 0}
+    - target: {fileID: 2291510936226178180, guid: df684a5863d57ac4ba8cb3cb2954619a, type: 3}
+      propertyPath: m_Anchor.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2291510936226178180, guid: df684a5863d57ac4ba8cb3cb2954619a, type: 3}
+      propertyPath: m_ConnectedBody
+      value: 
+      objectReference: {fileID: 5795391967339115374}
     - target: {fileID: 5859380064246551772, guid: df684a5863d57ac4ba8cb3cb2954619a, type: 3}
       propertyPath: shoulder
       value: 
@@ -1020,6 +1028,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4110963030490547102}
     m_Modifications:
+    - target: {fileID: 2291510936226178180, guid: df684a5863d57ac4ba8cb3cb2954619a, type: 3}
+      propertyPath: m_Anchor.x
+      value: 0.45
+      objectReference: {fileID: 0}
+    - target: {fileID: 2291510936226178180, guid: df684a5863d57ac4ba8cb3cb2954619a, type: 3}
+      propertyPath: m_ConnectedBody
+      value: 
+      objectReference: {fileID: 5795391967339115374}
     - target: {fileID: 5859380064246551772, guid: df684a5863d57ac4ba8cb3cb2954619a, type: 3}
       propertyPath: shoulder
       value: 
