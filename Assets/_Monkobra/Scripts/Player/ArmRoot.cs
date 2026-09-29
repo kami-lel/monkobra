@@ -2,15 +2,19 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+// fixme arm root split into multiple system
+
 /// <summary>
-/// Prefab root of one arm, sitting at the hand end: the joint telescopes it
-/// away from the shoulder, so this transform is the hand.
+/// Prefab root of one arm, at the hand end: the joint telescopes it away from
+/// the shoulder, so this transform is the hand.
 /// <para>
-/// Reaching aims at a tracked target and drives the arm out to it, otherwise
-/// the arm sweeps a climb stroke on move input, left and right alternating.
+/// Sweeps a climb stroke on move input, left and right alternating. Holding
+/// interact aims once at the newest fruit and stretches out along that line,
+/// releasing grabs the fruit iff the hand overlaps it then: too short or
+/// stretched past it is a miss.
 /// </para>
 /// <para>
-/// The <see cref="ConfigurableJoint"/> is authored in the Inspector; this
+/// The <see cref="ConfigurableJoint"/> is authored in the Inspector, this
 /// script only writes its drive targets.
 /// </para>
 /// </summary>
@@ -18,12 +22,10 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(ConfigurableJoint))]
 public class ArmRoot: MonoBehaviour {
     // Public Members  #########################################################
-    /// <returns>whether the arm is reaching for a target, else climbing
-    /// </returns>
+    /// <returns>if the arm is reaching for fruit, else climbing</returns>
     public bool IsReaching => isReaching;
 
-    /// <returns>whether the hand is touching anything at all right now
-    /// </returns>
+    /// <returns>if the hand touches anything right now</returns>
     public bool IsHandTouching {
         get {
             PruneHandContacts();
@@ -31,8 +33,8 @@ public class ArmRoot: MonoBehaviour {
         }
     }
 
-    /// <returns>every collider the hand is touching right now, a live view,
-    /// do not hold onto it across frames</returns>
+    /// <returns>colliders the hand touches right now, a live view, do not
+    /// hold across frames</returns>
     public IReadOnlyCollection<Collider> HandContacts {
         get {
             PruneHandContacts();
@@ -40,63 +42,34 @@ public class ArmRoot: MonoBehaviour {
         }
     }
 
-    /// <returns>shoulder to hand distance on the first step, the arm's
-    /// unstretched length; u</returns>
+    /// <returns>shoulder to hand distance at start, unstretched; u</returns>
     public float RestLengthU => restLengthU;
 
-    /// <returns>shoulder to hand distance right now, rest length plus
-    /// whatever the linear drive has telescoped out; u</returns>
+    /// <returns>shoulder to hand distance now; u</returns>
     public float CurrentLengthU =>
         Vector3.Distance(ShoulderWorld, transform.position);
-
-    // Public Methods  #########################################################
-    /// <summary>
-    /// Switches the arm into reach mode and tracks <paramref name="target"/>'s
-    /// world position every step until <see cref="CancelReach"/>. A null
-    /// target cancels the reach.
-    /// </summary>
-    public void SetReachTarget(Transform target) {
-        isReaching = target != null;
-        reachTarget = target;
-        // a settled arm sleeps, and a new drive target alone will not wake it
-        if (body != null) {
-            body.WakeUp();
-        }
-    }
-
-    /// <summary>Switches the arm back to climbing.</summary>
-    public void CancelReach() {
-        isReaching = false;
-        reachTarget = null;
-    }
 
     // Inspector Fields  #######################################################
     [Header("Wiring")]
     [SerializeField]
-    [Tooltip(
-        "renderer-only cube child, stretched to span shoulder to hand"
-    )]
+    [Tooltip("renderer-only cube child, stretched from shoulder to hand")]
     private Transform armVisual;
 
     [SerializeField]
-    [Tooltip(
-        "collider-only hand child, only its contacts count as hand contacts"
-    )]
+    [Tooltip("collider-only hand child, only its contacts count as hand's")]
     private Collider handCollider;
 
     [SerializeField]
     [Tooltip(
-        "shared stroke, input and arm-width tuning, the same asset on both "
-            + "arms, everything physical lives on the ConfigurableJoint"
+        "shared stroke, input and arm-width tuning, same asset on both arms"
     )]
     private MonkeyConfig config;
 
     [Header("Identity")]
     [SerializeField]
     [Tooltip(
-        "whether this is the monkey's right arm, else the left arm, the two "
-            + "climb half a cycle out of phase. Which way the arm leans and "
-            + "sweeps comes from its transform, not from this flag"
+        "whether this is the right arm, else left, the 2 climb half a cycle "
+            + "out of phase. Lean and sweep direction come from the transform"
     )]
     private bool isRightArm;
 
@@ -105,24 +78,35 @@ public class ArmRoot: MonoBehaviour {
         // Inspector Assignment Guard  -----------------------------------------
         if (armVisual == null) {
             Debug.LogWarning(
-                "ArmRoot:\tmust assign Inspector Field: armVisual", this
+                "ArmRoot:\tmust assign Inspector Field: armVisual",
+                this
             );
         }
         if (handCollider == null) {
             Debug.LogWarning(
-                "ArmRoot:\tmust assign Inspector Field: handCollider", this
+                "ArmRoot:\tmust assign Inspector Field: handCollider",
+                this
             );
         }
         if (config == null) {
             Debug.LogWarning(
-                "ArmRoot:\tmust assign Inspector Field: config", this
+                "ArmRoot:\tmust assign Inspector Field: config",
+                this
             );
-        }
-        else if (config.MoveAction == null) {
-            Debug.LogWarning(
-                "ArmRoot:\tmust assign MonkeyConfig field: moveAction",
-                config
-            );
+        } else {
+            if (config.MoveAction == null) {
+                Debug.LogWarning(
+                    "ArmRoot:\tmust assign MonkeyConfig field: moveAction",
+                    config
+                );
+            }
+            if (config.InteractAction == null) {
+                Debug.LogWarning(
+                    "ArmRoot:\tmust assign MonkeyConfig field: "
+                        + "interactAction",
+                    config
+                );
+            }
         }
 
         body = GetComponent<Rigidbody>();
@@ -133,10 +117,10 @@ public class ArmRoot: MonoBehaviour {
         joint = GetComponent<ConfigurableJoint>();
         if (joint == null) {
             Debug.LogError(
-                "ArmRoot:\tfail to get Component: ConfigurableJoint", this
+                "ArmRoot:\tfail to get Component: ConfigurableJoint",
+                this
             );
-        }
-        else if (joint.connectedBody == null) {
+        } else if (joint.connectedBody == null) {
             Debug.LogWarning(
                 "ArmRoot:\tmust assign ConfigurableJoint field: Connected "
                     + "Body, the arm has nothing to hang off",
@@ -144,18 +128,16 @@ public class ArmRoot: MonoBehaviour {
             );
         }
 
-        // the arm is posed by its drives alone, never by weight, and a prefab
-        // override can quietly switch gravity back on, so settle it here
+        // drives pose the arm, a prefab override may re-enable gravity
         if (body != null) {
             body.useGravity = false;
         }
 
-        // arms alternate, so one starts half a stroke ahead of the other
+        // arms alternate, 1 starts half a stroke ahead
         cyclePhase = isRightArm ? 0.5f : 0f;
     }
 
-    // the joint finishes resolving its anchors after Awake, so the authored
-    // setup is only safe to read from here on
+    // joint resolves its anchors after Awake, read authored setup from here
     private void Start() {
         if (joint == null) {
             return;
@@ -164,34 +146,35 @@ public class ArmRoot: MonoBehaviour {
         reachZMotion = joint.zMotion;
         Vector3 outward = transform.position - ShoulderWorld;
         restLengthU = outward.magnitude;
-        reachAxisSign = Vector3.Dot(
-            transform.TransformDirection(LocalReachAxis), outward
-        ) >= 0f
-            ? 1f
-            : -1f;
+        reachAxisSign =
+            Vector3.Dot(transform.TransformDirection(LocalReachAxis), outward)
+            >= 0f
+                ? 1f
+                : -1f;
 
-        // PhysX orthogonalizes Secondary Axis against Axis to build the frame,
-        // so rebuild it the same way rather than trusting the authored pair to
-        // be square. Captured at rest, where the arm's frame and the connected
-        // body's still agree, which is what targetRotation is measured from
+        // PhysX orthogonalizes Secondary Axis against Axis, so rebuild the
+        // frame the same way. Captured at rest, where arm and connected body
+        // frames agree, the base targetRotation is measured from
         Vector3 jointUp = Vector3.ProjectOnPlane(
-            joint.secondaryAxis, joint.axis
+            joint.secondaryAxis,
+            joint.axis
         );
         Quaternion localJointFrame =
             jointUp.sqrMagnitude > Mathf.Epsilon
-            ? Quaternion.LookRotation(LocalReachAxis, jointUp.normalized)
-            : Quaternion.identity;
-        Quaternion connectedRotation = joint.connectedBody != null
-            ? joint.connectedBody.rotation
-            : Quaternion.identity;
-        connectedJointFrame = Quaternion.Inverse(connectedRotation)
+                ? Quaternion.LookRotation(LocalReachAxis, jointUp.normalized)
+                : Quaternion.identity;
+        Quaternion connectedRotation =
+            joint.connectedBody != null
+                ? joint.connectedBody.rotation
+                : Quaternion.identity;
+        connectedJointFrame =
+            Quaternion.Inverse(connectedRotation)
             * transform.rotation
             * localJointFrame;
 
         IgnoreBodyCollisions();
 
-        // the drives are what move the arm: a target written against a zero
-        // spring does nothing, and the arm is left floating free in the world
+        // a target against a zero spring does nothing, arm floats free
         if (AimSpring <= 0f) {
             Debug.LogWarning(
                 "ArmRoot:\tConfigurableJoint has no angular drive spring, "
@@ -214,13 +197,12 @@ public class ArmRoot: MonoBehaviour {
             );
         }
 
-        // the visual spans whatever the joint says the arm measures, so a
-        // hand bigger than that swallows the whole limb and the arm reads on
-        // screen as having retracted into the body
+        // a hand bigger than the arm swallows the visual, arm reads retracted
         if (handCollider != null) {
             Vector3 handExtents = handCollider.bounds.extents;
             float handRadiusU = Mathf.Max(
-                handExtents.x, Mathf.Max(handExtents.y, handExtents.z)
+                handExtents.x,
+                Mathf.Max(handExtents.y, handExtents.z)
             );
             if (handRadiusU >= restLengthU) {
                 Debug.LogWarning(
@@ -247,14 +229,24 @@ public class ArmRoot: MonoBehaviour {
         if (MoveAction != null) {
             MoveAction.action.Enable();
         }
+        if (InteractAction != null) {
+            InteractAction.action.Enable();
+            InteractAction.action.performed += OnInteractPerformed;
+            InteractAction.action.canceled += OnInteractCanceled;
+        }
     }
 
     private void OnDisable() {
         if (MoveAction != null) {
             MoveAction.action.Disable();
         }
-        // physics stops reporting while disabled, so stale contacts would
-        // never clear on their own
+        if (InteractAction != null) {
+            InteractAction.action.performed -= OnInteractPerformed;
+            InteractAction.action.canceled -= OnInteractCanceled;
+            InteractAction.action.Disable();
+        }
+        EndReach();
+        // no physics reports while disabled, stale contacts never clear
         handContacts.Clear();
     }
 
@@ -263,16 +255,14 @@ public class ArmRoot: MonoBehaviour {
             return;
         }
 
-        // the linear axis carries its authored motion only while reaching, so
-        // nothing can telescope the arm while it climbs. Re-assigning an
-        // unchanged joint motion every step jolts the solver, hence the guards
+        // linear axis moves only while reaching, else locked. Guards skip
+        // re-assigning an unchanged motion, which jolts the solver
         if (isReaching) {
             if (joint.zMotion != reachZMotion) {
                 joint.zMotion = reachZMotion;
             }
             DriveReach();
-        }
-        else {
+        } else {
             if (joint.zMotion != ConfigurableJointMotion.Locked) {
                 joint.zMotion = ConfigurableJointMotion.Locked;
                 SetExtension(0f);
@@ -289,9 +279,52 @@ public class ArmRoot: MonoBehaviour {
     }
 
     private void OnCollisionExit(Collision collision) {
-        // exit carries no contact points to filter on, so drop the collider
-        // either way, it is only in the set if the hand put it there
+        // exit has no contact points, drop either way, only hand's are in
         handContacts.Remove(collision.collider);
+    }
+
+    // Event Handlers  #########################################################
+    // detection singleton picks the side, only the matching arm reaches
+    private void OnInteractPerformed(InputAction.CallbackContext context) {
+        UpwardFruitDetection fruitDetection = UpwardFruitDetection.I;
+        if (fruitDetection == null) {
+            Debug.LogError(
+                "ArmRoot:\tfail to get singleton: UpwardFruitDetection",
+                this
+            );
+            return;
+        }
+
+        DetectionSide armSide = isRightArm
+            ? DetectionSide.Right
+            : DetectionSide.Left;
+        if (fruitDetection.ReachSide != armSide) {
+            return;
+        }
+
+        Collider fruit = fruitDetection.GetNewestFruit(armSide);
+        if (fruit == null) {
+            return;
+        }
+
+        isReaching = true;
+        reachFruit = fruit;
+        reachExtensionU = 0f;
+        // aim once, the arm then only stretches along that line
+        SetAimWorld(fruit.transform.position - ShoulderWorld);
+        // a settled arm sleeps, a new drive target alone will not wake it
+        if (body != null) {
+            body.WakeUp();
+        }
+        if (Debug.isDebugBuild) {
+            Debug.Log($"ArmRoot:\treaching for {fruit.name}", this);
+        }
+    }
+
+    // release decides the grab, then the arm pulls back
+    private void OnInteractCanceled(InputAction.CallbackContext context) {
+        TryGrabFruit();
+        EndReach();
     }
 
     // Constants  ##############################################################
@@ -300,34 +333,34 @@ public class ArmRoot: MonoBehaviour {
 
     // Private Members  ########################################################
     private bool isReaching;
-    private Transform reachTarget;
+    private Collider reachFruit; // fruit the reach aims at
+    private float reachExtensionU; // commanded extension while held; u
     private float cyclePhase; // 0..1, advances only while moving
     private float restLengthU;
 
-    // the authored linear motion, restored whenever the arm reaches
+    // authored linear motion, restored on reach
     private ConfigurableJointMotion reachZMotion =
         ConfigurableJointMotion.Limited;
 
-    // the joint's own basis, as it sits in the connected body's frame at rest.
-    // targetRotation is measured in this frame, so a direction has to be
-    // brought into it before the drive can be aimed along one
+    // joint basis in the connected body's frame at rest, what targetRotation
+    // is measured in, so directions go through it before aiming
     private Quaternion connectedJointFrame = Quaternion.identity;
 
-    // +1 when the joint's reach axis already points away from the shoulder,
-    // -1 when it points back through the body, measured once from the
-    // authored pose. Two arms on opposite sides of one body share the same
-    // local axes, so their outward directions are mirrored and the drive
-    // target has to follow, else one arm telescopes into the torso
+    // +1 iff the joint's reach axis points away from the shoulder, else -1,
+    // measured once from the authored pose. Arms on opposite sides share
+    // local axes, so their outward directions mirror and the drive follows
     private float reachAxisSign = 1f;
 
     private readonly HashSet<Collider> handContacts = new HashSet<Collider>();
 
-    // both arms share one action, held on the config asset
+    // both arms share 1 action, held on the config asset
     private InputActionReference MoveAction =>
         config != null ? config.MoveAction : null;
 
-    // the shoulder is the joint's own pivot, read off the connected body so it
-    // tracks the body every step, no separate Transform to keep in sync
+    private InputActionReference InteractAction =>
+        config != null ? config.InteractAction : null;
+
+    // the joint's pivot, read off the connected body so it tracks every step
     private Vector3 ShoulderWorld {
         get {
             if (joint == null) {
@@ -341,17 +374,17 @@ public class ArmRoot: MonoBehaviour {
         }
     }
 
-    // whichever angular drive the authored Rotation Drive Mode actually uses
+    // angular drive the authored Rotation Drive Mode actually uses
     private float AimSpring =>
         joint.rotationDriveMode == RotationDriveMode.Slerp
-        ? joint.slerpDrive.positionSpring
-        : Mathf.Max(
-            joint.angularXDrive.positionSpring,
-            joint.angularYZDrive.positionSpring
-        );
+            ? joint.slerpDrive.positionSpring
+            : Mathf.Max(
+                joint.angularXDrive.positionSpring,
+                joint.angularYZDrive.positionSpring
+            );
 
-    // the joint frame's third axis, the one targetPosition's z drives, so
-    // editing Axis or Secondary Axis redirects the whole arm
+    // joint frame's 3rd axis, driven by targetPosition z, so editing Axis or
+    // Secondary Axis redirects the arm
     private Vector3 LocalReachAxis {
         get {
             Vector3 axis = Vector3.Cross(joint.axis, joint.secondaryAxis);
@@ -366,9 +399,8 @@ public class ArmRoot: MonoBehaviour {
     private ConfigurableJoint joint;
 
     // Private Methods  ########################################################
-    // an arm brushing its own torso would shove the body it is trying to
-    // climb with, and would report the monkey itself as a hand contact, so
-    // take the arm and the body out of each other's collision matrix
+    // arm brushing the torso would shove the body and report the monkey as a
+    // hand contact, so drop collisions between them
     private void IgnoreBodyCollisions() {
         if (joint.connectedBody == null) {
             return;
@@ -379,7 +411,7 @@ public class ArmRoot: MonoBehaviour {
             joint.connectedBody.GetComponentsInChildren<Collider>(true);
         foreach (Collider armCollider in armColliders) {
             foreach (Collider bodyCollider in bodyColliders) {
-                // an arm parented under the body shows up in both lists
+                // an arm parented under the body is in both lists
                 if (
                     armCollider == bodyCollider
                     || bodyCollider.attachedRigidbody == body
@@ -391,36 +423,103 @@ public class ArmRoot: MonoBehaviour {
         }
     }
 
-    // aim the arm at the tracked target and telescope out to close the gap,
-    // the drive spring is what lets the hand sail past it and the joint's own
-    // Linear Limit is what stops it
-    private void DriveReach() {
-        if (reachTarget == null) {
+    private void EndReach() {
+        isReaching = false;
+        reachFruit = null;
+        reachExtensionU = 0f;
+    }
+
+    // grab the aimed fruit iff the hand overlaps it now: switch it off and
+    // drop it from detection. Too short or past it, no overlap, no grab
+    private void TryGrabFruit() {
+        if (!isReaching || reachFruit == null) {
             return;
         }
 
-        Vector3 toTarget = reachTarget.position - ShoulderWorld;
-        float extensionU = Mathf.Clamp(
-            toTarget.magnitude - restLengthU, 0f, joint.linearLimit.limit
-        );
+        Collider fruit = reachFruit;
+        if (!fruit.gameObject.activeInHierarchy) {
+            return;
+        }
 
-        SetAimWorld(toTarget);
-        SetExtension(extensionU);
+        if (!IsHandOnFruit(fruit)) {
+            if (Debug.isDebugBuild) {
+                bool isTooShort =
+                    CurrentLengthU
+                    < Vector3.Distance(ShoulderWorld, fruit.bounds.center);
+                Debug.Log(
+                    "ArmRoot:\tmiss "
+                        + fruit.name
+                        + ", arm too "
+                        + (isTooShort ? "short" : "long"),
+                    this
+                );
+            }
+            return;
+        }
+
+        fruit.gameObject.SetActive(false);
+        // a disabled collider may never raise its trigger exit
+        UpwardFruitDetection fruitDetection = UpwardFruitDetection.I;
+        if (fruitDetection != null) {
+            fruitDetection.RemoveFruit(fruit);
+        }
+
+        StaminaBar staminaBar = StaminaBar.I;
+        if (staminaBar != null) {
+            staminaBar.AddStaminaByFruit();
+        } else {
+            Debug.LogError("ArmRoot:\tfail to get singleton: StaminaBar", this);
+        }
+        if (Debug.isDebugBuild) {
+            Debug.Log($"ArmRoot:\tgrabbed {fruit.name}", this);
+        }
     }
 
-    // hand over hand: the sweep about the joint's primary axis carries the
-    // stroke, the arm keeps its rest length and the hand rides the end of it
-    private void DriveClimb() {
-        Vector2 directionalInput = MoveAction != null
-            ? MoveAction.action.ReadValue<Vector2>()
-            : Vector2.zero;
+    // triggers report no contacts, so measure the overlap directly
+    private bool IsHandOnFruit(Collider fruit) {
+        if (handCollider == null) {
+            return false;
+        }
 
-        // no input: hold the pose, leave the drive targets where they are
+        Transform handXfm = handCollider.transform;
+        Transform fruitXfm = fruit.transform;
+        return Physics.ComputePenetration(
+            handCollider,
+            handXfm.position,
+            handXfm.rotation,
+            fruit,
+            fruitXfm.position,
+            fruitXfm.rotation,
+            out _,
+            out _
+        );
+    }
+
+    // stretch at a steady speed along the locked aim, through the fruit,
+    // until released
+    private void DriveReach() {
+        reachExtensionU = Mathf.MoveTowards(
+            reachExtensionU,
+            joint.linearLimit.limit,
+            config.ReachExtendSpeedU * Time.fixedDeltaTime
+        );
+        SetExtension(reachExtensionU);
+    }
+
+    // hand over hand: sweep about the joint's primary axis, arm keeps its
+    // rest length and the hand rides the end
+    private void DriveClimb() {
+        Vector2 directionalInput =
+            MoveAction != null
+                ? MoveAction.action.ReadValue<Vector2>()
+                : Vector2.zero;
+
+        // no input: hold pose, leave drive targets as they are
         if (directionalInput.sqrMagnitude <= INPUT_DEADZONE_SQR) {
             return;
         }
 
-        // moving down plays the stroke backward, a climb-down
+        // moving down plays the stroke backward
         float direction = directionalInput.y < -INPUT_DEADZONE ? -1f : 1f;
         float inputScale = Mathf.Clamp01(directionalInput.magnitude);
         cyclePhase = Mathf.Repeat(
@@ -432,20 +531,15 @@ public class ArmRoot: MonoBehaviour {
             1f
         );
 
-        // the sweep rides the config's stroke range: its midpoint is the
-        // arm's neutral pitch, and half its span is the swing amplitude
+        // stroke range midpoint is the neutral pitch, half its span the swing
         float phaseRad = cyclePhase * Mathf.PI * 2f;
         float midDeg = (config.MaxAngleDeg + config.MinAngleDeg) * 0.5f;
         float halfRangeDeg = (config.MaxAngleDeg - config.MinAngleDeg) * 0.5f;
         float swingDeg = midDeg + halfRangeDeg * Mathf.Sin(phaseRad);
 
-        // the drive reads targetRotation in the joint's own frame, where the
-        // authored Axis is always right and Secondary Axis always up, whatever
-        // they were set to in the Inspector. Re-aiming them there still
-        // re-aims the climb, by turning the frame the stroke is measured in.
-        // Both arms take the same angles: the right arm's transform is flipped
-        // a half turn, so one set already reads mirrored in the world, and the
-        // stroke stays in step while the splay leans them apart
+        // targetRotation is in the joint's own frame: Axis right, Secondary
+        // Axis up. Both arms take the same angles, the right arm's transform
+        // is flipped a half turn so it reads mirrored, splay leans them apart
         SetAimJoint(
             Quaternion.AngleAxis(-swingDeg, Vector3.right)
                 * Quaternion.AngleAxis(config.SplayDeg, Vector3.up)
@@ -455,36 +549,36 @@ public class ArmRoot: MonoBehaviour {
         }
     }
 
-    // point the reach axis along a world direction, converted into the joint's
-    // own frame, which is what targetRotation is measured against
+    // point the reach axis along a world direction, taken into the joint's
+    // frame, which targetRotation is measured in
     private void SetAimWorld(Vector3 worldDirection) {
         if (worldDirection.sqrMagnitude <= Mathf.Epsilon) {
             return;
         }
 
-        Quaternion connectedRotation = joint.connectedBody != null
-            ? joint.connectedBody.rotation
-            : Quaternion.identity;
-        // carry the direction all the way into the joint's frame, where the
-        // reach axis is forward, then swing forward onto it. Reading the
-        // connected body rather than this arm keeps the drive from chasing
-        // the rotation it is itself producing
-        Vector3 jointDirection = Quaternion.Inverse(connectedJointFrame)
-            * (Quaternion.Inverse(connectedRotation)
-                * worldDirection.normalized);
-        SetAimJoint(
-            Quaternion.FromToRotation(Vector3.forward, jointDirection)
-        );
+        // read the connected body, not this arm, so the drive never chases
+        // its own rotation
+        Quaternion connectedRotation =
+            joint.connectedBody != null
+                ? joint.connectedBody.rotation
+                : Quaternion.identity;
+        Vector3 jointDirection =
+            Quaternion.Inverse(connectedJointFrame)
+            * (
+                Quaternion.Inverse(connectedRotation)
+                * worldDirection.normalized
+            );
+        // targetRotation runs backward, write the inverse swing
+        SetAimJoint(Quaternion.FromToRotation(jointDirection, Vector3.forward));
     }
 
-    // the rotation is read in the joint's frame, not the arm's: Axis is right,
-    // Secondary Axis is up, and the reach axis is forward
+    // joint frame: Axis right, Secondary Axis up, reach axis forward
     private void SetAimJoint(Quaternion jointRotation) {
         joint.targetRotation = jointRotation;
     }
 
-    // InvertDriveAxis covers the joint's own drive sign convention, shared by
-    // both arms, and reachAxisSign covers the mirror between them
+    // InvertDriveAxis covers the joint's drive sign, reachAxisSign the mirror
+    // between arms
     private void SetExtension(float extensionU) {
         bool isInverted = config == null || config.InvertDriveAxis;
         joint.targetPosition = new Vector3(
@@ -494,30 +588,30 @@ public class ArmRoot: MonoBehaviour {
         );
     }
 
-    // span the visual from the shoulder to wherever the hand actually ended
-    // up, measured and not commanded, so an overshoot shows on screen
+    // span the visual from shoulder to where the hand actually is, measured
+    // not commanded
     private void StretchVisual() {
         if (armVisual == null) {
             return;
         }
 
-        Vector3 shoulderLocal =
-            transform.InverseTransformPoint(ShoulderWorld);
+        Vector3 shoulderLocal = transform.InverseTransformPoint(ShoulderWorld);
         float lengthU = shoulderLocal.magnitude;
 
-        // sit the cube's centre halfway to the shoulder and point its local Z
-        // down that line, so the span holds however the joint frame is aimed
+        // cube centre halfway to the shoulder, local Z down that line
         armVisual.localPosition = shoulderLocal * 0.5f;
-        armVisual.localRotation = lengthU > Mathf.Epsilon
-            ? Quaternion.LookRotation(shoulderLocal)
-            : Quaternion.identity;
+        armVisual.localRotation =
+            lengthU > Mathf.Epsilon
+                ? Quaternion.LookRotation(shoulderLocal)
+                : Quaternion.identity;
         armVisual.localScale = new Vector3(
-            config.ArmWidthU, config.ArmWidthU, lengthU
+            config.ArmWidthU,
+            config.ArmWidthU,
+            lengthU
         );
     }
 
-    // every child collider's collisions land on this Rigidbody, so keep only
-    // the ones the hand itself made
+    // child colliders all collide on this Rigidbody, keep the hand's
     private bool IsHandContact(Collision collision) {
         if (handCollider == null) {
             return true;
@@ -531,8 +625,7 @@ public class ArmRoot: MonoBehaviour {
         return false;
     }
 
-    // a contact's collider can be destroyed while still touching, and exit
-    // never fires for it
+    // a touching collider may be destroyed, its exit never fires
     private void PruneHandContacts() {
         handContacts.RemoveWhere(contact => contact == null);
     }

@@ -2,13 +2,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Tracks which side (left/right) of the character has fruit within reach,
-/// driven by two <see cref="DetectionZone"/> children (their trigger
-/// Colliders live on separate child GameObjects, so OnTriggerEnter/Exit
-/// must be handled there and forwarded via events, not on this script).
-/// Tracks overlapping colliders tagged "FruitCollider" per side so
-/// ReachForLeft/ReachForRight stay accurate even when multiple fruits
-/// overlap a side at once.
+/// Tracks which side of the character has fruit within reach, fed by 2
+/// <see cref="DetectionZone"/> children that forward their trigger events.
+/// Keeps every "FruitCollider" overlap per side, so ReachForLeft and
+/// ReachForRight hold with several fruits at once.
 /// </summary>
 public class UpwardFruitDetection: MonoBehaviour {
     // Public Members  #########################################################
@@ -19,11 +16,41 @@ public class UpwardFruitDetection: MonoBehaviour {
     public bool ReachForLeft => leftFruits.Count > 0;
     public bool ReachForRight => rightFruits.Count > 0;
 
+    /// <summary>side to reach for: right iff only right has fruit</summary>
+    public DetectionSide ReachSide =>
+        ReachForRight && !ReachForLeft
+            ? DetectionSide.Right
+            : DetectionSide.Left;
+
+    // Public Methods  #########################################################
+    /// <returns>newest fruit in reach on <paramref name="side"/>, else null
+    /// </returns>
+    public Collider GetNewestFruit(DetectionSide side) {
+        HashSet<Collider> fruits =
+            side == DetectionSide.Left ? leftFruits : rightFruits;
+        for (int i = fruitOrder.Count - 1; i >= 0; i--) {
+            if (fruits.Contains(fruitOrder[i])) {
+                return fruitOrder[i];
+            }
+        }
+        return null;
+    }
+
     /// <summary>
-    /// most recently entered fruit still w/i reach; null iff none
+    /// forgets <paramref name="fruit"/> on both sides, for a fruit switched
+    /// off inside a zone, whose trigger exit may never fire
     /// </summary>
-    public Collider NewestFruit =>
-        fruitOrder.Count > 0 ? fruitOrder[fruitOrder.Count - 1] : null;
+    public void RemoveFruit(Collider fruit) {
+        bool hadLeft = leftFruits.Remove(fruit);
+        bool hadRight = rightFruits.Remove(fruit);
+        fruitOrder.Remove(fruit);
+        if (hadLeft && leftFruits.Count == 0) {
+            LogReachChanged(DetectionSide.Left);
+        }
+        if (hadRight && rightFruits.Count == 0) {
+            LogReachChanged(DetectionSide.Right);
+        }
+    }
 
     // Inspector Fields  #######################################################
     [Tooltip("left-side detection zone, must report Side == Left")]
@@ -45,7 +72,7 @@ public class UpwardFruitDetection: MonoBehaviour {
             );
         }
 
-        // drop this duplicate component only, its GameObject may hold more
+        // drop only this duplicate component, the GameObject may hold more
         if (I != null && I != this) {
             Debug.LogWarning(
                 "UpwardFruitDetection:\tduplicate instance, removing",
@@ -121,7 +148,7 @@ public class UpwardFruitDetection: MonoBehaviour {
     private readonly HashSet<Collider> leftFruits = new HashSet<Collider>();
     private readonly HashSet<Collider> rightFruits = new HashSet<Collider>();
 
-    // entry order across both sides; last elem is newest, drives NewestFruit
+    // entry order across both sides, last is newest
     private readonly List<Collider> fruitOrder = new List<Collider>();
 
     // Private Methods  ########################################################
