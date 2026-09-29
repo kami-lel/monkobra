@@ -43,7 +43,7 @@ The repository root is the Unity project root. `Library/`, `Temp/`, `Logs/`, `Us
 | Tree | stack of static and dynamic trunk segments under a `TreeTop`, each dynamic segment decorated with branches | implemented, finite height |
 | Branch hit | camera shake, then stun (input ignored) while the monkey drops a set distance, all tuned in `MonkeyConfig` | implemented |
 | Cobra | orbits and climbs the trunk on its own, trigger contact shows the game-over panel | implemented |
-| Stamina | `StaminaBar` slider drains on a timer, `AddStaminaByFruit` restores a fixed amount, budget, drain rate and fruit restore come from `GameConfig` | grabs restore it, not yet tied to hits |
+| Stamina | `StaminaBar` slider drains on a timer and by movement (`MonkeyPrefabRoot` calls `DrainByMovement` each step: climbing costs most, orbiting less, descending and the stun fall nothing), `AddStaminaByFruit` restores a fixed amount, budget, rates and fruit restore come from `GameConfig` | grabs restore it, not yet tied to hits |
 | Grab | hold the interact action: camera swaps to a side view and the arm stretches toward the newest fruit at `ReachExtendSpeedU`; release grabs it iff the hand collider overlaps the fruit at that instant, else a miss (too short, or stretched past it) | grab implemented, the fruit is switched off and `ArmRoot` calls `StaminaBar.I.AddStaminaByFruit` |
 | Win, lose | `GameController.WinGame` and `LoseGame` end the run once | screens are stubs |
 
@@ -68,7 +68,7 @@ All under `Assets/_Monkobra/Scripts/`.
 | Script | Role |
 | --- | --- |
 | `GameController` | scene singleton (`Instance`), owns the win or lose end state |
-| `GameConfig` | ScriptableObject of game-wide tuning: max stamina, drain amount and interval, stamina per fruit. Asset at `Settings/_Shared/GameConfig.asset`, read by `StaminaBar` |
+| `GameConfig` | ScriptableObject of game-wide tuning: max stamina, drain amount and interval, stamina per fruit, stamina per unit climbed and per unit orbited. Asset at `Settings/_Shared/GameConfig.asset`, read by `StaminaBar` |
 | `Environment/TreeManager` | singleton (`I`) exposing tree `MinY`, `MaxY` for height-to-progress mapping |
 | `Environment/DynamicTreeSegmentPrefabRoot` | on `Start`, places Branch With Fruit prefabs on itself, count scaled by climb progress |
 | `Environment/BranchFruitPlacementConfig` | ScriptableObject of shared placement tuning: branch counts, radius, separation, retry cap |
@@ -82,7 +82,7 @@ All under `Assets/_Monkobra/Scripts/`.
 | `Player/CameraRigManager` | swaps behind, look-left, look-right cameras by Cinemachine priority |
 | `Cobra/CobraClimb` | spiral path around `pathCenter`, body segments trail the head |
 | `Cobra/CobraCollisions` | trigger enter calls `GameOverController` |
-| `UI/StaminaBar` | singleton (`I`), slider drained on a timer, loses the game at 0, `AddStaminaByFruit` restores it on a grab |
+| `UI/StaminaBar` | singleton (`I`), slider drained on a timer and by `DrainByMovement`, loses the game at 0, `AddStaminaByFruit` restores it on a grab |
 | `UI/ProgressBarRoot`, `UI/GameOverController` | player-height progress scrollbar, game-over panel |
 
 ## Patterns & Conventions
@@ -95,13 +95,13 @@ All under `Assets/_Monkobra/Scripts/`.
 - Input arrives through `InputActionReference` fields, each script enables and disables its own action, and the arms take theirs from `MonkeyConfig` so both read one action
 - Scripts guard required inspector fields in `Awake` with a logged error naming the field
 - Tuning values stay in serialized fields, and shared tuning sits in a ScriptableObject: `MonkeyPrefabRoot` and `ArmRoot` hold only wiring references and which side an arm is, every number and the input action come from `MonkeyConfig`, while game-wide numbers such as stamina come from `GameConfig`
-- Two coding styles coexist: the newer scripts (`Environment/`, `Player/`, `GameController`) follow the house Unity style, while `Cobra/` and `UI/StaminaBar`, `UI/GameOverController` are older contributions still in the template style
+- Two coding styles coexist: the newer scripts (`Environment/`, `Player/`, `GameController`) follow the house Unity style, while `Cobra/` and `UI/GameOverController` are older contributions still in the template style
 - The core tension is escape vs. sustain: grabbing slows the monkey's reactions, so every pickup risks a branch or cobra collision
 
 ## Known Gaps & Constraints
 
 - No tests, build, or run commands exist: verification means opening `Lv1Scene` in the Editor
-- Stamina drains on a timer only: it is not linked to climb speed or branch hits
+- Stamina drains on a timer and by movement, but is not linked to branch hits
 - `GameController` win and lose screens are stubs, and the cobra path uses `GameOverController` instead of `LoseGame`
 - `CobraDemo` scene remains next to `Lv1Scene`, while recent history says the demo was merged into `Lv1Scene`
 - The tree is finite (`TreeManager` min and max y), not the endless tree of the pitch

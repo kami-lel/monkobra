@@ -146,6 +146,18 @@ public class MonkeyPrefabRoot: MonoBehaviour {
             );
         }
 
+        // the stun fall is involuntary and so is descending: only voluntary
+        // upward and sideways travel costs stamina
+        if (!isStunned && StaminaBar.I != null) {
+            float climbedU = nextY - transform.position.y;
+            float orbitedU = Mathf.Abs(directionalInput.x)
+                * config.RotationSpeedDeg
+                * Time.fixedDeltaTime
+                * Mathf.Deg2Rad
+                * orbitRadius;
+            StaminaBar.I.DrainByMovement(climbedU, orbitedU);
+        }
+
         Vector3 next =
             transform.parent.position + CalcOrbitOffset(orbitAngleDeg);
         next.y = nextY;
