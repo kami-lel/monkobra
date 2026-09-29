@@ -169,6 +169,25 @@ public class ArmRoot: MonoBehaviour {
         ) >= 0f
             ? 1f
             : -1f;
+
+        // PhysX orthogonalizes Secondary Axis against Axis to build the frame,
+        // so rebuild it the same way rather than trusting the authored pair to
+        // be square. Captured at rest, where the arm's frame and the connected
+        // body's still agree, which is what targetRotation is measured from
+        Vector3 jointUp = Vector3.ProjectOnPlane(
+            joint.secondaryAxis, joint.axis
+        );
+        Quaternion localJointFrame =
+            jointUp.sqrMagnitude > Mathf.Epsilon
+            ? Quaternion.LookRotation(LocalReachAxis, jointUp.normalized)
+            : Quaternion.identity;
+        Quaternion connectedRotation = joint.connectedBody != null
+            ? joint.connectedBody.rotation
+            : Quaternion.identity;
+        connectedJointFrame = Quaternion.Inverse(connectedRotation)
+            * transform.rotation
+            * localJointFrame;
+
         IgnoreBodyCollisions();
 
         // the drives are what move the arm: a target written against a zero
@@ -288,6 +307,11 @@ public class ArmRoot: MonoBehaviour {
     // the authored linear motion, restored whenever the arm reaches
     private ConfigurableJointMotion reachZMotion =
         ConfigurableJointMotion.Limited;
+
+    // the joint's own basis, as it sits in the connected body's frame at rest.
+    // targetRotation is measured in this frame, so a direction has to be
+    // brought into it before the drive can be aimed along one
+    private Quaternion connectedJointFrame = Quaternion.identity;
 
     // +1 when the joint's reach axis already points away from the shoulder,
     // -1 when it points back through the body, measured once from the
@@ -415,22 +439,24 @@ public class ArmRoot: MonoBehaviour {
         float halfRangeDeg = (config.MaxAngleDeg - config.MinAngleDeg) * 0.5f;
         float swingDeg = midDeg + halfRangeDeg * Mathf.Sin(phaseRad);
 
-        // the stroke swings about the joint's own axes, so re-aiming those in
-        // the Inspector re-aims the climb with them. Both arms take the same
-        // local angles: the right arm's transform is flipped a half turn, so
-        // one set of angles already reads mirrored in the world, and the
+        // the drive reads targetRotation in the joint's own frame, where the
+        // authored Axis is always right and Secondary Axis always up, whatever
+        // they were set to in the Inspector. Re-aiming them there still
+        // re-aims the climb, by turning the frame the stroke is measured in.
+        // Both arms take the same angles: the right arm's transform is flipped
+        // a half turn, so one set already reads mirrored in the world, and the
         // stroke stays in step while the splay leans them apart
-        SetAimLocal(
-            Quaternion.AngleAxis(-swingDeg, joint.axis)
-                * Quaternion.AngleAxis(config.SplayDeg, joint.secondaryAxis)
+        SetAimJoint(
+            Quaternion.AngleAxis(-swingDeg, Vector3.right)
+                * Quaternion.AngleAxis(config.SplayDeg, Vector3.up)
         );
         if (body != null) {
             body.WakeUp();
         }
     }
 
-    // point the reach axis along a world direction, expressed in the
-    // connected body's frame, which is what targetRotation is measured against
+    // point the reach axis along a world direction, converted into the joint's
+    // own frame, which is what targetRotation is measured against
     private void SetAimWorld(Vector3 worldDirection) {
         if (worldDirection.sqrMagnitude <= Mathf.Epsilon) {
             return;
@@ -439,16 +465,22 @@ public class ArmRoot: MonoBehaviour {
         Quaternion connectedRotation = joint.connectedBody != null
             ? joint.connectedBody.rotation
             : Quaternion.identity;
-        // swing the authored reach axis onto the target direction, rather than
-        // assuming that axis is local forward
-        Quaternion worldAim =
-            Quaternion.LookRotation(worldDirection.normalized)
-                * Quaternion.Inverse(Quaternion.LookRotation(LocalReachAxis));
-        SetAimLocal(Quaternion.Inverse(connectedRotation) * worldAim);
+        // carry the direction all the way into the joint's frame, where the
+        // reach axis is forward, then swing forward onto it. Reading the
+        // connected body rather than this arm keeps the drive from chasing
+        // the rotation it is itself producing
+        Vector3 jointDirection = Quaternion.Inverse(connectedJointFrame)
+            * (Quaternion.Inverse(connectedRotation)
+                * worldDirection.normalized);
+        SetAimJoint(
+            Quaternion.FromToRotation(Vector3.forward, jointDirection)
+        );
     }
 
-    private void SetAimLocal(Quaternion localRotation) {
-        joint.targetRotation = localRotation;
+    // the rotation is read in the joint's frame, not the arm's: Axis is right,
+    // Secondary Axis is up, and the reach axis is forward
+    private void SetAimJoint(Quaternion jointRotation) {
+        joint.targetRotation = jointRotation;
     }
 
     // InvertDriveAxis covers the joint's own drive sign convention, shared by

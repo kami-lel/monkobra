@@ -6,6 +6,7 @@ TagManager:
   tags:
   - FruitCollider
   - Branch
+  - WinZone
   layers:
   - Default
   - TransparentFX
