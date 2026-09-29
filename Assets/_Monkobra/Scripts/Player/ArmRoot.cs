@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+// fixme arm root split into multiple system
+
 /// <summary>
 /// Prefab root of one arm, at the hand end: the joint telescopes it away from
 /// the shoulder, so this transform is the hand.
@@ -76,20 +78,22 @@ public class ArmRoot: MonoBehaviour {
         // Inspector Assignment Guard  -----------------------------------------
         if (armVisual == null) {
             Debug.LogWarning(
-                "ArmRoot:\tmust assign Inspector Field: armVisual", this
+                "ArmRoot:\tmust assign Inspector Field: armVisual",
+                this
             );
         }
         if (handCollider == null) {
             Debug.LogWarning(
-                "ArmRoot:\tmust assign Inspector Field: handCollider", this
+                "ArmRoot:\tmust assign Inspector Field: handCollider",
+                this
             );
         }
         if (config == null) {
             Debug.LogWarning(
-                "ArmRoot:\tmust assign Inspector Field: config", this
+                "ArmRoot:\tmust assign Inspector Field: config",
+                this
             );
-        }
-        else {
+        } else {
             if (config.MoveAction == null) {
                 Debug.LogWarning(
                     "ArmRoot:\tmust assign MonkeyConfig field: moveAction",
@@ -113,10 +117,10 @@ public class ArmRoot: MonoBehaviour {
         joint = GetComponent<ConfigurableJoint>();
         if (joint == null) {
             Debug.LogError(
-                "ArmRoot:\tfail to get Component: ConfigurableJoint", this
+                "ArmRoot:\tfail to get Component: ConfigurableJoint",
+                this
             );
-        }
-        else if (joint.connectedBody == null) {
+        } else if (joint.connectedBody == null) {
             Debug.LogWarning(
                 "ArmRoot:\tmust assign ConfigurableJoint field: Connected "
                     + "Body, the arm has nothing to hang off",
@@ -142,26 +146,29 @@ public class ArmRoot: MonoBehaviour {
         reachZMotion = joint.zMotion;
         Vector3 outward = transform.position - ShoulderWorld;
         restLengthU = outward.magnitude;
-        reachAxisSign = Vector3.Dot(
-            transform.TransformDirection(LocalReachAxis), outward
-        ) >= 0f
-            ? 1f
-            : -1f;
+        reachAxisSign =
+            Vector3.Dot(transform.TransformDirection(LocalReachAxis), outward)
+            >= 0f
+                ? 1f
+                : -1f;
 
         // PhysX orthogonalizes Secondary Axis against Axis, so rebuild the
         // frame the same way. Captured at rest, where arm and connected body
         // frames agree, the base targetRotation is measured from
         Vector3 jointUp = Vector3.ProjectOnPlane(
-            joint.secondaryAxis, joint.axis
+            joint.secondaryAxis,
+            joint.axis
         );
         Quaternion localJointFrame =
             jointUp.sqrMagnitude > Mathf.Epsilon
-            ? Quaternion.LookRotation(LocalReachAxis, jointUp.normalized)
-            : Quaternion.identity;
-        Quaternion connectedRotation = joint.connectedBody != null
-            ? joint.connectedBody.rotation
-            : Quaternion.identity;
-        connectedJointFrame = Quaternion.Inverse(connectedRotation)
+                ? Quaternion.LookRotation(LocalReachAxis, jointUp.normalized)
+                : Quaternion.identity;
+        Quaternion connectedRotation =
+            joint.connectedBody != null
+                ? joint.connectedBody.rotation
+                : Quaternion.identity;
+        connectedJointFrame =
+            Quaternion.Inverse(connectedRotation)
             * transform.rotation
             * localJointFrame;
 
@@ -194,7 +201,8 @@ public class ArmRoot: MonoBehaviour {
         if (handCollider != null) {
             Vector3 handExtents = handCollider.bounds.extents;
             float handRadiusU = Mathf.Max(
-                handExtents.x, Mathf.Max(handExtents.y, handExtents.z)
+                handExtents.x,
+                Mathf.Max(handExtents.y, handExtents.z)
             );
             if (handRadiusU >= restLengthU) {
                 Debug.LogWarning(
@@ -254,8 +262,7 @@ public class ArmRoot: MonoBehaviour {
                 joint.zMotion = reachZMotion;
             }
             DriveReach();
-        }
-        else {
+        } else {
             if (joint.zMotion != ConfigurableJointMotion.Locked) {
                 joint.zMotion = ConfigurableJointMotion.Locked;
                 SetExtension(0f);
@@ -282,13 +289,15 @@ public class ArmRoot: MonoBehaviour {
         UpwardFruitDetection fruitDetection = UpwardFruitDetection.I;
         if (fruitDetection == null) {
             Debug.LogError(
-                "ArmRoot:\tfail to get singleton: UpwardFruitDetection", this
+                "ArmRoot:\tfail to get singleton: UpwardFruitDetection",
+                this
             );
             return;
         }
 
-        DetectionSide armSide =
-            isRightArm ? DetectionSide.Right : DetectionSide.Left;
+        DetectionSide armSide = isRightArm
+            ? DetectionSide.Right
+            : DetectionSide.Left;
         if (fruitDetection.ReachSide != armSide) {
             return;
         }
@@ -368,11 +377,11 @@ public class ArmRoot: MonoBehaviour {
     // angular drive the authored Rotation Drive Mode actually uses
     private float AimSpring =>
         joint.rotationDriveMode == RotationDriveMode.Slerp
-        ? joint.slerpDrive.positionSpring
-        : Mathf.Max(
-            joint.angularXDrive.positionSpring,
-            joint.angularYZDrive.positionSpring
-        );
+            ? joint.slerpDrive.positionSpring
+            : Mathf.Max(
+                joint.angularXDrive.positionSpring,
+                joint.angularYZDrive.positionSpring
+            );
 
     // joint frame's 3rd axis, driven by targetPosition z, so editing Axis or
     // Secondary Axis redirects the arm
@@ -434,10 +443,13 @@ public class ArmRoot: MonoBehaviour {
 
         if (!IsHandOnFruit(fruit)) {
             if (Debug.isDebugBuild) {
-                bool isTooShort = CurrentLengthU
+                bool isTooShort =
+                    CurrentLengthU
                     < Vector3.Distance(ShoulderWorld, fruit.bounds.center);
                 Debug.Log(
-                    "ArmRoot:\tmiss " + fruit.name + ", arm too "
+                    "ArmRoot:\tmiss "
+                        + fruit.name
+                        + ", arm too "
                         + (isTooShort ? "short" : "long"),
                     this
                 );
@@ -455,11 +467,8 @@ public class ArmRoot: MonoBehaviour {
         StaminaBar staminaBar = StaminaBar.I;
         if (staminaBar != null) {
             staminaBar.AddStaminaByFruit();
-        }
-        else {
-            Debug.LogError(
-                "ArmRoot:\tfail to get singleton: StaminaBar", this
-            );
+        } else {
+            Debug.LogError("ArmRoot:\tfail to get singleton: StaminaBar", this);
         }
         if (Debug.isDebugBuild) {
             Debug.Log($"ArmRoot:\tgrabbed {fruit.name}", this);
@@ -500,9 +509,10 @@ public class ArmRoot: MonoBehaviour {
     // hand over hand: sweep about the joint's primary axis, arm keeps its
     // rest length and the hand rides the end
     private void DriveClimb() {
-        Vector2 directionalInput = MoveAction != null
-            ? MoveAction.action.ReadValue<Vector2>()
-            : Vector2.zero;
+        Vector2 directionalInput =
+            MoveAction != null
+                ? MoveAction.action.ReadValue<Vector2>()
+                : Vector2.zero;
 
         // no input: hold pose, leave drive targets as they are
         if (directionalInput.sqrMagnitude <= INPUT_DEADZONE_SQR) {
@@ -548,16 +558,18 @@ public class ArmRoot: MonoBehaviour {
 
         // read the connected body, not this arm, so the drive never chases
         // its own rotation
-        Quaternion connectedRotation = joint.connectedBody != null
-            ? joint.connectedBody.rotation
-            : Quaternion.identity;
-        Vector3 jointDirection = Quaternion.Inverse(connectedJointFrame)
-            * (Quaternion.Inverse(connectedRotation)
-                * worldDirection.normalized);
+        Quaternion connectedRotation =
+            joint.connectedBody != null
+                ? joint.connectedBody.rotation
+                : Quaternion.identity;
+        Vector3 jointDirection =
+            Quaternion.Inverse(connectedJointFrame)
+            * (
+                Quaternion.Inverse(connectedRotation)
+                * worldDirection.normalized
+            );
         // targetRotation runs backward, write the inverse swing
-        SetAimJoint(
-            Quaternion.FromToRotation(jointDirection, Vector3.forward)
-        );
+        SetAimJoint(Quaternion.FromToRotation(jointDirection, Vector3.forward));
     }
 
     // joint frame: Axis right, Secondary Axis up, reach axis forward
@@ -583,17 +595,19 @@ public class ArmRoot: MonoBehaviour {
             return;
         }
 
-        Vector3 shoulderLocal =
-            transform.InverseTransformPoint(ShoulderWorld);
+        Vector3 shoulderLocal = transform.InverseTransformPoint(ShoulderWorld);
         float lengthU = shoulderLocal.magnitude;
 
         // cube centre halfway to the shoulder, local Z down that line
         armVisual.localPosition = shoulderLocal * 0.5f;
-        armVisual.localRotation = lengthU > Mathf.Epsilon
-            ? Quaternion.LookRotation(shoulderLocal)
-            : Quaternion.identity;
+        armVisual.localRotation =
+            lengthU > Mathf.Epsilon
+                ? Quaternion.LookRotation(shoulderLocal)
+                : Quaternion.identity;
         armVisual.localScale = new Vector3(
-            config.ArmWidthU, config.ArmWidthU, lengthU
+            config.ArmWidthU,
+            config.ArmWidthU,
+            lengthU
         );
     }
 
