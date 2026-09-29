@@ -59,13 +59,13 @@ public class MonkeyConfig: ScriptableObject {
     /// arm outward, true for the usual ConfigurableJoint axis setup</returns>
     public bool InvertDriveAxis => invertDriveAxis;
 
-    /// <returns>how far the hand pushes out at the top of a climb stroke; u
-    /// </returns>
-    public float CycleReachU => cycleReachU;
-
     /// <returns>resting outward lean of each arm, keeps the two off each
     /// other; deg</returns>
     public float SplayDeg => splayDeg;
+
+    /// <returns>thickness of the arm cube across both axes it is not
+    /// stretched along; u</returns>
+    public float ArmWidthU => armWidthU;
 
     /// <returns>climb speed moving up; u/s</returns>
     public float UpSpeedU => upSpeedU;
@@ -154,14 +154,18 @@ public class MonkeyConfig: ScriptableObject {
 
     [Header("Arm - Climb Cycle")]
     [SerializeField]
-    [Tooltip("how far the hand pushes out at the top of a stroke; u")]
-    private float cycleReachU = 0.6f;
-
-    [SerializeField]
     [Tooltip(
         "resting outward lean of each arm, keeps the 2 off each other; deg"
     )]
     private float splayDeg = 20f;
+
+    [Header("Arm - Visual")]
+    [SerializeField]
+    [Tooltip(
+        "thickness of the arm cube across both axes it is not stretched "
+            + "along, the authored scale is overwritten every step; u"
+    )]
+    private float armWidthU = 0.2f;
 
     [Header("Movement")]
     [SerializeField]
@@ -216,7 +220,7 @@ public class MonkeyConfig: ScriptableObject {
         reachSpring = Mathf.Max(0f, reachSpring);
         reachDamper = Mathf.Max(0f, reachDamper);
         overshootAllowanceU = Mathf.Max(0f, overshootAllowanceU);
-        cycleReachU = Mathf.Max(0f, cycleReachU);
+        armWidthU = Mathf.Max(0.001f, armWidthU);
         upSpeedU = Mathf.Max(0f, upSpeedU);
         downSpeedU = Mathf.Max(0f, downSpeedU);
         rotationSpeedDeg = Mathf.Max(0f, rotationSpeedDeg);

@@ -26,11 +26,12 @@ using UnityEngine.InputSystem;
 /// back, and the joint's linear limit leaves an overshoot allowance past max
 /// reach for the overshoot to live in. Otherwise the arm climbs: while the
 /// move action has input, a cycle phase advances at a rate scaled by input
-/// magnitude and drives a reach-out / pull-down stroke on the linear and
-/// angular drives a quarter cycle apart, so the hand traces a loop. The right
-/// arm runs half a cycle out of phase with the left, so the two alternate.
-/// Downward input plays the stroke in reverse; w/o input the phase freezes and
-/// the arm holds its pose.
+/// magnitude and sweeps the arm up and down across the configured stroke
+/// range. The linear axis stays locked throughout, so a climbing arm holds
+/// its rest length and only ever swings: nothing telescopes the arm or moves
+/// the hand off it. The right arm runs half a cycle out of phase with the
+/// left, so the two alternate. Downward input plays the stroke in reverse;
+/// w/o input the phase freezes and the arm holds its pose.
 /// </para>
 /// <para>
 /// Every tuning value and the move action itself come from the shared
@@ -192,11 +193,6 @@ public class ArmRoot: MonoBehaviour {
         restLengthU = shoulder != null
             ? Vector3.Distance(shoulder.position, transform.position)
             : 0f;
-        if (armVisual != null) {
-            armVisualWidth = new Vector2(
-                armVisual.localScale.x, armVisual.localScale.y
-            );
-        }
 
         // arms alternate, so one starts half a stroke ahead of the other
         cyclePhase = isRightArm ? 0.5f : 0f;
@@ -233,10 +229,20 @@ public class ArmRoot: MonoBehaviour {
             return;
         }
 
+        // the linear axis is unlocked only while reaching, so nothing can
+        // telescope the arm while it climbs. Re-assigning an unchanged joint
+        // motion every step jolts the solver, hence the transition guards
         if (isReaching) {
+            if (joint.zMotion != ConfigurableJointMotion.Limited) {
+                joint.zMotion = ConfigurableJointMotion.Limited;
+            }
             DriveReach();
         }
         else {
+            if (joint.zMotion != ConfigurableJointMotion.Locked) {
+                joint.zMotion = ConfigurableJointMotion.Locked;
+                SetExtension(0f);
+            }
             DriveClimb();
         }
         StretchVisual();
@@ -263,7 +269,6 @@ public class ArmRoot: MonoBehaviour {
     private Transform reachTarget;
     private float cyclePhase; // 0..1, advances only while moving
     private float restLengthU;
-    private Vector2 armVisualWidth; // visual's local X and Y scale, kept as-is
 
     private readonly HashSet<Collider> handContacts = new HashSet<Collider>();
 
@@ -363,9 +368,8 @@ public class ArmRoot: MonoBehaviour {
         SetExtension(extensionU);
     }
 
-    // hand over hand: the linear stroke pushes the hand out and pulls it back
-    // in, the angular sweep runs a quarter cycle ahead so the hand traces a
-    // loop rather than a straight line
+    // hand over hand: the angular sweep alone carries the stroke, the arm
+    // keeps its rest length and the hand rides the end of it
     private void DriveClimb() {
         Vector2 directionalInput = MoveAction != null
             ? MoveAction.action.ReadValue<Vector2>()
@@ -388,22 +392,18 @@ public class ArmRoot: MonoBehaviour {
             1f
         );
 
-        float phaseRad = cyclePhase * Mathf.PI * 2f;
-        // sin is remapped to 0..1 so the arm never pulls inside its rest
-        // length, cos puts the sweep a quarter cycle ahead of the push
-        float extensionU =
-            config.CycleReachU * 0.5f * (1f + Mathf.Sin(phaseRad));
-
         // the sweep rides the config's stroke range: its midpoint is the
         // arm's neutral pitch, and half its span is the swing amplitude
+        float phaseRad = cyclePhase * Mathf.PI * 2f;
         float midDeg = (config.MaxAngleDeg + config.MinAngleDeg) * 0.5f;
         float halfRangeDeg = (config.MaxAngleDeg - config.MinAngleDeg) * 0.5f;
-        float swingDeg = midDeg + halfRangeDeg * Mathf.Cos(phaseRad);
+        float swingDeg = midDeg + halfRangeDeg * Mathf.Sin(phaseRad);
 
+        // climbing is a pure sweep: the arm holds its rest length throughout,
+        // so the hand swings but never telescopes
         SetAimLocal(
             Quaternion.Euler(-swingDeg, SideSign * config.SplayDeg, 0f)
         );
-        SetExtension(extensionU);
         if (body != null) {
             body.WakeUp();
         }
@@ -447,8 +447,10 @@ public class ArmRoot: MonoBehaviour {
             shoulder.position, transform.position
         );
         armVisual.localPosition = new Vector3(0f, 0f, -lengthU * 0.5f);
+        // all 3 axes are written, so it does not matter which one the cube
+        // was authored long on: local Z is the length, the other 2 the width
         armVisual.localScale = new Vector3(
-            armVisualWidth.x, armVisualWidth.y, lengthU
+            config.ArmWidthU, config.ArmWidthU, lengthU
         );
     }
 
