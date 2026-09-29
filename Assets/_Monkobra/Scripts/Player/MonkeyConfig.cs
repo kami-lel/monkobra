@@ -2,17 +2,12 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Shared tuning for the monkey: the arm stroke and reach drives, the climb
-/// and orbit speeds, the branch-hit stun, and the one movement action every
-/// consumer reads its input from. Consumed by <see cref="ArmRoot"/> and
-/// <see cref="MonkeyPrefabRoot"/>, and by the older <see cref="MonkeyArm"/>,
-/// which shares the arm drive values.
+/// Shared tuning for the monkey: arm stroke and reach, climb and orbit speeds,
+/// branch-hit stun, and the input actions every consumer reads. Consumed by
+/// <see cref="ArmRoot"/> and <see cref="MonkeyPrefabRoot"/>.
 /// <para>
-/// <see cref="ArmRoot"/> takes nothing physical from here: its springs,
-/// dampers, force limits, reach distance, anchors and axes are all authored on
-/// its own <see cref="ConfigurableJoint"/>. The reach and drive spring fields
-/// below therefore serve only <see cref="MonkeyArm"/>, which still configures
-/// its joint from script.
+/// <see cref="ArmRoot"/> takes nothing physical from here, springs, limits,
+/// anchors and axes are authored on its <see cref="ConfigurableJoint"/>.
 /// </para>
 /// </summary>
 [CreateAssetMenu(
@@ -27,64 +22,25 @@ public class MonkeyConfig: ScriptableObject {
     /// <returns>top of the stroke, arm fully reached up, in deg</returns>
     public float MaxAngleDeg => maxAngleDeg;
 
-    /// <returns>amplitude of each extra free axis as a fraction of the main
-    /// stroke, 0 keeps the hand on a straight line</returns>
-    public float SideSwingRatio => sideSwingRatio;
-
-    /// <returns>stroke phase speed, in deg/s, 360 is one full stroke per
-    /// second</returns>
+    /// <returns>stroke phase speed; deg/s, 360 is 1 stroke per s</returns>
     public float StrokeSpeedDeg => strokeSpeedDeg;
 
-    /// <returns>the same stroke speed as <see cref="StrokeSpeedDeg"/>, in
-    /// full strokes per second, for drives that track a 0..1 phase rather
-    /// than an angle</returns>
+    /// <returns><see cref="StrokeSpeedDeg"/> as strokes per s, for a 0..1
+    /// phase</returns>
     public float StrokeSpeedCycles => strokeSpeedDeg / 360f;
-
-    /// <returns>angular drive stiffness pulling the arm to its target
-    /// angle</returns>
-    public float DriveSpring => driveSpring;
-
-    /// <returns>angular drive damping, curbs oscillation around the
-    /// target</returns>
-    public float DriveDamper => driveDamper;
-
-    /// <returns>farthest the arm can extend past its rest length; u</returns>
-    public float MaxReachDistanceU => maxReachDistanceU;
-
-    /// <returns>linear drive stiffness pulling the arm to its reach
-    /// target</returns>
-    public float ReachSpring => reachSpring;
-
-    /// <returns>linear drive damping, curbs oscillation on reach</returns>
-    public float ReachDamper => reachDamper;
-
-    /// <returns>share of the turn toward the target taken on reach; 0..1
-    /// </returns>
-    public float ReachAimWeight => reachAimWeight;
-
-    /// <returns>fastest aim turn on reach; deg/s</returns>
-    public float ReachAimSpeedDeg => reachAimSpeedDeg;
-
-    /// <returns>chance a reach overshoots its target; 0..1</returns>
-    public float ReachOvershootChance => reachOvershootChance;
-
-    /// <returns>extra extension on an overshoot; u</returns>
-    public float ReachOvershootU => reachOvershootU;
 
     /// <returns>speed the arm stretches out while interact is held; u/s
     /// </returns>
     public float ReachExtendSpeedU => reachExtendSpeedU;
 
-    /// <returns>whether the linear drive target has to be negated to push the
-    /// arm outward, true for the usual ConfigurableJoint axis setup</returns>
+    /// <returns>if the linear drive target is negated to push the arm
+    /// outward, the usual joint axis setup</returns>
     public bool InvertDriveAxis => invertDriveAxis;
 
-    /// <returns>resting outward lean of each arm, keeps the two off each
-    /// other; deg</returns>
+    /// <returns>resting outward lean of each arm; deg</returns>
     public float SplayDeg => splayDeg;
 
-    /// <returns>thickness of the arm cube across both axes it is not
-    /// stretched along; u</returns>
+    /// <returns>arm cube thickness across its 2 short axes; u</returns>
     public float ArmWidthU => armWidthU;
 
     /// <returns>climb speed moving up; u/s</returns>
@@ -116,8 +72,8 @@ public class MonkeyConfig: ScriptableObject {
     /// where x orbits and y climbs</returns>
     public InputActionReference MoveAction => moveAction;
 
-    /// <returns>action held to reach an arm out for fruit, the same one the
-    /// camera rig reads</returns>
+    /// <returns>action held to reach for fruit, also read by the camera rig
+    /// </returns>
     public InputActionReference InteractAction => interactAction;
 
     // Inspector Fields  #######################################################
@@ -131,67 +87,16 @@ public class MonkeyConfig: ScriptableObject {
     private float maxAngleDeg = 30f;
 
     [SerializeField]
-    [Tooltip(
-        "amplitude of each extra free axis as a fraction of the main "
-            + "stroke, 0 keeps the hand on a straight line"
-    )]
-    private float sideSwingRatio = 0.1f;
-
-    [SerializeField]
     [Tooltip("stroke phase speed, in deg/s, 360 is 1 full stroke per sec")]
     private float strokeSpeedDeg = 240f;
 
-    [SerializeField]
-    [Tooltip("angular drive stiffness pulling arm to target angle")]
-    private float driveSpring = 200f;
-
-    [SerializeField]
-    [Tooltip("angular drive damping, curbs oscillation around target")]
-    private float driveDamper = 20f;
-
     [Header("Arm - Reach")]
     [SerializeField]
-    [Tooltip("farthest arm can extend past its rest length; u")]
-    private float maxReachDistanceU = 3f;
-
-    [SerializeField]
-    [Tooltip("linear drive stiffness pulling arm to reach target")]
-    private float reachSpring = 400f;
-
-    [SerializeField]
-    [Tooltip("linear drive damping, curbs oscillation on reach")]
-    private float reachDamper = 40f;
-
-    [SerializeField]
-    [Range(0f, 1f)]
-    [Tooltip("share of the turn toward the target taken on reach")]
-    private float reachAimWeight = 0.4f;
-
-    [SerializeField]
-    [Tooltip("fastest aim turn on reach; deg/s")]
-    private float reachAimSpeedDeg = 90f;
-
-    [SerializeField]
-    [Range(0f, 1f)]
-    [Tooltip("chance a reach overshoots its target, rolled once per reach")]
-    private float reachOvershootChance = 0.35f;
-
-    [SerializeField]
-    [Tooltip("extra extension on an overshoot; u")]
-    private float reachOvershootU = 1f;
-
-    [SerializeField]
-    [Tooltip(
-        "speed the arm stretches out while interact is held, release when "
-            + "the hand sits on the fruit to grab it; u/s"
-    )]
+    [Tooltip("arm stretch speed while interact is held; u/s")]
     private float reachExtendSpeedU = 4f;
 
     [SerializeField]
-    [Tooltip(
-        "uncheck if an arm telescopes inward instead of outward, the linear "
-            + "drive target reads inverted on some joint axis setups"
-    )]
+    [Tooltip("uncheck if an arm telescopes inward instead of outward")]
     private bool invertDriveAxis = true;
 
     [Header("Arm - Climb Cycle")]
@@ -261,18 +166,8 @@ public class MonkeyConfig: ScriptableObject {
     // Editor Validation  ######################################################
     private void OnValidate() {
         maxAngleDeg = Mathf.Max(minAngleDeg, maxAngleDeg);
-        sideSwingRatio = Mathf.Max(0f, sideSwingRatio);
         strokeSpeedDeg = Mathf.Max(0f, strokeSpeedDeg);
-        driveSpring = Mathf.Max(0f, driveSpring);
-        driveDamper = Mathf.Max(0f, driveDamper);
-        maxReachDistanceU = Mathf.Max(0f, maxReachDistanceU);
-        reachSpring = Mathf.Max(0f, reachSpring);
-        reachDamper = Mathf.Max(0f, reachDamper);
-        reachAimWeight = Mathf.Clamp01(reachAimWeight);
-        reachOvershootChance = Mathf.Clamp01(reachOvershootChance);
-        reachOvershootU = Mathf.Max(0f, reachOvershootU);
         reachExtendSpeedU = Mathf.Max(0f, reachExtendSpeedU);
-        reachAimSpeedDeg = Mathf.Max(0f, reachAimSpeedDeg);
         armWidthU = Mathf.Max(0.001f, armWidthU);
         upSpeedU = Mathf.Max(0f, upSpeedU);
         downSpeedU = Mathf.Max(0f, downSpeedU);

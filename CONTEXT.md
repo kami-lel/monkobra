@@ -39,7 +39,7 @@ The repository root is the Unity project root. `Library/`, `Temp/`, `Logs/`, `Us
 | Element | Behavior | Status |
 | --- | --- | --- |
 | Monkey | kinematic body: vertical input ramps a climb speed along world Y, horizontal input orbits the trunk at a fixed radius | implemented |
-| Arms | `ArmRoot` drives a `ConfigurableJoint` per arm: an alternating hand-over-hand stroke while move input is held, or a spring-driven reach that can overshoot its target, with the hand reporting its own contacts | implemented, two arm scripts coexist |
+| Arms | `ArmRoot` drives a `ConfigurableJoint` per arm: an alternating hand-over-hand stroke while move input is held, or a reach that locks its aim at press and only stretches, with the hand reporting its own contacts | implemented |
 | Tree | stack of static and dynamic trunk segments under a `TreeTop`, each dynamic segment decorated with branches | implemented, finite height |
 | Branch hit | camera shake, then stun (input ignored) while the monkey drops a set distance, all tuned in `MonkeyConfig` | implemented |
 | Cobra | orbits and climbs the trunk on its own, trigger contact shows the game-over panel | implemented |
@@ -73,9 +73,8 @@ All under `Assets/_Monkobra/Scripts/`.
 | `Environment/BranchFruitPlacementConfig` | ScriptableObject of shared placement tuning: branch counts, radius, separation, retry cap |
 | `Environment/BranchWithScriptRoot` | decides per branch whether it bears a banana, then shows or hides the fruit children |
 | `Player/MonkeyPrefabRoot` | movement, branch-hit stun and drop |
-| `Player/ArmRoot` | one arm's Rigidbody and `ConfigurableJoint`, sitting at the hand end: climbs a stroke cycle on move input, or reaches a tracked target on a spring that may overshoot, and reports the hand's live contacts. Writes only the joint's drive targets, never its configuration |
-| `Player/MonkeyArm` | the earlier arm driver, angular stroke plus reach, superseded by `ArmRoot` but still present |
-| `Player/MonkeyConfig` | ScriptableObject of all shared monkey tuning: arm stroke and reach drives, overshoot allowance, climb and orbit speeds, branch-hit stun, and the one move action the body and both arms read |
+| `Player/ArmRoot` | one arm's Rigidbody and `ConfigurableJoint`, sitting at the hand end: climbs a stroke cycle on move input, or on interact locks its aim at the newest fruit and stretches out, grabbing on release iff the hand overlaps the fruit. Reports the hand's live contacts. Writes only the joint's drive targets, never its configuration |
+| `Player/MonkeyConfig` | ScriptableObject of all shared monkey tuning: arm stroke, reach speed, climb and orbit speeds, branch-hit stun, and the move and interact actions the body and arms read |
 | `Player/HitBranchDetection` | trigger on tag `Branch`, raises `BranchHit`, fires the camera impulse |
 | `Player/UpwardFruitDetection` | singleton (`I`), `ReachForLeft` and `ReachForRight` from tag `FruitCollider` overlaps |
 | `Player/DetectionZone` | side-tagged trigger volume that forwards enter and exit events |
@@ -104,7 +103,6 @@ All under `Assets/_Monkobra/Scripts/`.
 - Stamina drains on a timer only: it is not linked to climb speed, branch hits, or a stamina-out lose condition
 - `GameController` win and lose screens are stubs, and the cobra path uses `GameOverController` instead of `LoseGame`
 - `CobraDemo` scene remains next to `Lv1Scene`, while recent history says the demo was merged into `Lv1Scene`
-- Two arm drivers coexist, `ArmRoot` and the older `MonkeyArm`: they share `MonkeyConfig`, so a tuning change moves both
 - The tree is finite (`TreeManager` min and max y), not the endless tree of the pitch
 - Difficulty does not scale with distance yet, apart from branch count per segment
 - The prototype's WebGL link, gameplay video, and contributions belong to a different team's submission and do not describe this repository
