@@ -58,6 +58,23 @@ public class MonkeyConfig: ScriptableObject {
     /// <returns>linear drive damping, curbs oscillation on reach</returns>
     public float ReachDamper => reachDamper;
 
+    /// <returns>share of the turn toward the target taken on reach; 0..1
+    /// </returns>
+    public float ReachAimWeight => reachAimWeight;
+
+    /// <returns>fastest aim turn on reach; deg/s</returns>
+    public float ReachAimSpeedDeg => reachAimSpeedDeg;
+
+    /// <returns>chance a reach overshoots its target; 0..1</returns>
+    public float ReachOvershootChance => reachOvershootChance;
+
+    /// <returns>extra extension on an overshoot; u</returns>
+    public float ReachOvershootU => reachOvershootU;
+
+    /// <returns>speed the arm stretches out while interact is held; u/s
+    /// </returns>
+    public float ReachExtendSpeedU => reachExtendSpeedU;
+
     /// <returns>whether the linear drive target has to be negated to push the
     /// arm outward, true for the usual ConfigurableJoint axis setup</returns>
     public bool InvertDriveAxis => invertDriveAxis;
@@ -146,6 +163,31 @@ public class MonkeyConfig: ScriptableObject {
     private float reachDamper = 40f;
 
     [SerializeField]
+    [Range(0f, 1f)]
+    [Tooltip("share of the turn toward the target taken on reach")]
+    private float reachAimWeight = 0.4f;
+
+    [SerializeField]
+    [Tooltip("fastest aim turn on reach; deg/s")]
+    private float reachAimSpeedDeg = 90f;
+
+    [SerializeField]
+    [Range(0f, 1f)]
+    [Tooltip("chance a reach overshoots its target, rolled once per reach")]
+    private float reachOvershootChance = 0.35f;
+
+    [SerializeField]
+    [Tooltip("extra extension on an overshoot; u")]
+    private float reachOvershootU = 1f;
+
+    [SerializeField]
+    [Tooltip(
+        "speed the arm stretches out while interact is held, release when "
+            + "the hand sits on the fruit to grab it; u/s"
+    )]
+    private float reachExtendSpeedU = 4f;
+
+    [SerializeField]
     [Tooltip(
         "uncheck if an arm telescopes inward instead of outward, the linear "
             + "drive target reads inverted on some joint axis setups"
@@ -226,6 +268,11 @@ public class MonkeyConfig: ScriptableObject {
         maxReachDistanceU = Mathf.Max(0f, maxReachDistanceU);
         reachSpring = Mathf.Max(0f, reachSpring);
         reachDamper = Mathf.Max(0f, reachDamper);
+        reachAimWeight = Mathf.Clamp01(reachAimWeight);
+        reachOvershootChance = Mathf.Clamp01(reachOvershootChance);
+        reachOvershootU = Mathf.Max(0f, reachOvershootU);
+        reachExtendSpeedU = Mathf.Max(0f, reachExtendSpeedU);
+        reachAimSpeedDeg = Mathf.Max(0f, reachAimSpeedDeg);
         armWidthU = Mathf.Max(0.001f, armWidthU);
         upSpeedU = Mathf.Max(0f, upSpeedU);
         downSpeedU = Mathf.Max(0f, downSpeedU);

@@ -44,7 +44,7 @@ The repository root is the Unity project root. `Library/`, `Temp/`, `Logs/`, `Us
 | Branch hit | camera shake, then stun (input ignored) while the monkey drops a set distance, all tuned in `MonkeyConfig` | implemented |
 | Cobra | orbits and climbs the trunk on its own, trigger contact shows the game-over panel | implemented |
 | Stamina | `StaminaBar` slider drains on a timer, `AddStamina` restores it | bar exists, not yet tied to hits or grabs |
-| Grab | hold the interact action: camera swaps to a side view, chosen by which side has fruit in reach | camera and reach detection only, no pickup yet |
+| Grab | hold the interact action: camera swaps to a side view and the arm stretches toward the newest fruit at `ReachExtendSpeedU`; release grabs it iff the hand collider overlaps the fruit at that instant, else a miss (too short, or stretched past it) | grab implemented, the fruit is switched off, stamina not yet restored |
 | Win, lose | `GameController.WinGame` and `LoseGame` end the run once | screens are stubs |
 
 ```mermaid
@@ -100,7 +100,7 @@ All under `Assets/_Monkobra/Scripts/`.
 ## Known Gaps & Constraints
 
 - No tests, build, or run commands exist: verification means opening `Lv1Scene` in the Editor
-- The banana pickup does not exist yet: the grab only switches camera views, and nothing calls `StaminaBar.AddStamina`
+- A grabbed banana is only switched off: nothing calls `StaminaBar.AddStamina` yet
 - Stamina drains on a timer only: it is not linked to climb speed, branch hits, or a stamina-out lose condition
 - `GameController` win and lose screens are stubs, and the cobra path uses `GameOverController` instead of `LoseGame`
 - `CobraDemo` scene remains next to `Lv1Scene`, while recent history says the demo was merged into `Lv1Scene`

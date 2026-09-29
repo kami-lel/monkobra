@@ -10,6 +10,11 @@ using UnityEngine.InputSystem;
 /// the arm sweeps a climb stroke on move input, left and right alternating.
 /// </para>
 /// <para>
+/// Holding interact stretches the arm out toward the newest fruit at a steady
+/// speed, releasing it grabs that fruit iff the hand overlaps it at that
+/// instant: too short or stretched past it is a miss.
+/// </para>
+/// <para>
 /// The <see cref="ConfigurableJoint"/> is authored in the Inspector; this
 /// script only writes its drive targets.
 /// </para>
@@ -58,6 +63,9 @@ public class ArmRoot: MonoBehaviour {
     public void SetReachTarget(Transform target) {
         isReaching = target != null;
         reachTarget = target;
+        isOvershooting = isReaching
+            && config != null
+            && Random.value < config.ReachOvershootChance;
         // a settled arm sleeps, and a new drive target alone will not wake it
         if (body != null) {
             body.WakeUp();
@@ -68,6 +76,7 @@ public class ArmRoot: MonoBehaviour {
     public void CancelReach() {
         isReaching = false;
         reachTarget = null;
+        isOvershooting = false;
     }
 
     // Inspector Fields  #######################################################
@@ -118,11 +127,20 @@ public class ArmRoot: MonoBehaviour {
                 "ArmRoot:\tmust assign Inspector Field: config", this
             );
         }
-        else if (config.MoveAction == null) {
-            Debug.LogWarning(
-                "ArmRoot:\tmust assign MonkeyConfig field: moveAction",
-                config
-            );
+        else {
+            if (config.MoveAction == null) {
+                Debug.LogWarning(
+                    "ArmRoot:\tmust assign MonkeyConfig field: moveAction",
+                    config
+                );
+            }
+            if (config.InteractAction == null) {
+                Debug.LogWarning(
+                    "ArmRoot:\tmust assign MonkeyConfig field: "
+                        + "interactAction",
+                    config
+                );
+            }
         }
 
         body = GetComponent<Rigidbody>();
@@ -311,7 +329,7 @@ public class ArmRoot: MonoBehaviour {
         UpwardFruitDetection fruitDetection = UpwardFruitDetection.I;
         if (fruitDetection == null) {
             Debug.LogError(
-                "ArmRoot:	fail to get singleton: UpwardFruitDetection", this
+                "ArmRoot:\tfail to get singleton: UpwardFruitDetection", this
             );
             return;
         }
@@ -329,12 +347,18 @@ public class ArmRoot: MonoBehaviour {
 
         SetReachTarget(fruit.transform);
         isInteractReach = true;
+        reachFruit = fruit;
+        reachExtensionU = 0f;
+        // lock the aim once, in full, the arm then only stretches along it
+        SetAimWorld(fruit.transform.position - ShoulderWorld, true);
         if (Debug.isDebugBuild) {
-            Debug.Log($"ArmRoot:	reaching for {fruit.name}", this);
+            Debug.Log($"ArmRoot:\treaching for {fruit.name}", this);
         }
     }
 
+    // release is the moment of truth: grab first, then pull the arm back
     private void OnInteractCanceled(InputAction.CallbackContext context) {
+        TryGrabFruit();
         EndInteractReach();
     }
 
@@ -344,8 +368,11 @@ public class ArmRoot: MonoBehaviour {
 
     // Private Members  ########################################################
     private bool isReaching;
+    private bool isOvershooting; // rolled once per reach
     private bool isInteractReach; // whether the interact action started reach
     private Transform reachTarget;
+    private Collider reachFruit; // fruit the interact reach aims at
+    private float reachExtensionU; // commanded extension while held; u
     private float cyclePhase; // 0..1, advances only while moving
     private float restLengthU;
 
@@ -445,23 +472,96 @@ public class ArmRoot: MonoBehaviour {
             return;
         }
         isInteractReach = false;
+        reachFruit = null;
+        reachExtensionU = 0f;
         CancelReach();
     }
 
-    // aim the arm at the tracked target and telescope out to close the gap,
-    // the drive spring is what lets the hand sail past it and the joint's own
-    // Linear Limit is what stops it
+    // grab the aimed fruit iff the hand overlaps it right now, the fruit is
+    // switched off and dropped from detection so it cannot be reached again.
+    // Stretched too short or past the fruit, the overlap is missing: no grab
+    private void TryGrabFruit() {
+        if (!isInteractReach || reachFruit == null) {
+            return;
+        }
+
+        Collider fruit = reachFruit;
+        if (!fruit.gameObject.activeInHierarchy) {
+            return;
+        }
+
+        if (!IsHandOnFruit(fruit)) {
+            if (Debug.isDebugBuild) {
+                bool isTooShort = CurrentLengthU
+                    < Vector3.Distance(ShoulderWorld, fruit.bounds.center);
+                Debug.Log(
+                    "ArmRoot:\tmiss " + fruit.name + ", arm too "
+                        + (isTooShort ? "short" : "long"),
+                    this
+                );
+            }
+            return;
+        }
+
+        fruit.gameObject.SetActive(false);
+        // a disabled collider may never raise its trigger exit
+        UpwardFruitDetection fruitDetection = UpwardFruitDetection.I;
+        if (fruitDetection != null) {
+            fruitDetection.RemoveFruit(fruit);
+        }
+        if (Debug.isDebugBuild) {
+            Debug.Log($"ArmRoot:\tgrabbed {fruit.name}", this);
+        }
+    }
+
+    // trigger colliders report no contacts of their own, so measure the
+    // overlap directly
+    private bool IsHandOnFruit(Collider fruit) {
+        if (handCollider == null) {
+            return false;
+        }
+
+        Transform handXfm = handCollider.transform;
+        Transform fruitXfm = fruit.transform;
+        return Physics.ComputePenetration(
+            handCollider,
+            handXfm.position,
+            handXfm.rotation,
+            fruit,
+            fruitXfm.position,
+            fruitXfm.rotation,
+            out _,
+            out _
+        );
+    }
+
+    // telescope out. An interact reach only stretches, at a steady speed and
+    // straight through the fruit until released, its aim was locked at press
+    // and is never rewritten. Any other reach still tracks and aims
     private void DriveReach() {
         if (reachTarget == null) {
             return;
         }
 
-        Vector3 toTarget = reachTarget.position - ShoulderWorld;
-        float extensionU = Mathf.Clamp(
-            toTarget.magnitude - restLengthU, 0f, joint.linearLimit.limit
-        );
+        float limitU = joint.linearLimit.limit;
+        float extensionU;
+        if (isInteractReach) {
+            reachExtensionU = Mathf.MoveTowards(
+                reachExtensionU,
+                limitU,
+                config.ReachExtendSpeedU * Time.fixedDeltaTime
+            );
+            extensionU = reachExtensionU;
+        }
+        else {
+            Vector3 toTarget = reachTarget.position - ShoulderWorld;
+            float overshootU = isOvershooting ? config.ReachOvershootU : 0f;
+            extensionU = Mathf.Clamp(
+                toTarget.magnitude - restLengthU + overshootU, 0f, limitU
+            );
+            SetAimWorld(toTarget);
+        }
 
-        SetAimWorld(toTarget);
         SetExtension(extensionU);
     }
 
@@ -513,8 +613,9 @@ public class ArmRoot: MonoBehaviour {
     }
 
     // point the reach axis along a world direction, converted into the joint's
-    // own frame, which is what targetRotation is measured against
-    private void SetAimWorld(Vector3 worldDirection) {
+    // own frame, which is what targetRotation is measured against. A snap
+    // writes the full aim at once, else the aim leans in at a capped speed
+    private void SetAimWorld(Vector3 worldDirection, bool isSnap = false) {
         if (worldDirection.sqrMagnitude <= Mathf.Epsilon) {
             return;
         }
@@ -529,8 +630,24 @@ public class ArmRoot: MonoBehaviour {
         Vector3 jointDirection = Quaternion.Inverse(connectedJointFrame)
             * (Quaternion.Inverse(connectedRotation)
                 * worldDirection.normalized);
+        // targetRotation runs backward, so write the inverse swing
+        Quaternion fullAim =
+            Quaternion.FromToRotation(jointDirection, Vector3.forward);
+        if (isSnap) {
+            SetAimJoint(fullAim);
+            return;
+        }
+
+        // lean part way from straight out, capped turn speed
+        Quaternion softAim = Quaternion.Slerp(
+            Quaternion.identity, fullAim, config.ReachAimWeight
+        );
         SetAimJoint(
-            Quaternion.FromToRotation(Vector3.forward, jointDirection)
+            Quaternion.RotateTowards(
+                joint.targetRotation,
+                softAim,
+                config.ReachAimSpeedDeg * Time.fixedDeltaTime
+            )
         );
     }
 

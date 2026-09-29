@@ -25,18 +25,15 @@ public class UpwardFruitDetection: MonoBehaviour {
     public Collider NewestFruit =>
         fruitOrder.Count > 0 ? fruitOrder[fruitOrder.Count - 1] : null;
 
-    /// <summary>
-    /// side the interact action should reach for: right only if fruit is
-    /// reachable there and not on the left, left otherwise
-    /// </summary>
+    /// <summary>side to reach for: right iff only right has fruit</summary>
     public DetectionSide ReachSide =>
         ReachForRight && !ReachForLeft
             ? DetectionSide.Right
             : DetectionSide.Left;
 
     // Public Methods  #########################################################
-    /// <returns>most recently entered fruit still w/i reach on
-    /// <paramref name="side"/>; null iff none</returns>
+    /// <returns>newest fruit in reach on <paramref name="side"/>, else null
+    /// </returns>
     public Collider GetNewestFruit(DetectionSide side) {
         HashSet<Collider> fruits =
             side == DetectionSide.Left ? leftFruits : rightFruits;
@@ -46,6 +43,22 @@ public class UpwardFruitDetection: MonoBehaviour {
             }
         }
         return null;
+    }
+
+    /// <summary>
+    /// forgets <paramref name="fruit"/> on both sides, for a fruit switched
+    /// off while still inside a zone, which may never raise its trigger exit
+    /// </summary>
+    public void RemoveFruit(Collider fruit) {
+        bool hadLeft = leftFruits.Remove(fruit);
+        bool hadRight = rightFruits.Remove(fruit);
+        fruitOrder.Remove(fruit);
+        if (hadLeft && leftFruits.Count == 0) {
+            LogReachChanged(DetectionSide.Left);
+        }
+        if (hadRight && rightFruits.Count == 0) {
+            LogReachChanged(DetectionSide.Right);
+        }
     }
 
     // Inspector Fields  #######################################################

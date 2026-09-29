@@ -1093,8 +1093,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 387742569}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.08656981, y: -0.7984894, z: -0.118391275, w: 0.58386976}
-  m_LocalPosition: {x: 10, y: -2, z: 6.0000005}
+  m_LocalRotation: {x: 0.013721906, y: 0.98497325, z: 0.09349331, w: -0.14456339}
+  m_LocalPosition: {x: 0.000000029802322, y: -0.99999994, z: 10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1122,7 +1122,7 @@ MonoBehaviour:
       Size: {x: 0.8, y: 0.8}
       Offset: {x: 0, y: 0}
   CenterOnActivate: 1
-  TargetOffset: {x: -12, y: 5, z: -1}
+  TargetOffset: {x: -3, y: 1, z: 0}
   Damping: {x: 0.5, y: 0.5}
   Lookahead:
     Enabled: 0
@@ -1147,7 +1147,7 @@ MonoBehaviour:
     AngularDampingMode: 0
     RotationDamping: {x: 1, y: 1, z: 1}
     QuaternionDamping: 1
-  FollowOffset: {x: 10, y: -2, z: 6}
+  FollowOffset: {x: 0, y: -1, z: 10}
 --- !u!114 &387742573
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1172,7 +1172,7 @@ MonoBehaviour:
     LookAtTarget: {fileID: 0}
     CustomLookAtTarget: 0
   Lens:
-    FieldOfView: 45
+    FieldOfView: 50
     OrthographicSize: 10
     NearClipPlane: 0.1
     FarClipPlane: 5000
@@ -1559,8 +1559,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 567824735}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.059092052, y: 0.7787927, z: 0.15091072, w: 0.6059836}
-  m_LocalPosition: {x: -10.279061, y: -2.4460514, z: 5.325198}
+  m_LocalRotation: {x: 0.007178432, y: 0.9947869, z: -0.09925197, w: 0.022283465}
+  m_LocalPosition: {x: -0.44799006, y: 2.0649786, z: 10.224244}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1651,7 +1651,7 @@ Camera:
     height: 1
   near clip plane: 0.1
   far clip plane: 5000
-  field of view: 45
+  field of view: 60
   orthographic: 0
   orthographic size: 10
   m_Depth: 0
@@ -4564,8 +4564,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1836741339}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.086569786, y: 0.7984894, z: 0.11839125, w: 0.58386976}
-  m_LocalPosition: {x: -10, y: -2, z: 6}
+  m_LocalRotation: {x: -0.01372191, y: 0.9849732, z: 0.09349335, w: 0.14456342}
+  m_LocalPosition: {x: 0.000000029802322, y: -0.99999994, z: 10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4593,7 +4593,7 @@ MonoBehaviour:
       Size: {x: 0.8, y: 0.8}
       Offset: {x: 0, y: 0}
   CenterOnActivate: 1
-  TargetOffset: {x: 12, y: 5, z: -1}
+  TargetOffset: {x: 3, y: 1, z: 0}
   Damping: {x: 0.5, y: 0.5}
   Lookahead:
     Enabled: 0
@@ -4618,7 +4618,7 @@ MonoBehaviour:
     AngularDampingMode: 0
     RotationDamping: {x: 1, y: 1, z: 1}
     QuaternionDamping: 1
-  FollowOffset: {x: -10, y: -2, z: 6}
+  FollowOffset: {x: 0, y: -1, z: 10}
 --- !u!114 &1836741343
 MonoBehaviour:
   m_ObjectHideFlags: 0
