@@ -25,6 +25,29 @@ public class UpwardFruitDetection: MonoBehaviour {
     public Collider NewestFruit =>
         fruitOrder.Count > 0 ? fruitOrder[fruitOrder.Count - 1] : null;
 
+    /// <summary>
+    /// side the interact action should reach for: right only if fruit is
+    /// reachable there and not on the left, left otherwise
+    /// </summary>
+    public DetectionSide ReachSide =>
+        ReachForRight && !ReachForLeft
+            ? DetectionSide.Right
+            : DetectionSide.Left;
+
+    // Public Methods  #########################################################
+    /// <returns>most recently entered fruit still w/i reach on
+    /// <paramref name="side"/>; null iff none</returns>
+    public Collider GetNewestFruit(DetectionSide side) {
+        HashSet<Collider> fruits =
+            side == DetectionSide.Left ? leftFruits : rightFruits;
+        for (int i = fruitOrder.Count - 1; i >= 0; i--) {
+            if (fruits.Contains(fruitOrder[i])) {
+                return fruitOrder[i];
+            }
+        }
+        return null;
+    }
+
     // Inspector Fields  #######################################################
     [Tooltip("left-side detection zone, must report Side == Left")]
     [SerializeField]

@@ -99,6 +99,10 @@ public class MonkeyConfig: ScriptableObject {
     /// where x orbits and y climbs</returns>
     public InputActionReference MoveAction => moveAction;
 
+    /// <returns>action held to reach an arm out for fruit, the same one the
+    /// camera rig reads</returns>
+    public InputActionReference InteractAction => interactAction;
+
     // Inspector Fields  #######################################################
     [Header("Arm - Stroke")]
     [SerializeField]
@@ -204,6 +208,13 @@ public class MonkeyConfig: ScriptableObject {
             + "Vector2 where x orbits the trunk and y climbs"
     )]
     private InputActionReference moveAction;
+
+    [SerializeField]
+    [Tooltip(
+        "action held to reach an arm out for fruit, the same action "
+            + "CameraRigManager reads"
+    )]
+    private InputActionReference interactAction;
 
     // Editor Validation  ######################################################
     private void OnValidate() {

@@ -247,12 +247,23 @@ public class ArmRoot: MonoBehaviour {
         if (MoveAction != null) {
             MoveAction.action.Enable();
         }
+        if (InteractAction != null) {
+            InteractAction.action.Enable();
+            InteractAction.action.performed += OnInteractPerformed;
+            InteractAction.action.canceled += OnInteractCanceled;
+        }
     }
 
     private void OnDisable() {
         if (MoveAction != null) {
             MoveAction.action.Disable();
         }
+        if (InteractAction != null) {
+            InteractAction.action.performed -= OnInteractPerformed;
+            InteractAction.action.canceled -= OnInteractCanceled;
+            InteractAction.action.Disable();
+        }
+        EndInteractReach();
         // physics stops reporting while disabled, so stale contacts would
         // never clear on their own
         handContacts.Clear();
@@ -294,12 +305,46 @@ public class ArmRoot: MonoBehaviour {
         handContacts.Remove(collision.collider);
     }
 
+    // Event Handlers  #########################################################
+    // the detection singleton picks the side, so only the matching arm reaches
+    private void OnInteractPerformed(InputAction.CallbackContext context) {
+        UpwardFruitDetection fruitDetection = UpwardFruitDetection.I;
+        if (fruitDetection == null) {
+            Debug.LogError(
+                "ArmRoot:	fail to get singleton: UpwardFruitDetection", this
+            );
+            return;
+        }
+
+        DetectionSide armSide =
+            isRightArm ? DetectionSide.Right : DetectionSide.Left;
+        if (fruitDetection.ReachSide != armSide) {
+            return;
+        }
+
+        Collider fruit = fruitDetection.GetNewestFruit(armSide);
+        if (fruit == null) {
+            return;
+        }
+
+        SetReachTarget(fruit.transform);
+        isInteractReach = true;
+        if (Debug.isDebugBuild) {
+            Debug.Log($"ArmRoot:	reaching for {fruit.name}", this);
+        }
+    }
+
+    private void OnInteractCanceled(InputAction.CallbackContext context) {
+        EndInteractReach();
+    }
+
     // Constants  ##############################################################
     private const float INPUT_DEADZONE = 0.1f;
     private const float INPUT_DEADZONE_SQR = INPUT_DEADZONE * INPUT_DEADZONE;
 
     // Private Members  ########################################################
     private bool isReaching;
+    private bool isInteractReach; // whether the interact action started reach
     private Transform reachTarget;
     private float cyclePhase; // 0..1, advances only while moving
     private float restLengthU;
@@ -325,6 +370,9 @@ public class ArmRoot: MonoBehaviour {
     // both arms share one action, held on the config asset
     private InputActionReference MoveAction =>
         config != null ? config.MoveAction : null;
+
+    private InputActionReference InteractAction =>
+        config != null ? config.InteractAction : null;
 
     // the shoulder is the joint's own pivot, read off the connected body so it
     // tracks the body every step, no separate Transform to keep in sync
@@ -389,6 +437,15 @@ public class ArmRoot: MonoBehaviour {
                 Physics.IgnoreCollision(armCollider, bodyCollider, true);
             }
         }
+    }
+
+    // release only a reach the interact action began, leave other reaches be
+    private void EndInteractReach() {
+        if (!isInteractReach) {
+            return;
+        }
+        isInteractReach = false;
+        CancelReach();
     }
 
     // aim the arm at the tracked target and telescope out to close the gap,
