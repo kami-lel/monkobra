@@ -95,7 +95,8 @@ public class ArmRoot: MonoBehaviour {
     [SerializeField]
     [Tooltip(
         "whether this is the monkey's right arm, else the left arm, the two "
-            + "climb half a cycle out of phase and splay to opposite sides"
+            + "climb half a cycle out of phase. Which way the arm leans and "
+            + "sweeps comes from its transform, not from this flag"
     )]
     private bool isRightArm;
 
@@ -161,7 +162,13 @@ public class ArmRoot: MonoBehaviour {
         }
 
         reachZMotion = joint.zMotion;
-        restLengthU = Vector3.Distance(ShoulderWorld, transform.position);
+        Vector3 outward = transform.position - ShoulderWorld;
+        restLengthU = outward.magnitude;
+        reachAxisSign = Vector3.Dot(
+            transform.TransformDirection(LocalReachAxis), outward
+        ) >= 0f
+            ? 1f
+            : -1f;
         IgnoreBodyCollisions();
 
         // the drives are what move the arm: a target written against a zero
@@ -186,6 +193,25 @@ public class ArmRoot: MonoBehaviour {
                     + "no room to reach",
                 this
             );
+        }
+
+        // the visual spans whatever the joint says the arm measures, so a
+        // hand bigger than that swallows the whole limb and the arm reads on
+        // screen as having retracted into the body
+        if (handCollider != null) {
+            Vector3 handExtents = handCollider.bounds.extents;
+            float handRadiusU = Mathf.Max(
+                handExtents.x, Mathf.Max(handExtents.y, handExtents.z)
+            );
+            if (handRadiusU >= restLengthU) {
+                Debug.LogWarning(
+                    $"ArmRoot:\thand is {handRadiusU}u across but the joint "
+                        + $"anchor puts the shoulder only {restLengthU}u away, "
+                        + "so the arm draws entirely inside its own hand, move "
+                        + "the anchor to the shoulder or shrink the hand",
+                    this
+                );
+            }
         }
 
         if (Debug.isDebugBuild) {
@@ -263,10 +289,14 @@ public class ArmRoot: MonoBehaviour {
     private ConfigurableJointMotion reachZMotion =
         ConfigurableJointMotion.Limited;
 
-    private readonly HashSet<Collider> handContacts = new HashSet<Collider>();
+    // +1 when the joint's reach axis already points away from the shoulder,
+    // -1 when it points back through the body, measured once from the
+    // authored pose. Two arms on opposite sides of one body share the same
+    // local axes, so their outward directions are mirrored and the drive
+    // target has to follow, else one arm telescopes into the torso
+    private float reachAxisSign = 1f;
 
-    // mirrors every side-dependent angle for the left arm
-    private float SideSign => isRightArm ? 1f : -1f;
+    private readonly HashSet<Collider> handContacts = new HashSet<Collider>();
 
     // both arms share one action, held on the config asset
     private InputActionReference MoveAction =>
@@ -386,12 +416,13 @@ public class ArmRoot: MonoBehaviour {
         float swingDeg = midDeg + halfRangeDeg * Mathf.Sin(phaseRad);
 
         // the stroke swings about the joint's own axes, so re-aiming those in
-        // the Inspector re-aims the climb with them
+        // the Inspector re-aims the climb with them. Both arms take the same
+        // local angles: the right arm's transform is flipped a half turn, so
+        // one set of angles already reads mirrored in the world, and the
+        // stroke stays in step while the splay leans them apart
         SetAimLocal(
             Quaternion.AngleAxis(-swingDeg, joint.axis)
-                * Quaternion.AngleAxis(
-                    SideSign * config.SplayDeg, joint.secondaryAxis
-                )
+                * Quaternion.AngleAxis(config.SplayDeg, joint.secondaryAxis)
         );
         if (body != null) {
             body.WakeUp();
@@ -420,10 +451,14 @@ public class ArmRoot: MonoBehaviour {
         joint.targetRotation = localRotation;
     }
 
+    // InvertDriveAxis covers the joint's own drive sign convention, shared by
+    // both arms, and reachAxisSign covers the mirror between them
     private void SetExtension(float extensionU) {
         bool isInverted = config == null || config.InvertDriveAxis;
         joint.targetPosition = new Vector3(
-            0f, 0f, isInverted ? -extensionU : extensionU
+            0f,
+            0f,
+            reachAxisSign * (isInverted ? -extensionU : extensionU)
         );
     }
 

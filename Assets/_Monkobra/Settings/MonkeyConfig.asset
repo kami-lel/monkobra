@@ -25,6 +25,7 @@ MonoBehaviour:
   invertDriveAxis: 1
   cycleReachU: 0.6
   splayDeg: 20
+  armWidthU: 0.2
   upSpeedU: 6
   downSpeedU: 12
   rotationSpeedDeg: 50
