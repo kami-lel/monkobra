@@ -12,7 +12,7 @@ Unity course project (USC CSCI-526, Fall 2026): a 3D vertical climbing game. Ove
 
 ## Setup Commands
 
-Editor version is Unity `6000.3.22f1` (Unity 6, URP). Open the repository folder through Unity Hub. No build or test command exists yet.
+Editor version is Unity `6000.3.22f1` (Unity 6, URP). Open the repository folder through Unity Hub. The only build is the WebGL export below, made from the Editor; no test command exists yet.
 
 ## GitHub Pages WebGL Build
 
