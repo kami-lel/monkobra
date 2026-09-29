@@ -139,9 +139,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3c4b3c1423604954aa05bd4476b025d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StaminaBar
-  maxStamina: 100
-  decreaseAmount: 10
-  decreaseInterval: 30
+  config: {fileID: 11400000, guid: a0a52087f5b94dc487b912f590bd2535, type: 2}
 --- !u!1 &2089550947058290794
 GameObject:
   m_ObjectHideFlags: 0

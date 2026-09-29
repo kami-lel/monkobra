@@ -4162,10 +4162,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: StaminaBar
       objectReference: {fileID: 0}
-    - target: {fileID: 2796074396119240967, guid: 4f7b2e3d9df44034096d964cb9622089, type: 3}
-      propertyPath: decreaseInterval
-      value: 10
-      objectReference: {fileID: 0}
     - target: {fileID: 7914521894620063502, guid: 4f7b2e3d9df44034096d964cb9622089, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0

@@ -5,9 +5,9 @@ using UnityEngine.UI;
 [RequireComponent(typeof(Slider))]
 public class StaminaBar : MonoBehaviour
 {
-    [SerializeField] private float maxStamina = 100f;
-    [SerializeField] private float decreaseAmount = 10f;
-    [SerializeField] private float decreaseInterval = 30f;
+    [SerializeField]
+    [Tooltip("game-wide tuning; stamina budget and drain rate")]
+    private GameConfig config;
 
     public float CurrentStamina => currentStamina;
     public bool HasStamina => currentStamina > 0f;
@@ -17,11 +17,22 @@ public class StaminaBar : MonoBehaviour
 
     private void Awake()
     {
+        // Inspector Assignment Guard  -----------------------------------------
+        if (config == null)
+        {
+            Debug.LogWarning(
+                "StaminaBar:\tmust assign Inspector Field: config",
+                this
+            );
+            enabled = false;
+            return;
+        }
+
         staminaSlider = GetComponent<Slider>();
 
-        currentStamina = maxStamina;
+        currentStamina = config.MaxStamina;
         staminaSlider.minValue = 0f;
-        staminaSlider.maxValue = maxStamina;
+        staminaSlider.maxValue = config.MaxStamina;
         staminaSlider.value = currentStamina;
 
         if (Debug.isDebugBuild)
@@ -39,11 +50,11 @@ public class StaminaBar : MonoBehaviour
     {
         while (currentStamina > 0f)
         {
-            yield return new WaitForSeconds(decreaseInterval);
+            yield return new WaitForSeconds(config.StaminaDecreaseIntervalS);
 
             currentStamina = Mathf.Max(
                 0f,
-                currentStamina - decreaseAmount
+                currentStamina - config.StaminaDecreaseAmount
             );
 
             staminaSlider.value = currentStamina;
@@ -83,7 +94,7 @@ public class StaminaBar : MonoBehaviour
         }
 
         currentStamina = Mathf.Min(
-            maxStamina,
+            config.MaxStamina,
             currentStamina + amount
         );
 
