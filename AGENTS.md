@@ -1,6 +1,16 @@
 # Monkobra AGENTS
 
-Unity course project (USC CSCI-526, Fall 2026): a 3D vertical climbing game. Overview in [README.md](README.md), system knowledge in [CONTEXT.md](CONTEXT.md). Chat instructions override this file.
+Prescriptive rules for agents working in this project.
+
+- Belongs Here: rules an agent must follow, ie commands, conventions, constraints, who decides; only what an agent cannot infer from the code
+- Size: stay lean for the context window; when the file grows, move detail to `docs/` or cut it
+- Upkeep: update in the same change that moves a command, convention, or constraint
+- Structure: follow the existing sections; keep every rule true for every contributor
+- Belongs in `CONTEXT.md`: descriptive knowledge of the system, ie architecture, domain model, patterns, known gaps
+- Belongs in `docs/`: system documentation for users and agents alike; link it from here, never grow this file to hold it
+- Local Layer: put machine-specific or personal rules in `AGENTS.local.md`; create it if missing, never commit it
+
+Unity course project (USC CSCI-526, Fall 2026): a 3D vertical climbing game. Overview in [README.md](README.md), system knowledge in [CONTEXT.md](CONTEXT.md). Chat instructions override this file. No `docs/` folder exists yet.
 
 ## Layout & Naming
 
