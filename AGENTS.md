@@ -76,8 +76,10 @@ No test suite exists yet. When one is added, record the exact scoped command her
 
 ## PR & Commit Instructions
 
-- Work happens on `dev`, and `main` is the merge target
-- Commits follow the user's global git rules: run the `prepare-commit-msg` hook, never pass `-m`
+- Feature work always happens on a feature branch, never directly on `dev` or `main`
+- Before starting feature work on `dev` or `main`, ask the user to create or switch to a feature branch, and wait for the answer
+- Feature branches merge into `dev`, and `main` is the merge target
+- Do not use the `prepare-commit-msg` hook: write the commit message yourself and pass it with `-m`
 
 ## Documentation Maintenance
 
