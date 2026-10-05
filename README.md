@@ -25,6 +25,7 @@ Banana grabbing and stamina balancing.
 - Up / Down: climb the tree
 - Left / Right: circle around the tree
 - Space (hold and release): reach out and grab a banana
+- Space (press rapidly): break free of a spider web
 
 ## Mechanics
 
@@ -33,10 +34,15 @@ Banana grabbing and stamina balancing.
 - Branch Collision: hitting a branch shakes the camera, drops the monkey, and briefly takes away control
 - Banana Grab: hold-and-release timing sets how far the arm stretches, and a clean grab restores stamina
 - Stamina Bar: drains over time and with movement, topped up only by grabbing bananas
+- Spider Web: webs cling to the upper half of the trunk, touching one holds the monkey in place until Space is mashed to fill the escape bar, then the web vanishes and the monkey is briefly immune
 
 ## Getting Started
 
 Open the repository folder through Unity Hub with Editor `6000.3.22f1` (Unity 6, URP), then open `Lv1Scene` and press Play. The game also runs in the browser from the committed WebGL export in `Monkobra/`, served by GitHub Pages.
+
+### Testing the Spider Web
+
+Open `WebDemo` and press Play. Webs only spawn from the middle of the tree up, so for a quick test select the `Tree` object and set `SpiderWebSpawner` > Start Progress to `0` (and Spawn Chance to `1`) to put webs right by the start. With Gizmos on, yellow boxes mark each web's trigger and a cyan ring marks the start height. The first trap shows the hint text and bar, later traps the bar only, and reloading the scene brings the hint back.
 
 ## Contributing
 

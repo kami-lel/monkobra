@@ -3700,6 +3700,8 @@ GameObject:
   m_Component:
   - component: {fileID: 2476254920268462736}
   - component: {fileID: 5372440992956113088}
+  - component: {fileID: 809108776426763196}
+  - component: {fileID: -7967758877750076835}
   m_Layer: 0
   m_Name: SpiderWeb
   m_TagString: Untagged
@@ -3717,7 +3719,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0.69}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1, y: 1.5, z: 1.5}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3013277382128224586}
@@ -3899,6 +3901,42 @@ MonoBehaviour:
   sag: 0.06
   webMaterial: {fileID: 2100000, guid: 906f4892bde12417d93d23637ab10c7c, type: 2}
   seed: 1
+--- !u!65 &809108776426763196
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2396055925710931720}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.2, y: 2.2, z: 2.2}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &-7967758877750076835
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2396055925710931720}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d93c5dea39ee4de3b58846c7a5ccc78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpiderWebTrap
+  pulseScale: 0.1
+  pulseTwistDeg: 6
+  pulseDurationS: 0.15
 --- !u!1 &2430151885042702714
 GameObject:
   m_ObjectHideFlags: 0

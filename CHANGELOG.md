@@ -12,7 +12,11 @@ fixme cobra done as pool
 
 ### Added
 
+- Spider web trap in `WebDemo`: webs spawn on the upper trunk clear of branches and fruit, hold the monkey on contact, and break on rapid Space presses, with a first-trap hint, an escape bar, and a short immunity after escaping
+
 ### Changed
+
+- `MonkeyPrefabRoot` exposes `IsHeld` to freeze the body in place
 
 ### Deprecated
 

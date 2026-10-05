@@ -127,6 +127,7 @@ GameObject:
   - component: {fileID: 2526013903023601068}
   - component: {fileID: 8910251406619591012}
   - component: {fileID: 9198043481806832196}
+  - component: {fileID: -8657935869639358425}
   m_Layer: 0
   m_Name: Monkey
   m_TagString: Player
@@ -231,6 +232,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   leftZone: {fileID: 8123187931713319305}
   rightZone: {fileID: 5851461741562908947}
+--- !u!114 &-8657935869639358425
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1602697259893314259}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07f13d6ba233e4d3081f90899fd0427f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpiderWebStruggle
+  monkeyConfig: {fileID: 11400000, guid: 807cabe9104f1f948afe0b58847b456f, type: 2}
+  escapeAction: {fileID: -2099379676528639254, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  pressGain: 0.12
+  decayPerS: 0.35
+  protectionDurationS: 1
 --- !u!1 &2917627373943038392
 GameObject:
   m_ObjectHideFlags: 0
