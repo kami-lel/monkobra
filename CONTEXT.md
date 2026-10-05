@@ -10,7 +10,7 @@ Monkobra is a 3D vertical upward-scrolling game: a monkey climbs a tall tree, ch
 | Packages in play | Input System, Cinemachine (camera views, impulse shake), uGUI |
 | Genre | 3D obstacle-running (*Temple Run 2*, *Subway Surfers*, *Minion Rush*) |
 | Course | USC CSCI-526, Fall 2026 |
-| Team | Yuqing Lu, Yangyi Lu (Erik) |
+| Team | Yuqing Lu, Yangyi Lu (Erik), Houdong Pan, Wenhai Dong, Belle Dai |
 
 ## Repository Layout
 
@@ -22,9 +22,9 @@ monkobra/
 ├── CHANGELOG.md       version history, plus open triage tags in a comment
 ├── Assets/
 │   ├── _Monkobra/     all authored assets, <Type>/<Module>/<asset>
-│   │   ├── Scenes/    Lv1Scene (main), CobraDemo (standalone cobra test)
+│   │   ├── Scenes/    Lv1Scene (main), CobraDemo (standalone cobra test), WebDemo (spider web test)
 │   │   ├── Scripts/   Cobra/, Environment/, Player/, UI/, GameController, GameConfig
-│   │   ├── Prefabs/   Monkey, Environment/ (tree, branch), UI/StaminaBar
+│   │   ├── Prefabs/   Monkey, Environment/ (tree, branch, spider web), UI/StaminaBar
 │   │   ├── Material/  Environment/, Player/
 │   │   └── Settings/  tuning assets (MonkeyConfig, GameConfig, BranchFruitPlacementConfig), _Shared/ URP assets
 │   └── Readme.asset   Unity template leftover
@@ -46,6 +46,7 @@ The repository root is the Unity project root. `Library/`, `Temp/`, `Logs/`, `Us
 | Cobra | orbits and climbs the trunk on its own, trigger contact calls `GameController.LoseGame` | implemented |
 | Stamina | `StaminaBar` slider drains on a timer and by movement (`MonkeyPrefabRoot` calls `DrainByMovement` each step: climbing costs most, orbiting less, descending and the stun fall nothing), `AddStaminaByFruit` restores a fixed amount, budget, rates and fruit restore come from `GameConfig` | grabs restore it, not yet tied to hits |
 | Grab | hold the interact action: camera swaps to a side view and the arm stretches toward the newest fruit at `ReachExtendSpeedU`; release grabs it iff the hand collider overlaps the fruit at that instant, else a miss (too short, or stretched past it) | grab implemented, the fruit is switched off and `ArmRoot` calls `StaminaBar.I.AddStaminaByFruit` |
+| Spider web | `SpiderWebSpawner` sticks webs flat on the trunk from `startProgress` of the climb up, clear of branches and fruit. The monkey's solid body touching a web's trigger holds it in place (`MonkeyPrefabRoot.IsHeld`) and pauses interact; each Jump (Space) press fills an escape bar that drains while idle, a full bar removes the web and grants a short immunity. `SpiderWebPrompt` shows the hint on the first trap per scene load, the bar on every trap | implemented in `WebDemo` |
 | Win, lose | `GameController.WinGame` and `LoseGame` end the run once: `ScreensManager` shows the win or lose panel and time freezes. Triggers: win zone (`WinZoneHandler`, `MonkeyPrefabRoot`), cobra contact, stamina at 0 | implemented |
 
 ```mermaid
@@ -62,6 +63,10 @@ graph LR
   Cobra[CobraCollisions] --> Game[GameController]
   Stamina[StaminaBar] --> Game
   Game --> Screens[ScreensManager]
+  Spawner[SpiderWebSpawner] --> Web[SpiderWebTrap]
+  Web -->|TryTrap| Struggle[SpiderWebStruggle]
+  Struggle -->|IsHeld| Root
+  Struggle --> Prompt[SpiderWebPrompt]
 ```
 
 ## Systems & Key Scripts
@@ -76,7 +81,7 @@ All under `Assets/_Monkobra/Scripts/`.
 | `Environment/DynamicTreeSegmentPrefabRoot` | on `Start`, places Branch With Fruit prefabs on itself, count scaled by climb progress |
 | `Environment/BranchFruitPlacementConfig` | ScriptableObject of shared placement tuning: branch counts, radius, separation, retry cap. Asset at `Settings/` |
 | `Environment/BranchWithScriptRoot` | decides per branch whether it bears a banana, then shows or hides the fruit children |
-| `Player/MonkeyPrefabRoot` | movement, branch-hit stun and drop |
+| `Player/MonkeyPrefabRoot` | movement, branch-hit stun and drop, `IsHeld` freezes the body in place |
 | `Player/ArmRoot` | one arm's Rigidbody and `ConfigurableJoint`, sitting at the hand end: climbs a stroke cycle on move input, or on interact locks its aim at the newest fruit and stretches out, grabbing on release iff the hand overlaps the fruit. Reports the hand's live contacts. Writes only the joint's drive targets, never its configuration |
 | `Player/MonkeyConfig` | ScriptableObject of all shared monkey tuning: arm stroke, reach speed, climb and orbit speeds, branch-hit stun, and the move and interact actions the body and arms read |
 | `Player/HitBranchDetection` | trigger on tag `Branch`, raises `BranchHit`, fires the camera impulse |
@@ -86,9 +91,14 @@ All under `Assets/_Monkobra/Scripts/`.
 | `Cobra/CobraClimb` | spiral path around `pathCenter`, body segments trail the head |
 | `Cobra/CobraCollisions` | trigger enter calls `GameController.LoseGame` |
 | `UI/StaminaBar` | singleton (`I`), slider drained on a timer and by `DrainByMovement`, loses the game at 0, `AddStaminaByFruit` restores it on a grab |
+| `Environment/SpiderWebSpawner` | on the tree root, after default execution order: rolls web slots per `DynamicTreeSegment` below it, lays each web flat on its segment's bark facing out, and drops spots below the start height, near another web, or whose trigger overlaps a branch or fruit. `PopulateSegment` decorates a segment added later |
+| `Environment/SpiderWebTrap` | web prefab root, 1 trigger `BoxCollider` deepened outward along local +X to reach the monkey; hands itself to the `SpiderWebStruggle` on a touching solid collider's Rigidbody, pulses on escape presses, `Release` destroys it |
+| `Environment/SpiderWebStruggle` | on the monkey root: trap state, escape progress and decay, post-escape protection, `Trapped`, `ProgressChanged`, `Escaped` events. Holds the body via `IsHeld` and disables interact from trap until protection ends |
+| `Environment/SpiderWebBuilder` | editor context-menu tool that builds the web prefab out of thin cubes |
 | `Environment/WinZoneHandler` | win-zone trigger, calls `GameController.WinGame` on the player |
 | `UI/ScreensManager` | singleton (`I`), shows the win or lose panel |
 | `UI/ProgressBarRoot` | player-height progress scrollbar |
+| `UI/SpiderWebPrompt` | on an always-active Canvas child, shows the first-trap hint and the escape bar from `SpiderWebStruggle` events |
 
 ## Patterns & Conventions
 
@@ -96,7 +106,7 @@ All under `Assets/_Monkobra/Scripts/`.
 - A consumer that may start before its singleton reads it in `Start`, not `Awake`, so Awake order never matters
 - Nothing about the monkey is mass or gravity driven: the body is kinematic and `MonkeyPrefabRoot` writes its position and rotation outright, so no arm joint or collision can move it, while each `ArmRoot` is posed purely by its joint drives, forces gravity off on its own Rigidbody, and ignores collisions with the body's colliders so a hand never reports the monkey itself
 - Detection scripts forward trigger events (`Entered`, `Exited`, `BranchHit`) rather than calling their consumers directly
-- Trigger matching relies on tags: `Branch`, `FruitCollider`
+- Trigger matching relies on tags: `Branch`, `FruitCollider`. Webs are the exception: a web skips trigger colliders, the monkey's fruit zones and branch sensor, and looks for `SpiderWebStruggle` on the touching collider's Rigidbody, which an arm's own Rigidbody lacks
 - Input arrives through `InputActionReference` fields, each script enables and disables its own action, and the arms take theirs from `MonkeyConfig` so both read one action
 - Scripts guard required inspector fields in `Awake` with a logged error naming the field
 - Tuning values stay in serialized fields, and shared tuning sits in a ScriptableObject: `MonkeyPrefabRoot` and `ArmRoot` hold only wiring references and which side an arm is, every number and the input action come from `MonkeyConfig`, while game-wide numbers such as stamina come from `GameConfig`
@@ -107,7 +117,8 @@ All under `Assets/_Monkobra/Scripts/`.
 
 - No tests or run commands exist: verification means opening `Lv1Scene` in the Editor
 - Stamina drains on a timer and by movement, but is not linked to branch hits
-- `CobraDemo` scene remains next to `Lv1Scene`
+- `CobraDemo` and `WebDemo` scenes remain next to `Lv1Scene`, and spider webs are wired only in `WebDemo`
+- Space is both interact and the web escape key, so `SpiderWebStruggle` escapes on the Jump action and keeps interact disabled while trapped
 - The tree is finite (`TreeManager` min and max y), not the endless tree of the pitch
 - Difficulty does not scale with distance yet, apart from branch count per segment
 - The prototype's WebGL link, gameplay video, and contributions belong to a different team's submission and do not describe this repository

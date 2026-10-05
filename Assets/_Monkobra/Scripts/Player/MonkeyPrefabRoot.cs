@@ -20,6 +20,21 @@ using UnityEngine.InputSystem;
 /// </para>
 /// </summary>
 public class MonkeyPrefabRoot: MonoBehaviour {
+    // Public Members  #########################################################
+    /// <summary>
+    /// While true the body stays exactly where it is, ignoring input and any
+    /// branch-hit fall. Set by <see cref="SpiderWebStruggle"/> while the
+    /// monkey is caught in a web. Either change zeroes the climb speed, so
+    /// the climb resumes from rest rather than with the speed carried in.
+    /// </summary>
+    public bool IsHeld {
+        get => isHeld;
+        set {
+            isHeld = value;
+            climbSpeedU = 0f;
+        }
+    }
+
     // Inspector Fields  #######################################################
     [SerializeField]
     [Tooltip("raises branch hit event, knocks monkey off climb")]
@@ -107,6 +122,15 @@ public class MonkeyPrefabRoot: MonoBehaviour {
 
     private void FixedUpdate() {
         if (config == null) {
+            return;
+        }
+
+        // held, e.g. caught in a web: write no new pose so the body stays
+        // put, but keep it awake so the cobra's trigger still registers it
+        if (isHeld) {
+            if (body != null) {
+                body.WakeUp();
+            }
             return;
         }
 
@@ -219,6 +243,7 @@ public class MonkeyPrefabRoot: MonoBehaviour {
     private float climbSpeedU; // ramped vertical speed, this script's own
     private float stunEndTime; // Time.time when control returns
     private float dropTargetY; // world Y where hit fall stops
+    private bool isHeld; // body frozen in place, see IsHeld
 
     private bool IsStunned => Time.time < stunEndTime;
 
