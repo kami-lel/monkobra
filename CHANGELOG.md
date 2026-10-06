@@ -12,6 +12,10 @@ fixme cobra done as pool
 
 ### Changed
 
+- falling cobra contact in `FallingCobraDemo` now uses the monkey's branch-hit stun and drop instead of ending the run
+- falling cobra spawning now unlocks after a configurable climb distance from the monkey's starting height instead of 60% of the finite tree
+- falling cobra spawn intervals now shorten with the monkey's highest climb, down to a configurable minimum
+
 ### Deprecated
 
 ### Removed

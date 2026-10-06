@@ -5,10 +5,15 @@ public class FallingCobraSpawner: MonoBehaviour {
     [SerializeField] private FallingCobra fallingCobraPrefab;
 
     [Header("When to Spawn")]
-    [SerializeField, Range(0f, 1f)]
-    private float startProgress = 0.6f;
+    [SerializeField]
+    [Tooltip("Vertical distance climbed from the player's starting height before falling cobras can spawn; u")]
+    private float startClimbHeightU = 60f;
 
-    [SerializeField] private float spawnIntervalS = 8f;
+    [SerializeField] private float initialSpawnIntervalS = 8f;
+    [SerializeField] private float minSpawnIntervalS = 4f;
+    [SerializeField]
+    [Tooltip("Additional climb after falling cobras unlock before the minimum spawn interval is reached; u")]
+    private float climbDistanceToMinIntervalU = 200f;
     [SerializeField] private float retryIntervalS = 1f;
 
     [Header("Branch Selection")]
@@ -19,6 +24,9 @@ public class FallingCobraSpawner: MonoBehaviour {
 
     private Transform player;
     private FallingCobra activeCobra;
+    private float playerStartY;
+    private float highestClimbHeightU;
+    private bool spawningUnlocked;
     private float nextSpawnTime;
 
     private void Awake() {
@@ -36,6 +44,7 @@ public class FallingCobraSpawner: MonoBehaviour {
             GameObject.FindGameObjectWithTag("Player");
         if (playerObject != null) {
             player = playerObject.transform;
+            playerStartY = player.position.y;
         } else {
             Debug.LogError(
                 "FallingCobraSpawner:\tPlayer not found",
@@ -49,18 +58,22 @@ public class FallingCobraSpawner: MonoBehaviour {
             player == null
             || TreeManager.I == null
             || fallingCobraPrefab == null
-            || activeCobra != null
-            || Time.time < nextSpawnTime
         ) {
             return;
         }
 
-        float progress = Mathf.InverseLerp(
-            TreeManager.I.MinY,
-            TreeManager.I.MaxY,
-            player.position.y
+        highestClimbHeightU = Mathf.Max(
+            highestClimbHeightU,
+            player.position.y - playerStartY
         );
-        if (progress < startProgress) {
+        if (!spawningUnlocked) {
+            if (highestClimbHeightU < startClimbHeightU) {
+                return;
+            }
+            spawningUnlocked = true;
+        }
+
+        if (activeCobra != null || Time.time < nextSpawnTime) {
             return;
         }
 
@@ -74,7 +87,17 @@ public class FallingCobraSpawner: MonoBehaviour {
             spawnPosition,
             Quaternion.identity
         );
-        nextSpawnTime = Time.time + spawnIntervalS;
+        float climbAfterUnlockU =
+            highestClimbHeightU - startClimbHeightU;
+        float difficulty = Mathf.Clamp01(
+            climbAfterUnlockU / climbDistanceToMinIntervalU
+        );
+        float currentIntervalS = Mathf.Lerp(
+            initialSpawnIntervalS,
+            minSpawnIntervalS,
+            difficulty
+        );
+        nextSpawnTime = Time.time + currentIntervalS;
     }
 
     private bool TryFindBranchSpawn(out Vector3 spawnPosition) {
@@ -136,7 +159,16 @@ public class FallingCobraSpawner: MonoBehaviour {
     }
 
     private void OnValidate() {
-        spawnIntervalS = Mathf.Max(0f, spawnIntervalS);
+        startClimbHeightU = Mathf.Max(0f, startClimbHeightU);
+        initialSpawnIntervalS =
+            Mathf.Max(0.1f, initialSpawnIntervalS);
+        minSpawnIntervalS = Mathf.Clamp(
+            minSpawnIntervalS,
+            0.1f,
+            initialSpawnIntervalS
+        );
+        climbDistanceToMinIntervalU =
+            Mathf.Max(0.1f, climbDistanceToMinIntervalU);
         retryIntervalS = Mathf.Max(0.1f, retryIntervalS);
         minBranchAbovePlayerU =
             Mathf.Max(0f, minBranchAbovePlayerU);
