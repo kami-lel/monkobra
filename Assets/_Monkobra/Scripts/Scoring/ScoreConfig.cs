@@ -7,11 +7,9 @@ public class ScoreConfig: ScriptableObject {
     public float UnitsPerMeter => Mathf.Max(0.001f, unitsPerMeter);
 
     [SerializeField, Min(0)]
-    [Tooltip("Points for each complete new meter above the run's starting height.")]
     private int pointsPerMeter = 1;
 
     [SerializeField, Min(0.001f)]
-    [Tooltip("Unity world units in one meter. Leave at 1 for a 1:1 scale.")]
     private float unitsPerMeter = 1f;
 
     private void OnValidate() {
