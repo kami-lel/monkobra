@@ -28,8 +28,16 @@ Banana grabbing and stamina balancing.
 
 ## Mechanics
 
-- Movement and Climb: free up-down and around-the-tree movement, with stamina spent on every climb
+- Movement and Climb: free up-down and around-the-tree movement, with stamina spent on every climb and, at a lower rate, on every step around the trunk
 - Cobra Chase: a cobra tangles up the trunk from the bottom of the screen, and touching it ends the run
 - Branch Collision: hitting a branch shakes the camera, drops the monkey, and briefly takes away control
 - Banana Grab: hold-and-release timing sets how far the arm stretches, and a clean grab restores stamina
-- Stamina Bar: drains over time and is topped up only by grabbing bananas
+- Stamina Bar: drains over time and with movement, topped up only by grabbing bananas
+
+## Getting Started
+
+Open the repository folder through Unity Hub with Editor `6000.3.22f1` (Unity 6, URP), then open `Lv1Scene` and press Play. The game also runs in the browser from the committed WebGL export in `Monkobra/`, served by GitHub Pages.
+
+## Contributing
+
+Agent rules and the WebGL export steps are in [AGENTS.md](AGENTS.md), the system map and known gaps in [CONTEXT.md](CONTEXT.md), and version history in [CHANGELOG.md](CHANGELOG.md).
