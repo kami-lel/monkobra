@@ -1,24 +1,42 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 /// <summary>
 /// Sits on the "FruitCollider" object of a banana. Listens to
-/// <see cref="UpwardFruitDetection.GrabbableFruitChanged"/> and, while a
-/// hand overlaps this fruit (release grabs it), adds the outline material as
-/// an extra slot on every child mesh renderer.
+/// <see cref="UpwardFruitDetection"/> and outlines every child mesh renderer
+/// in 1 of 2 tiers, grabbable winning over reachable:
+/// <list type="bullet">
+/// <item>reachable: the fruit sits in a detection zone</item>
+/// <item>grabbable: a hand overlaps the fruit, so a release grabs it</item>
+/// </list>
+/// The outline is an extra material slot, added only while a tier applies.
 /// </summary>
 public class FruitOutlineListener: MonoBehaviour {
     // Inspector Fields  #######################################################
+    [Header("Outline Materials")]
     [SerializeField]
-    [Tooltip("outline material; extra slot on fruit meshes while grabbable")]
-    private Material outlineMat;
+    [Tooltip("outline while fruit sits in a detection zone")]
+    private Material reachableOutlineMat;
+
+    [FormerlySerializedAs("outlineMat")]
+    [SerializeField]
+    [Tooltip("outline while a hand overlaps fruit; release grabs it")]
+    private Material grabbableOutlineMat;
 
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
         // Inspector Assignment Guard  -----------------------------------------
-        if (outlineMat == null) {
+        if (reachableOutlineMat == null) {
             Debug.LogWarning(
                 "FruitOutlineListener:\t"
-                    + "must assign Inspector Field: outlineMat",
+                    + "must assign Inspector Field: reachableOutlineMat",
+                this
+            );
+        }
+        if (grabbableOutlineMat == null) {
+            Debug.LogWarning(
+                "FruitOutlineListener:\t"
+                    + "must assign Inspector Field: grabbableOutlineMat",
                 this
             );
         }
@@ -33,14 +51,16 @@ public class FruitOutlineListener: MonoBehaviour {
 
         meshes = GetComponentsInChildren<MeshRenderer>(true);
         plainMats = new Material[meshes.Length][];
-        outlinedMats = new Material[meshes.Length][];
+        reachableMats = new Material[meshes.Length][];
+        grabbableMats = new Material[meshes.Length][];
         for (int i = 0; i < meshes.Length; i++) {
             // keep slot 0 only, so a leftover outline slot never sticks
             Material baseMat = meshes[i].sharedMaterials[0];
             plainMats[i] = new Material[] { baseMat };
-            outlinedMats[i] = new Material[] { baseMat, outlineMat };
+            reachableMats[i] = BuildMats(baseMat, reachableOutlineMat);
+            grabbableMats[i] = BuildMats(baseMat, grabbableOutlineMat);
         }
-        SetOutlined(false);
+        ApplyOutline();
     }
 
     // read in Start, so Awake order never matters
@@ -55,44 +75,77 @@ public class FruitOutlineListener: MonoBehaviour {
             return;
         }
 
+        detection.FruitReachChanged += OnFruitReachChanged;
         detection.GrabbableFruitChanged += OnGrabbableFruitChanged;
-        SetOutlined(detection.GrabbableFruit == fruitCollider);
+        isReachable = detection.IsFruitInReach(fruitCollider);
+        isGrabbable = detection.GrabbableFruit == fruitCollider;
+        ApplyOutline();
     }
 
     private void OnDestroy() {
-        if (UpwardFruitDetection.I != null) {
-            UpwardFruitDetection.I.GrabbableFruitChanged -=
-                OnGrabbableFruitChanged;
+        UpwardFruitDetection detection = UpwardFruitDetection.I;
+        if (detection != null) {
+            detection.FruitReachChanged -= OnFruitReachChanged;
+            detection.GrabbableFruitChanged -= OnGrabbableFruitChanged;
         }
     }
 
     // Event Handlers  #########################################################
+    private void OnFruitReachChanged(Collider fruit, bool isInReach) {
+        if (fruit != fruitCollider) {
+            return;
+        }
+
+        isReachable = isInReach;
+        ApplyOutline();
+    }
+
     private void OnGrabbableFruitChanged(Collider previous, Collider current) {
         if (current == fruitCollider) {
-            SetOutlined(true);
+            isGrabbable = true;
         } else if (previous == fruitCollider) {
-            SetOutlined(false);
+            isGrabbable = false;
+        } else {
+            return;
         }
+        ApplyOutline();
     }
 
     // private members  ########################################################
+    private bool isReachable;
+    private bool isGrabbable;
+
+    // cached references  ------------------------------------------------------
     private Collider fruitCollider;
     private MeshRenderer[] meshes;
+
+    // per mesh: slot 0 alone, or slot 0 plus a tier's outline
     private Material[][] plainMats;
-    private Material[][] outlinedMats;
+    private Material[][] reachableMats;
+    private Material[][] grabbableMats;
 
     // private methods  ########################################################
-    private void SetOutlined(bool isOutlined) {
-        // w/o outlineMat still strip the slot, never show a null material
-        bool showOutline = isOutlined && outlineMat != null;
+    // w/o an outline material the tier falls back to plain, never a null slot
+    private static Material[] BuildMats(Material baseMat, Material outlineMat) {
+        return outlineMat != null
+            ? new Material[] { baseMat, outlineMat }
+            : new Material[] { baseMat };
+    }
+
+    // grabbable beats reachable beats none
+    private void ApplyOutline() {
+        Material[][] tierMats =
+            isGrabbable ? grabbableMats
+            : isReachable ? reachableMats
+            : plainMats;
         for (int i = 0; i < meshes.Length; i++) {
-            meshes[i].sharedMaterials =
-                showOutline ? outlinedMats[i] : plainMats[i];
+            meshes[i].sharedMaterials = tierMats[i];
         }
 
         if (Debug.isDebugBuild) {
             Debug.Log(
-                $"FruitOutlineListener:\t{name} outlined: {isOutlined}",
+                $"FruitOutlineListener:\t{name} reachable: {isReachable}, "
+                    + $"grabbable: {isGrabbable}",
                 this
             );
         }
