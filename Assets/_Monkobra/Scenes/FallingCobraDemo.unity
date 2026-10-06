@@ -164,8 +164,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FallingCobraSpawner
   fallingCobraPrefab: {fileID: -3548897315033333001, guid: b60be837c54dfb545b11b9dd5e789cbb, type: 3}
-  startProgress: 0.6
-  spawnIntervalS: 8
+  startClimbHeightU: 60
+  initialSpawnIntervalS: 8
+  minSpawnIntervalS: 4
+  climbDistanceToMinIntervalU: 200
   retryIntervalS: 1
   minBranchAbovePlayerU: 4
   maxBranchAbovePlayerU: 9

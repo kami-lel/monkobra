@@ -1835,9 +1835,10 @@ GameObject:
   - component: {fileID: 6879723084753770433}
   - component: {fileID: 3325996933886592633}
   - component: {fileID: -3548897315033333001}
+  - component: {fileID: 3902953696277176351}
   m_Layer: 0
   m_Name: FallingCobra
-  m_TagString: Untagged
+  m_TagString: Branch
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1919,7 +1920,31 @@ MonoBehaviour:
   warningDurationS: 1.25
   fallSpeedU: 6
   segmentSpacingU: 0.35
+  hitRadiusU: 0.5
   despawnBelowPlayerU: 5
+--- !u!136 &3902953696277176351
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7203183000418505870}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &7886616681692154815
 GameObject:
   m_ObjectHideFlags: 0

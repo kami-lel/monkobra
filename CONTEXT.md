@@ -32,7 +32,7 @@ monkobra/
 ├── CHANGELOG.md       version history, plus open triage tags in a comment
 ├── Assets/
 │   ├── _Monkobra/     all authored assets, <Type>/<Module>/<asset>
-│   │   ├── Scenes/    Lv1Scene (main), CobraDemo (standalone cobra test)
+│   │   ├── Scenes/    Lv1Scene (main), CobraDemo, FallingCobraDemo (tests)
 │   │   ├── Scripts/   Cobra/, Environment/, Player/, UI/, GameController, GameConfig
 │   │   ├── Prefabs/   Monkey, Environment/ (tree, branch), UI/StaminaBar
 │   │   ├── Material/  Environment/, Player/
@@ -54,6 +54,7 @@ The repository root is the Unity project root. `Library/`, `Temp/`, `Logs/`, `Us
 | Tree | stack of static and dynamic trunk segments under a `TreeTop`, each dynamic segment decorated with branches | implemented, finite height |
 | Branch hit | camera shake, then stun (input ignored) while the monkey drops a set distance, all tuned in `MonkeyConfig` | implemented |
 | Cobra | orbits and climbs the trunk on its own, trigger contact calls `GameController.LoseGame` | implemented |
+| Falling cobra | in `FallingCobraDemo`, unlocks after a configured climb distance from the monkey's starting height, then periodically spawns from a nearby branch above the player, flashes a warning, and falls; its single `Branch` trigger causes the existing camera shake, stun and drop instead of ending the run | demo only; not in `Lv1Scene` |
 | Stamina | `StaminaBar` slider drains on a timer and by movement (`MonkeyPrefabRoot` calls `DrainByMovement` each step: climbing costs most, orbiting less, descending and the stun fall nothing), `AddStaminaByFruit` restores a fixed amount, budget, rates and fruit restore come from `GameConfig` | grabs restore it, not yet tied to hits |
 | Grab | hold the interact action: camera swaps to a side view and the arm stretches toward the newest fruit at `ReachExtendSpeedU`; release grabs it iff the hand collider overlaps the fruit at that instant, else a miss (too short, or stretched past it) | grab implemented, the fruit is switched off and `ArmRoot` calls `StaminaBar.I.AddStaminaByFruit` |
 | Win, lose | `GameController.WinGame` and `LoseGame` end the run once: `ScreensManager` shows the win or lose panel and time freezes. Triggers: win zone (`WinZoneHandler`, `MonkeyPrefabRoot`), cobra contact, stamina at 0 | implemented |
@@ -96,6 +97,8 @@ All under `Assets/_Monkobra/Scripts/`.
 | `Player/CameraRigManager` | swaps behind, look-left, look-right cameras by Cinemachine priority |
 | `Cobra/CobraClimb` | spiral path around `pathCenter`, body segments trail the head |
 | `Cobra/CobraCollisions` | trigger enter calls `GameController.LoseGame` |
+| `Cobra/FallingCobraSpawner` | in `FallingCobraDemo`, permanently unlocks after the monkey climbs a configured distance above its starting height; tracks peak climb so spawn intervals gradually shorten to a configured floor even if the monkey later falls, while spawning one cobra at a time from a nearby branch above the player |
+| `Cobra/FallingCobra` | flashes before falling; disables segment colliders and uses one capsule trigger tagged `Branch` so `HitBranchDetection` applies the existing drop penalty once |
 | `UI/StaminaBar` | singleton (`I`), slider drained on a timer and by `DrainByMovement`, loses the game at 0, `AddStaminaByFruit` restores it on a grab |
 | `Environment/WinZoneHandler` | win-zone trigger, calls `GameController.WinGame` on the player |
 | `UI/ScreensManager` | singleton (`I`), shows the win or lose panel |
@@ -118,9 +121,9 @@ All under `Assets/_Monkobra/Scripts/`.
 
 - No tests or run commands exist: verification means opening `Lv1Scene` in the Editor
 - Stamina drains on a timer and by movement, but is not linked to branch hits
-- `CobraDemo` scene remains next to `Lv1Scene`
+- `CobraDemo` and `FallingCobraDemo` are separate test scenes; the falling cobra is not yet placed in `Lv1Scene`
 - The tree is finite (`TreeManager` min and max y), not the endless tree of the pitch
-- Difficulty does not scale with distance yet, apart from branch count per segment
+- Branch count per segment and falling-cobra spawn frequency scale with climb distance in their respective scenes; broader difficulty scaling is not yet implemented
 - The prototype's WebGL link, gameplay video, and contributions belong to a different team's submission and do not describe this repository
 
 ## Living Document Maintenance
