@@ -262,6 +262,7 @@ public class ArmRoot: MonoBehaviour {
                 joint.zMotion = reachZMotion;
             }
             DriveReach();
+            UpdateGrabbableFruit();
         } else {
             if (joint.zMotion != ConfigurableJointMotion.Locked) {
                 joint.zMotion = ConfigurableJointMotion.Locked;
@@ -334,6 +335,7 @@ public class ArmRoot: MonoBehaviour {
     // Private Members  ########################################################
     private bool isReaching;
     private Collider reachFruit; // fruit the reach aims at
+    private Collider reportedFruit; // fruit this arm reported as grabbable
     private float reachExtensionU; // commanded extension while held; u
     private float cyclePhase; // 0..1, advances only while moving
     private float restLengthU;
@@ -427,11 +429,39 @@ public class ArmRoot: MonoBehaviour {
         isReaching = false;
         reachFruit = null;
         reachExtensionU = 0f;
+        ReportGrabbableFruit(null);
+    }
+
+    // cue for the outline: hand overlaps the aimed fruit, so a release grabs
+    private void UpdateGrabbableFruit() {
+        bool isOnFruit =
+            reachFruit != null
+            && reachFruit.gameObject.activeInHierarchy
+            && IsHandOnFruit(reachFruit);
+        ReportGrabbableFruit(isOnFruit ? reachFruit : null);
+    }
+
+    // tell the detection singleton only on change, and only what this arm set
+    private void ReportGrabbableFruit(Collider fruit) {
+        if (fruit == reportedFruit) {
+            return;
+        }
+        reportedFruit = fruit;
+
+        UpwardFruitDetection fruitDetection = UpwardFruitDetection.I;
+        if (fruitDetection != null) {
+            fruitDetection.SetGrabbableFruit(fruit);
+        }
     }
 
     // grab the aimed fruit iff the hand overlaps it now: switch it off and
     // drop it from detection. Too short or past it, no overlap, no grab
-    private void TryGrabFruit() {
+    private void TryGrabFruit() 
+    {
+        if (Time.timeScale <= 0f
+            || (GameController.I != null && GameController.I.IsGameOver)) {
+            return;
+        }//暂停或游戏结束后，不再摘水果
         if (!isReaching || reachFruit == null) {
             return;
         }
@@ -456,12 +486,26 @@ public class ArmRoot: MonoBehaviour {
             }
             return;
         }
-
-        fruit.gameObject.SetActive(false);
+        //成功摘到后，交给 ScorePickup 处理
+        ScorePickup pickup = fruit.GetComponentInParent<ScorePickup>();
+        if (pickup != null) {
+            if (!pickup.TryCollect()) {
+                return;
+            }
+        } else {
+            // Existing fruit without a score component keeps its old behavior.
+            fruit.gameObject.SetActive(false);
+        }
         // a disabled collider may never raise its trigger exit
         UpwardFruitDetection fruitDetection = UpwardFruitDetection.I;
         if (fruitDetection != null) {
-            fruitDetection.RemoveFruit(fruit);
+            if (pickup != null) {
+                foreach (Collider part in pickup.GetComponentsInChildren<Collider>(true)) {
+                    fruitDetection.RemoveFruit(part);
+                }
+            } else {
+                fruitDetection.RemoveFruit(fruit);
+            }//一个水果即使有多个碰撞体，摘掉后也会一起从检测列表移除，避免留下已经不存在的目标
         }
 
         StaminaBar staminaBar = StaminaBar.I;
