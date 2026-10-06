@@ -1,7 +1,6 @@
 using TMPro;
 using UnityEngine;
 
-/// <summary>Event-driven HUD or result text; result panels refresh on enable.</summary>
 [RequireComponent(typeof(TMP_Text))]
 public class ScoreDisplay: MonoBehaviour {
     [SerializeField]

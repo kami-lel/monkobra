@@ -1,10 +1,6 @@
 using System;
 using UnityEngine;
-
-/// <summary>
-/// Scene-scoped run score. Only new maximum height earns distance points;
-/// falling and re-climbing cannot farm points. Reload the scene for a new run.
-/// </summary>
+//记录高度分和奖励分，在分数变化时通知 UI，并在游戏结束后停止计分
 public class ScoreManager: MonoBehaviour {
     public static ScoreManager I { get; private set; }
     public long TotalScore => DistanceScore + RewardScore;
@@ -14,24 +10,17 @@ public class ScoreManager: MonoBehaviour {
     public bool IsRunEnded => isRunEnded;
     public event Action<long> ScoreChanged;
 
-    public bool CanScore => isActiveAndEnabled && hasStarted && !isRunEnded
-        && Time.timeScale > 0f
-        && (GameController.I == null || !GameController.I.IsGameOver);
-
-    [Header("Wiring")]
+    public bool CanScore => isActiveAndEnabled && hasStarted && !isRunEnded && Time.timeScale > 0f && (GameController.I == null || !GameController.I.IsGameOver);
+    //必须满足：组件启用、已经开局、尚未结束、没有暂停，才允许计分
     [SerializeField]
     private ScoreConfig config;
 
     [SerializeField]
-    [Tooltip("Monkey root, not a hand, the camera, or the moving tree.")]
     private Transform player;
-
-    /// <summary>
-    /// Future reward sources can call this after validating their own event.
-    /// The caller owns deduplication; fruit uses ScorePickup for this.
-    /// </summary>
-    public bool TryAddReward(ScoreReward reward) {
-        if (!CanScore || reward == null) {
+    //添加水果等奖励分
+    public bool AddReward(ScoreReward reward) {
+        if (!CanScore || reward == null) 
+        {
             return false;
         }
 
@@ -41,22 +30,15 @@ public class ScoreManager: MonoBehaviour {
         return true;
     }
 
-    /// <summary>Capture the final physical height, then freeze scoring.</summary>
     public void EndRun() {
-        if (!hasStarted || isRunEnded) {
+        if (!hasStarted || isRunEnded) 
+        {
             return;
         }
-        // Lock before publishing so event listeners cannot add a late reward.
         isRunEnded = true;
         SampleHeight();
     }
 
-    /// <summary>
-    /// If an endless-world system later shifts the PLAYER by a world Y delta,
-    /// call this with that same delta in the same operation, before scoring.
-    /// Example: player/world move down 1000 units => pass -1000.
-    /// Do not call it when only recycling tree segments.
-    /// </summary>
     public void ApplyWorldOriginShift(float worldDeltaY) {
         if (hasStarted && !float.IsNaN(worldDeltaY)
             && !float.IsInfinity(worldDeltaY)) {
@@ -80,7 +62,6 @@ public class ScoreManager: MonoBehaviour {
     }
 
     private void Start() {
-        // All scene Awake methods have run; the player's spawn pose is ready.
         pointsPerMeter = config.PointsPerMeter;
         unitsPerMeter = config.UnitsPerMeter;
         startY = ReadPlayerY();
@@ -91,10 +72,8 @@ public class ScoreManager: MonoBehaviour {
         hasStarted = true;
         ScoreChanged?.Invoke(TotalScore);
     }
-
+    //读取计分设置，记录出生高度，把分数和最高爬升距离清零
     private void FixedUpdate() {
-        // Observe each completed physics step, including frames with several
-        // physics steps. Rigidbody.position avoids render interpolation lag.
         if (CanScore) {
             SampleHeight();
         }
@@ -129,6 +108,7 @@ public class ScoreManager: MonoBehaviour {
             return;
         }
         double climbedUnits = (double)ReadPlayerY() - startY;
+        //如果数值无效，或者没超过之前的最高高度，就直接退出。不能刷分
         if (double.IsNaN(climbedUnits) || double.IsInfinity(climbedUnits)
             || climbedUnits <= highestClimbedUnits) {
             return;
@@ -137,6 +117,7 @@ public class ScoreManager: MonoBehaviour {
         long oldScore = TotalScore;
         highestClimbedUnits = climbedUnits;
         double points = Math.Floor(HighestClimbedMeters) * pointsPerMeter;
+        //高度分 = 最高爬升米数向下取整 × 每米分值
         long available = long.MaxValue - RewardScore;
         DistanceScore = points >= available ? available : (long)points;
         NotifyIfChanged(oldScore);
@@ -145,6 +126,6 @@ public class ScoreManager: MonoBehaviour {
     private void NotifyIfChanged(long oldScore) {
         if (TotalScore != oldScore) {
             ScoreChanged?.Invoke(TotalScore);
-        }
+        }//通知 UI
     }
 }
