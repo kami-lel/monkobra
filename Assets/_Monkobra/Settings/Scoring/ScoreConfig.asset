@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: ScoreConfig
   m_EditorClassIdentifier: Assembly-CSharp::ScoreConfig
   pointsPerMeter: 1
-  unitsPerMeter: 1
+  unitsPerMeter: 0.1

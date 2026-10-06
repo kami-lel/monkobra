@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bd3b381e7424b758f158a871a76e51a, type: 3}
   m_Name: BananaScore
   m_EditorClassIdentifier: Assembly-CSharp::ScoreReward
-  points: 5
+  points: 100
