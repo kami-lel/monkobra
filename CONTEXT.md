@@ -1,5 +1,15 @@
 # Monkobra CONTEXT
 
+Descriptive knowledge of this repository for agents and developers.
+
+- Belongs Here: what the system is, ie architecture, domain model, API surface, patterns, known gaps; only what the code cannot show, as it stands, never its history
+- Size: stay lean for the context window; when the file grows, move detail to `docs/` or cut it
+- Upkeep: update in the same change that moves architecture, patterns, commands, or environment variables
+- Structure: follow the existing sections; keep every statement true for every contributor
+- Belongs in `AGENTS.md`: prescriptive rules for agents, ie commands, conventions, constraints, do/don't
+- Belongs in `docs/`: system documentation for users and agents alike; link it from here, never grow this file to hold it
+- Local Layer: put machine-specific or personal context in `CONTEXT.local.md`; create it if missing, never commit it
+
 ## Project Overview
 
 Monkobra is a 3D vertical upward-scrolling game: a monkey climbs a tall tree, chased by a cobra, and grabs bananas to restore stamina. It descends from a paired prototype (`kami-lel/usc-csci-526-paired-prototype`).
@@ -85,7 +95,8 @@ All under `Assets/_Monkobra/Scripts/`.
 | `Player/ArmRoot` | one arm's Rigidbody and `ConfigurableJoint`, sitting at the hand end: climbs a stroke cycle on move input, or on interact locks its aim at the newest fruit and stretches out, grabbing on release iff the hand overlaps the fruit. Reports the hand's live contacts. Writes only the joint's drive targets, never its configuration |
 | `Player/MonkeyConfig` | ScriptableObject of all shared monkey tuning: arm stroke, reach speed, climb and orbit speeds, branch-hit stun, and the move and interact actions the body and arms read |
 | `Player/HitBranchDetection` | trigger on tag `Branch`, raises `BranchHit`, fires the camera impulse |
-| `Player/UpwardFruitDetection` | singleton (`I`), `ReachForLeft` and `ReachForRight` from tag `FruitCollider` overlaps |
+| `Player/UpwardFruitDetection` | singleton (`I`), `ReachForLeft` and `ReachForRight` from tag `FruitCollider` overlaps, plus the `FruitReachChanged` event and `IsFruitInReach` (fruit in either zone), and `GrabbableFruit` (the fruit a hand overlaps, set by `ArmRoot`) with its `GrabbableFruitChanged` event |
+| `Environment/FruitOutlineListener` | on a banana's `FruitCollider` object: outlines its child meshes in 2 tiers by adding an outline material slot, reachable while the fruit sits in a detection zone and grabbable (wins) while a hand overlaps it so a release would grab it. Both materials use `Shaders/Environment/FruitOutline`, an inverted-hull Shader Graph |
 | `Player/DetectionZone` | side-tagged trigger volume that forwards enter and exit events |
 | `Player/CameraRigManager` | swaps behind, look-left, look-right cameras by Cinemachine priority |
 | `Cobra/CobraClimb` | spiral path around `pathCenter`, body segments trail the head |
@@ -125,4 +136,4 @@ All under `Assets/_Monkobra/Scripts/`.
 
 ## Living Document Maintenance
 
-Update this file in the same change that adds entities, systems, or mechanics, or shifts boundaries or workflows. The assistant that made the change writes the update as its final step, and the file stays on the pull-request checklist.
+A stale briefing is worse than none. Update this file in the same pull request that adds entities, systems, or mechanics, or shifts patterns, boundaries, or workflows. The assistant that made the change writes the update as its final step, and the file stays on the pull-request checklist.
