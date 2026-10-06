@@ -122,7 +122,7 @@ All under `Assets/_Monkobra/Scripts/`.
 | `Scoring/ScorePickup` | on a fruit: `TryCollect` hands its `ScoreReward` to `ScoreManager` once and switches the fruit off |
 | `Scoring/ScoreReward` | ScriptableObject of one pickup's points. Asset at `Settings/Scoring/BananaScore.asset` |
 | `UI/ScoreDisplay` | TMP label showing `ScoreManager`'s total with a prefix, on the HUD and on each end panel |
-| `Editor/WebDemoMergeTool` | menu `Monkobra/Merge WebDemo Into Lv1Scene`: copies WebDemo's `SpiderWebSpawner` and `Canvas/SpiderWebPrompt` into Lv1Scene, rewires and verifies every field, saves Lv1Scene only, a no-op once merged |
+
 
 ## Patterns & Conventions
 
