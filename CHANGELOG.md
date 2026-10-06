@@ -1,8 +1,6 @@
 # Monkobra CHANGELOG
 
 <!--
-Todo Outline
-
 todo audio BGM
 todo audio SFX
 fixme cobra done as pool
