@@ -18,7 +18,7 @@ public class ScoreManager: MonoBehaviour {
     [SerializeField]
     private Transform player;
     //添加水果等奖励分
-    public bool AddReward(ScoreReward reward) {
+    public bool TryAddReward(ScoreReward reward) {
         if (!CanScore || reward == null) 
         {
             return false;
