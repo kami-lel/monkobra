@@ -1727,7 +1727,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 593574277}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e6ae36fedd2504b6ea10582ae7f7267a, type: 3}
   m_Name: 
@@ -1771,11 +1771,64 @@ MonoBehaviour:
   climbSpeed: 3
   orbitSpeedDegrees: 45
   clockwise: 1
-  segmentAngleSpacing: 7
-  segmentHeightSpacing: 0.1
-  limitToPlayerHeight: 1
+  coilTurns: 1.1
+  coilPitchU: 1.5
+  maxSegmentGapU: 0.4
+  maxThicknessU: 0.6
+  thicknessProfile:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.8
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.05
+      value: 0.6
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.3
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0.15
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  segmentFill: 0.8
+  headLengthU: 0.9
+  headWidthRatio: 1.5
+  neckLengthU: 2
+  neckLiftU: 0.8
+  waveAmplitudeU: 0.12
+  waveLengthU: 2.5
+  waveSpeedHz: 1
+  eyeSizeU: 0.14
+  slowNearPlayer: 1
   slowDownDistance: 2
-  minimumHeightGap: 0
+  minimumSpeedShare: 0.3
 --- !u!54 &593574280
 Rigidbody:
   m_ObjectHideFlags: 0
