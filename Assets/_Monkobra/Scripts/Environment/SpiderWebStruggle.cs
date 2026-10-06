@@ -57,6 +57,7 @@ public class SpiderWebStruggle: MonoBehaviour {
             || !isActiveAndEnabled
             || isTrapped
             || IsProtected
+            || IsGameHalted
             || monkeyRoot == null
         ) {
             return false;
@@ -162,8 +163,8 @@ public class SpiderWebStruggle: MonoBehaviour {
     }
 
     private void Update() {
-        // game over freezes time, the struggle freezes with it
-        if (Time.timeScale <= 0f) {
+        // paused or game over, the struggle freezes with the game
+        if (IsGameHalted) {
             return;
         }
 
@@ -187,7 +188,7 @@ public class SpiderWebStruggle: MonoBehaviour {
 
     // Event Handlers  #########################################################
     private void OnEscapePerformed(InputAction.CallbackContext context) {
-        if (!isTrapped || Time.timeScale <= 0f) {
+        if (!isTrapped || IsGameHalted) {
             return;
         }
 
@@ -211,6 +212,12 @@ public class SpiderWebStruggle: MonoBehaviour {
 
     private InputActionReference InteractAction =>
         monkeyConfig != null ? monkeyConfig.InteractAction : null;
+
+    // frozen time also covers a pause; game over is checked on its own too,
+    // so the struggle stays stopped even if a game over keeps time running
+    private static bool IsGameHalted =>
+        Time.timeScale <= 0f
+        || (GameController.I != null && GameController.I.IsGameOver);
 
     // cached references  ------------------------------------------------------
     private MonkeyPrefabRoot monkeyRoot;

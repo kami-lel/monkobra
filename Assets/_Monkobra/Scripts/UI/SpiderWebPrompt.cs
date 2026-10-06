@@ -6,7 +6,7 @@ using UnityEngine.UI;
 /// Screen-space UI for the spider web trap, driven by the monkey's
 /// <see cref="SpiderWebStruggle"/> events. The first trap since the scene
 /// loaded shows the prompt text and the progress bar, later traps show the
-/// bar only, and breaking free hides both.
+/// bar only, and breaking free or the game ending hides both.
 /// <para>
 /// Put it on an always-active Canvas child: it only toggles the text and bar
 /// objects, so its event subscriptions live on while those are hidden.
@@ -88,6 +88,18 @@ public class SpiderWebPrompt: MonoBehaviour {
         }
     }
 
+    // the cobra can end the game on a held monkey, no Escaped follows, and
+    // the hint would show through the half-transparent end panel
+    private void Update() {
+        if (
+            isVisible
+            && GameController.I != null
+            && GameController.I.IsGameOver
+        ) {
+            SetVisible(showPrompt: false, showBar: false);
+        }
+    }
+
     // Event Handlers  #########################################################
     private void OnTrapped(bool isFirstTrap) {
         SetFill(0f);
@@ -101,6 +113,9 @@ public class SpiderWebPrompt: MonoBehaviour {
     private void OnEscaped() {
         SetVisible(showPrompt: false, showBar: false);
     }
+
+    // private members  ########################################################
+    private bool isVisible; // text or bar shown right now
 
     // private methods  ########################################################
     // a Filled Image without a sprite draws a plain full quad and ignores
@@ -131,6 +146,7 @@ public class SpiderWebPrompt: MonoBehaviour {
     }
 
     private void SetVisible(bool showPrompt, bool showBar) {
+        isVisible = showPrompt || showBar;
         if (promptLabel != null) {
             promptLabel.gameObject.SetActive(showPrompt);
         }

@@ -10,7 +10,7 @@ fixme cobra done as pool
 
 ### Added
 
-- Spider web trap in `WebDemo`: webs spawn on the upper trunk clear of branches and fruit, hold the monkey on contact, and break on rapid Space presses, with a first-trap hint, an escape bar, and a short immunity after escaping
+- Spider web trap in `Lv1Scene`, also in the `WebDemo` test scene: webs spawn on the upper trunk clear of branches and fruit, hold the monkey on contact, and break on rapid Space presses, with a first-trap hint and an escape bar that hide on escape or game over, and a short immunity after escaping
 
 ### Changed
 
