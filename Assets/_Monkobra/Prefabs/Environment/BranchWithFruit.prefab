@@ -298,7 +298,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12c0feacc62a4ef4985699b49063ddf4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FruitOutlineListener
-  outlineMat: {fileID: 2100000, guid: 479ffb9af65a079419b366a4f48fc413, type: 2}
+  reachableOutlineMat: {fileID: 2100000, guid: 1e8d8a8ab1047f04b814065e9a51c55e, type: 2}
+  grabbableOutlineMat: {fileID: 2100000, guid: 479ffb9af65a079419b366a4f48fc413, type: 2}
 --- !u!1 &2686832758968347058
 GameObject:
   m_ObjectHideFlags: 0
