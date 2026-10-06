@@ -262,6 +262,7 @@ public class ArmRoot: MonoBehaviour {
                 joint.zMotion = reachZMotion;
             }
             DriveReach();
+            UpdateGrabbableFruit();
         } else {
             if (joint.zMotion != ConfigurableJointMotion.Locked) {
                 joint.zMotion = ConfigurableJointMotion.Locked;
@@ -334,6 +335,7 @@ public class ArmRoot: MonoBehaviour {
     // Private Members  ########################################################
     private bool isReaching;
     private Collider reachFruit; // fruit the reach aims at
+    private Collider reportedFruit; // fruit this arm reported as grabbable
     private float reachExtensionU; // commanded extension while held; u
     private float cyclePhase; // 0..1, advances only while moving
     private float restLengthU;
@@ -427,6 +429,29 @@ public class ArmRoot: MonoBehaviour {
         isReaching = false;
         reachFruit = null;
         reachExtensionU = 0f;
+        ReportGrabbableFruit(null);
+    }
+
+    // cue for the outline: hand overlaps the aimed fruit, so a release grabs
+    private void UpdateGrabbableFruit() {
+        bool isOnFruit =
+            reachFruit != null
+            && reachFruit.gameObject.activeInHierarchy
+            && IsHandOnFruit(reachFruit);
+        ReportGrabbableFruit(isOnFruit ? reachFruit : null);
+    }
+
+    // tell the detection singleton only on change, and only what this arm set
+    private void ReportGrabbableFruit(Collider fruit) {
+        if (fruit == reportedFruit) {
+            return;
+        }
+        reportedFruit = fruit;
+
+        UpwardFruitDetection fruitDetection = UpwardFruitDetection.I;
+        if (fruitDetection != null) {
+            fruitDetection.SetGrabbableFruit(fruit);
+        }
     }
 
     // grab the aimed fruit iff the hand overlaps it now: switch it off and
