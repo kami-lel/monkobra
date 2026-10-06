@@ -90,7 +90,8 @@ All under `Assets/_Monkobra/Scripts/`.
 | `Player/ArmRoot` | one arm's Rigidbody and `ConfigurableJoint`, sitting at the hand end: climbs a stroke cycle on move input, or on interact locks its aim at the newest fruit and stretches out, grabbing on release iff the hand overlaps the fruit. Reports the hand's live contacts. Writes only the joint's drive targets, never its configuration |
 | `Player/MonkeyConfig` | ScriptableObject of all shared monkey tuning: arm stroke, reach speed, climb and orbit speeds, branch-hit stun, and the move and interact actions the body and arms read |
 | `Player/HitBranchDetection` | trigger on tag `Branch`, raises `BranchHit`, fires the camera impulse |
-| `Player/UpwardFruitDetection` | singleton (`I`), `ReachForLeft` and `ReachForRight` from tag `FruitCollider` overlaps |
+| `Player/UpwardFruitDetection` | singleton (`I`), `ReachForLeft` and `ReachForRight` from tag `FruitCollider` overlaps, plus `GrabbableFruit` (the fruit a hand overlaps, set by `ArmRoot`) and its `GrabbableFruitChanged` event |
+| `Environment/FruitOutlineListener` | on a banana's `FruitCollider` object: while a hand overlaps that fruit (a release would grab it), adds the `FruitOutlineMat` slot (`Shaders/Environment/FruitOutline`, an inverted-hull Shader Graph) to its child meshes |
 | `Player/DetectionZone` | side-tagged trigger volume that forwards enter and exit events |
 | `Player/CameraRigManager` | swaps behind, look-left, look-right cameras by Cinemachine priority |
 | `Cobra/CobraClimb` | spiral path around `pathCenter`, body segments trail the head |
