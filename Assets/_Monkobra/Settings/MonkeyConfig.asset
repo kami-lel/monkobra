@@ -14,16 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MonkeyConfig
   minAngleDeg: -15
   maxAngleDeg: 30
-  sideSwingRatio: 0.1
   strokeSpeedDeg: 240
-  driveSpring: 200
-  driveDamper: 20
-  maxReachDistanceU: 3
-  reachSpring: 400
-  reachDamper: 40
-  overshootAllowanceU: 0.5
+  reachExtendSpeedU: 4
   invertDriveAxis: 1
-  cycleReachU: 0.6
   splayDeg: 20
   armWidthU: 0.2
   upSpeedU: 6

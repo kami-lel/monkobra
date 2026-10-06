@@ -1,10 +1,10 @@
 # Monkobra CHANGELOG
 
 <!--
-Todo audio BGM
-Todo audio SFX
 Todo Outline
 
+todo audio BGM
+todo audio SFX
 fixme cobra done as pool
 -->
 
@@ -12,42 +12,44 @@ fixme cobra done as pool
 
 ### Added
 
-- fruit grab: hold interact to lock aim at newest fruit, arm stretches at steady speed, release grabs iff hand overlaps fruit
-- fruit grab restores stamina via `StaminaBar.I.AddStaminaByFruit`
-- stamina drain by movement: climbing costs most, orbiting less, descent & stun fall free
-- `GameConfig` ScriptableObject for game-wide tuning: max stamina, timer drain, fruit restore, climb & orbit drain rates
-
 ### Changed
-
-- stamina tuning: `StaminaBar` fields → `GameConfig` asset
-- `StaminaBar` exposed as singleton `StaminaBar.I`
-- `BranchFruitPlacementConfig` & `GameConfig` assets → `Settings/`
-- `ArmRoot`: interact reach replaces spring/overshoot reach, aim locks once at press
-- `Arm` joint linear limit 3 → 5
-- `Lv1Scene` camera positions, rotations, FOV retuned
 
 ### Deprecated
 
 ### Removed
 
-- legacy arm drivers `MonkeyArm` & `HandHandler`, superseded by `ArmRoot`
-- unused reach tuning from `MonkeyConfig`: drive spring/damper, overshoot, aim weight
-
 ### Fixed
 
 ### Security
 
-[unreleased]: https://github.com/CSCI-526/Team4-Lu_Lu/compare/v0.1.0...dev
+[unreleased]: https://github.com/CSCI-526/Team4-Lu_Lu/compare/v0.1.1...dev
 
 
 
+## [0.1.1] - 2026-09-29
 
+### Added
 
+- fruit grab: hold interact to stretch arm toward newest fruit, release to grab iff hand overlaps it
+- fruit grab restores stamina
+- movement-based stamina drain: climbing costs most, orbiting less, descent free
+- `GameConfig` asset centralizing game-wide tuning
 
+### Changed
 
+- stamina tuning → `GameConfig`
+- `StaminaBar` reachable as singleton `StaminaBar.I`
+- tuning assets → `Settings/`
+- arm reach: aim locks at press, replaces spring/overshoot reach
+- arm joint reach limit ↑
+- `Lv1Scene` camera views retuned
 
+### Removed
 
+- legacy arm drivers `MonkeyArm` & `HandHandler`, superseded by `ArmRoot`
+- unused reach tuning from `MonkeyConfig`
 
+[0.1.1]: https://github.com/CSCI-526/Team4-Lu_Lu/compare/v0.1.0...v0.1.1
 
 
 
