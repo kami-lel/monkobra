@@ -432,6 +432,10 @@ public class ArmRoot: MonoBehaviour {
     // grab the aimed fruit iff the hand overlaps it now: switch it off and
     // drop it from detection. Too short or past it, no overlap, no grab
     private void TryGrabFruit() {
+        if (Time.timeScale <= 0f
+            || (GameController.I != null && GameController.I.IsGameOver)) {
+            return;
+        }
         if (!isReaching || reachFruit == null) {
             return;
         }
@@ -457,11 +461,25 @@ public class ArmRoot: MonoBehaviour {
             return;
         }
 
-        fruit.gameObject.SetActive(false);
+        ScorePickup pickup = fruit.GetComponentInParent<ScorePickup>();
+        if (pickup != null) {
+            if (!pickup.TryCollect()) {
+                return;
+            }
+        } else {
+            // Existing fruit without a score component keeps its old behavior.
+            fruit.gameObject.SetActive(false);
+        }
         // a disabled collider may never raise its trigger exit
         UpwardFruitDetection fruitDetection = UpwardFruitDetection.I;
         if (fruitDetection != null) {
-            fruitDetection.RemoveFruit(fruit);
+            if (pickup != null) {
+                foreach (Collider part in pickup.GetComponentsInChildren<Collider>(true)) {
+                    fruitDetection.RemoveFruit(part);
+                }
+            } else {
+                fruitDetection.RemoveFruit(fruit);
+            }
         }
 
         StaminaBar staminaBar = StaminaBar.I;

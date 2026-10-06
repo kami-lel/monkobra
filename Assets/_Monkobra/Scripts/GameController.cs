@@ -6,6 +6,8 @@ public class GameController: MonoBehaviour {
         get; private set;
     }
 
+    public bool IsGameOver => isGameOver;
+
     // Public Methods  #########################################################
     public void WinGame() {
         if (isGameOver) {
@@ -13,6 +15,10 @@ public class GameController: MonoBehaviour {
         }
 
         isGameOver = true;
+
+        if (ScoreManager.I != null) {
+            ScoreManager.I.EndRun();
+        }
 
         if (ScreensManager.I != null) {
             ScreensManager.I.ShowWinScreen();
@@ -33,6 +39,10 @@ public class GameController: MonoBehaviour {
         }
 
         isGameOver = true;
+
+        if (ScoreManager.I != null) {
+            ScoreManager.I.EndRun();
+        }
 
         if (ScreensManager.I != null) {
             ScreensManager.I.ShowLoseScreen();
