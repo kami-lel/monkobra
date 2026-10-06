@@ -55,6 +55,7 @@ The repository root is the Unity project root. `Library/`, `Temp/`, `Logs/`, `Us
 | Branch hit | camera shake, then stun (input ignored) while the monkey drops a set distance, all tuned in `MonkeyConfig` | implemented |
 | Cobra | orbits and climbs the trunk on its own, trigger contact calls `GameController.LoseGame` | implemented |
 | Falling cobra | in `FallingCobraDemo`, unlocks after a configured climb distance from the monkey's starting height, then periodically spawns from a nearby branch above the player, flashes a warning, and falls; its single `Branch` trigger causes the existing camera shake, stun and drop instead of ending the run | demo only; not in `Lv1Scene` |
+| Cobra | coils at least one full loop round the trunk as a corkscrew and climbs after the monkey; any trigger contact, side-on or by dropping onto the coil, calls `GameController.LoseGame` | implemented |
 | Stamina | `StaminaBar` slider drains on a timer and by movement (`MonkeyPrefabRoot` calls `DrainByMovement` each step: climbing costs most, orbiting less, descending and the stun fall nothing), `AddStaminaByFruit` restores a fixed amount, budget, rates and fruit restore come from `GameConfig` | grabs restore it, not yet tied to hits |
 | Grab | hold the interact action: camera swaps to a side view and the arm stretches toward the newest fruit at `ReachExtendSpeedU`; release grabs it iff the hand collider overlaps the fruit at that instant, else a miss (too short, or stretched past it) | grab implemented, the fruit is switched off and `ArmRoot` calls `StaminaBar.I.AddStaminaByFruit` |
 | Win, lose | `GameController.WinGame` and `LoseGame` end the run once: `ScreensManager` shows the win or lose panel and time freezes. Triggers: win zone (`WinZoneHandler`, `MonkeyPrefabRoot`), cobra contact, stamina at 0 | implemented |
@@ -96,9 +97,11 @@ All under `Assets/_Monkobra/Scripts/`.
 | `Player/DetectionZone` | side-tagged trigger volume that forwards enter and exit events |
 | `Player/CameraRigManager` | swaps behind, look-left, look-right cameras by Cinemachine priority |
 | `Cobra/CobraClimb` | spiral path around `pathCenter`, body segments trail the head |
-| `Cobra/CobraCollisions` | trigger enter calls `GameController.LoseGame` |
+| `Cobra/CobraCollisions` | trigger enter ;calls `GameController.LoseGame` |
 | `Cobra/FallingCobraSpawner` | in `FallingCobraDemo`, permanently unlocks after the monkey climbs a configured distance above its starting height; tracks peak climb so spawn intervals gradually shorten to a configured floor even if the monkey later falls, while spawning one cobra at a time from a nearby branch above the player |
 | `Cobra/FallingCobra` | flashes before falling; disables segment colliders and uses one capsule trigger tagged `Branch` so `HitBranchDetection` applies the existing drop penalty once |
+| `Cobra/CobraClimb` | corkscrew path around `pathCenter`: the body spans `coilTurns` (≥ 1) loops rising `coilPitchU` per loop, and on `Awake` clones the last segment until no gap along the coil exceeds `maxSegmentGapU`. The cobra climbs nonstop and never descends (only slowing as the coil nears the player), so it runs on into the monkey, and a monkey moving or dropping down runs into the coil. Looks are code-only, no art assets: a chain of rounded beads with small gaps (`segmentFill`), slightly tapered by `thicknessProfile`, while each bead's capsule collider is stretched to reach its neighbours so the hit shape stays gapless; head flattened with primitive-sphere eyes, raised neck, a slow travelling slither wave; the body keeps its material's color, only the eyes are tinted black via `MaterialPropertyBlock` |
+| `Cobra/CobraCollisions` | on the cobra root beside its kinematic Rigidbody, so every segment's trigger reports to it; contact with any monkey part (body and tail under the `Player`-tagged root, or a hand under `ArmRoot`) calls `GameController.LoseGame`, while the monkey's detection triggers are ignored |
 | `UI/StaminaBar` | singleton (`I`), slider drained on a timer and by `DrainByMovement`, loses the game at 0, `AddStaminaByFruit` restores it on a grab |
 | `Environment/WinZoneHandler` | win-zone trigger, calls `GameController.WinGame` on the player |
 | `UI/ScreensManager` | singleton (`I`), shows the win or lose panel |
@@ -114,7 +117,7 @@ All under `Assets/_Monkobra/Scripts/`.
 - Input arrives through `InputActionReference` fields, each script enables and disables its own action, and the arms take theirs from `MonkeyConfig` so both read one action
 - Scripts guard required inspector fields in `Awake` with a logged error naming the field
 - Tuning values stay in serialized fields, and shared tuning sits in a ScriptableObject: `MonkeyPrefabRoot` and `ArmRoot` hold only wiring references and which side an arm is, every number and the input action come from `MonkeyConfig`, while game-wide numbers such as stamina come from `GameConfig`
-- Two coding styles coexist: the newer scripts (`Environment/`, `Player/`, `GameController`) follow the house Unity style, while `Cobra/` is an older contribution still in the template style
+- Two coding styles coexist: the newer scripts (`Environment/`, `Player/`, `GameController`, `Cobra/CobraClimb`, `Cobra/CobraCollisions`) follow the house Unity style, while older contributions may still be in the template style
 - The core tension is escape vs. sustain: grabbing slows the monkey's reactions, so every pickup risks a branch or cobra collision
 
 ## Known Gaps & Constraints
