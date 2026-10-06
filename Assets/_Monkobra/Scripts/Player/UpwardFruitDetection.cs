@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -5,7 +6,8 @@ using UnityEngine;
 /// Tracks which side of the character has fruit within reach, fed by 2
 /// <see cref="DetectionZone"/> children that forward their trigger events.
 /// Keeps every "FruitCollider" overlap per side, so ReachForLeft and
-/// ReachForRight hold with several fruits at once.
+/// ReachForRight hold with several fruits at once. Also relays which fruit a
+/// hand currently overlaps, so a release would grab it.
 /// </summary>
 public class UpwardFruitDetection: MonoBehaviour {
     // Public Members  #########################################################
@@ -22,7 +24,36 @@ public class UpwardFruitDetection: MonoBehaviour {
             ? DetectionSide.Right
             : DetectionSide.Left;
 
+    /// <summary>fruit a hand overlaps now, so release grabs it, else null
+    /// </summary>
+    public Collider GrabbableFruit => grabbableFruit;
+
+    /// <summary>raised w/ (previous, current) when the grabbable fruit
+    /// changes</summary>
+    public event Action<Collider, Collider> GrabbableFruitChanged;
+
     // Public Methods  #########################################################
+    /// <summary>
+    /// sets the fruit a hand overlaps, null for none; raises
+    /// <see cref="GrabbableFruitChanged"/> iff it differs
+    /// </summary>
+    public void SetGrabbableFruit(Collider fruit) {
+        if (fruit == grabbableFruit) {
+            return;
+        }
+
+        Collider previous = grabbableFruit;
+        grabbableFruit = fruit;
+        if (Debug.isDebugBuild) {
+            Debug.Log(
+                "UpwardFruitDetection:\tgrabbable fruit changed: "
+                    + (fruit != null ? fruit.name : "none"),
+                this
+            );
+        }
+        GrabbableFruitChanged?.Invoke(previous, fruit);
+    }
+
     /// <returns>newest fruit in reach on <paramref name="side"/>, else null
     /// </returns>
     public Collider GetNewestFruit(DetectionSide side) {
@@ -49,6 +80,9 @@ public class UpwardFruitDetection: MonoBehaviour {
         }
         if (hadRight && rightFruits.Count == 0) {
             LogReachChanged(DetectionSide.Right);
+        }
+        if (fruit == grabbableFruit) {
+            SetGrabbableFruit(null);
         }
     }
 
@@ -150,6 +184,8 @@ public class UpwardFruitDetection: MonoBehaviour {
 
     // entry order across both sides, last is newest
     private readonly List<Collider> fruitOrder = new List<Collider>();
+
+    private Collider grabbableFruit;
 
     // Private Methods  ########################################################
     private void LogReachChanged(DetectionSide side) {
