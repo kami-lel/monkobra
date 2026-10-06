@@ -1,0 +1,40 @@
+using UnityEngine;
+
+[DisallowMultipleComponent]
+//同一个对象不能重复挂两个 ScorePickup，避免配置重复
+public class ScorePickup: MonoBehaviour {
+    [SerializeField]
+    private ScoreReward reward;
+
+    public bool TryCollect() {
+        if (!isActiveAndEnabled || isCollected || Time.timeScale <= 0f
+            || (GameController.I != null && GameController.I.IsGameOver)) {
+            return false;
+        }//组件没启用、已经领过、游戏暂停或结束，都会拒绝领取
+        if (reward == null) {
+            Debug.LogError("ScorePickup: assign reward in Inspector.", this);
+            return false;
+        }
+
+        ScoreManager manager = ScoreManager.I;
+        if (manager != null && !manager.CanScore) {
+            return false;
+        }
+
+        isCollected = true;
+        if (manager != null) {
+            manager.TryAddReward(reward);
+        } else {
+        
+            Debug.LogWarning("ScorePickup: no ScoreManager; collected without points.", this);
+        }
+        gameObject.SetActive(false);
+        return true;
+    }
+
+    private bool isCollected;
+
+    private void OnEnable() {
+        isCollected = false;
+    }
+}
