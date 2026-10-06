@@ -1,10 +1,7 @@
 using UnityEngine;
 
-/// <summary>
-/// Attach to a collectible root and assign its reward. This is deliberately
-/// not a trigger handler: ArmRoot calls it only after a successful grab.
-/// </summary>
 [DisallowMultipleComponent]
+//同一个对象不能重复挂两个 ScorePickup，避免配置重复
 public class ScorePickup: MonoBehaviour {
     [SerializeField]
     private ScoreReward reward;
@@ -13,7 +10,7 @@ public class ScorePickup: MonoBehaviour {
         if (!isActiveAndEnabled || isCollected || Time.timeScale <= 0f
             || (GameController.I != null && GameController.I.IsGameOver)) {
             return false;
-        }
+        }//组件没启用、已经领过、游戏暂停或结束，都会拒绝领取
         if (reward == null) {
             Debug.LogError("ScorePickup: assign reward in Inspector.", this);
             return false;
@@ -24,12 +21,11 @@ public class ScorePickup: MonoBehaviour {
             return false;
         }
 
-        // Claim before raising score events; two hands/colliders get one award.
         isCollected = true;
         if (manager != null) {
             manager.TryAddReward(reward);
         } else {
-            // Preserve fruit grabbing in legacy/test scenes without scoring.
+        
             Debug.LogWarning("ScorePickup: no ScoreManager; collected without points.", this);
         }
         gameObject.SetActive(false);
@@ -39,7 +35,6 @@ public class ScorePickup: MonoBehaviour {
     private bool isCollected;
 
     private void OnEnable() {
-        // A pooled item becomes collectible again when its root is reactivated.
         isCollected = false;
     }
 }

@@ -431,11 +431,12 @@ public class ArmRoot: MonoBehaviour {
 
     // grab the aimed fruit iff the hand overlaps it now: switch it off and
     // drop it from detection. Too short or past it, no overlap, no grab
-    private void TryGrabFruit() {
+    private void TryGrabFruit() 
+    {
         if (Time.timeScale <= 0f
             || (GameController.I != null && GameController.I.IsGameOver)) {
             return;
-        }
+        }//暂停或游戏结束后，不再摘水果
         if (!isReaching || reachFruit == null) {
             return;
         }
@@ -460,7 +461,7 @@ public class ArmRoot: MonoBehaviour {
             }
             return;
         }
-
+        //成功摘到后，交给 ScorePickup 处理
         ScorePickup pickup = fruit.GetComponentInParent<ScorePickup>();
         if (pickup != null) {
             if (!pickup.TryCollect()) {
@@ -479,7 +480,7 @@ public class ArmRoot: MonoBehaviour {
                 }
             } else {
                 fruitDetection.RemoveFruit(fruit);
-            }
+            }//一个水果即使有多个碰撞体，摘掉后也会一起从检测列表移除，避免留下已经不存在的目标
         }
 
         StaminaBar staminaBar = StaminaBar.I;

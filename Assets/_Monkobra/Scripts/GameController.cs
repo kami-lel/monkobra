@@ -7,7 +7,7 @@ public class GameController: MonoBehaviour {
     }
 
     public bool IsGameOver => isGameOver;
-
+    //公开，让其他脚本查看游戏是否结束
     // Public Methods  #########################################################
     public void WinGame() {
         if (isGameOver) {
@@ -18,7 +18,7 @@ public class GameController: MonoBehaviour {
 
         if (ScoreManager.I != null) {
             ScoreManager.I.EndRun();
-        }
+        }//先结算分数
 
         if (ScreensManager.I != null) {
             ScreensManager.I.ShowWinScreen();
@@ -42,7 +42,7 @@ public class GameController: MonoBehaviour {
 
         if (ScoreManager.I != null) {
             ScoreManager.I.EndRun();
-        }
+        }//先结算分数
 
         if (ScreensManager.I != null) {
             ScreensManager.I.ShowLoseScreen();
