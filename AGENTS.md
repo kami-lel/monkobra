@@ -14,9 +14,9 @@ Unity course project (USC CSCI-526, Fall 2026). Overview in [README.md](README.m
 
 Read these `docs/` files when their topic arises:
 
-- [Technical Design Document](docs/monkobra-tdd.md): engine, run lifecycle, monkey movement, tree, stamina, score, input, UI, and script conventions; start here for anything not covered below
-- [Mobs](docs/mob-doc.md): the cobra, falling cobra, branches, and spider webs, and what each does when the monkey touches it
-- [Grab System](docs/grab-doc.md): detection zones, arm reach, the release check, the camera swap, and fruit outlines
+- [Technical Design Document](docs/monkobra-tdd.md): how the game is built, and the script conventions to follow
+- [Mobs](docs/mob-doc.md): the cobra, falling cobra, branches, and spider webs
+- [Grab System](docs/grab-doc.md): detection zones, arm reach, and the release check
 
 ## Layout & Naming
 
@@ -89,8 +89,8 @@ No test suite exists yet. When one is added, record the exact scoped command her
 
 ## Documentation Maintenance
 
-- Update [CONTEXT.md](CONTEXT.md) in the same change whenever entities, systems, or mechanics shift
-- Update [README.md](README.md) when controls, setup steps, or the mechanic list change
+- Update [CONTEXT.md](CONTEXT.md) in the same change whenever a script is added, moved, or renamed
+- Update [README.md](README.md) when controls or setup steps change
 - Update the [Game Design Document](docs/monkobra-gdd.md) when design intent shifts, ie pillars, the core twist, resources, or win and lose rules; read it before changing how a mechanic is meant to feel
 - Update [Mobs](docs/mob-doc.md) when a cobra, branch, or web changes how it spawns, moves, or reacts to a touch, and the [Grab System](docs/grab-doc.md) when detection, reach, or release rules change
 - Update the [Technical Design Document](docs/monkobra-tdd.md) when the architecture, run lifecycle, tuning assets, input bindings, or conventions change

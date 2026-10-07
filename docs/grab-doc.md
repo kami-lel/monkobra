@@ -95,5 +95,4 @@ Bananas come from branches, not their own spawner. `BranchWithScriptRoot` rolls 
 
 - `ArmRoot` carries a fixme to split it into several systems
 - A miss costs no stamina, only exposure
-- `WebDemo` has no `ScoreManager`, so a grab there restores stamina but scores nothing
-- Space is bound to both Interact and Jump, so the web escape key and the grab key collide, and the struggle suspends interact while a monkey is trapped
+- Scenes without a `ScoreManager` restore stamina on a grab but score nothing, see [Score](monkobra-tdd.md#score)

@@ -72,7 +72,7 @@ graph TD
 | Banana Grab | hold-and-release timing as its own skill check | a hit restores stamina and scores points, a miss wastes time |
 | Branch Hit | punishes careless movement without ending the run | camera shake, brief loss of control, a drop down the trunk |
 | Cobra Chase | constant pursuit from below, its coil wraps the trunk so orbiting or dropping into it is as fatal as being caught from behind | any contact with the cobra's body ends the run |
-| Falling Cobra | a hazard from above that rewards watching the branches | warns, then falls, with the same penalty as a branch hit; so far only in a demo scene, not yet in the main level |
+| Falling Cobra | a hazard from above that rewards watching the branches | warns, then falls, with the same penalty as a branch hit |
 | Spider Web | a forced stop that lets the cobra gain ground, and a clash with the grab since reaching is locked while stuck | holds the monkey until rapid presses fill an escape bar, then brief immunity from further webs |
 | Score | rewards height and risk | points per meter climbed and a bonus per banana grabbed |
 
@@ -89,5 +89,5 @@ The intended arc is steady tension broken by short bursts of risk. The player cl
 ## Difficulty
 
 - Ramp: branches grow denser higher up the tree, and spider webs appear only on the upper half
-- Falling Cobra Ramp: once unlocked after a long climb, it drops more often the higher the monkey has climbed, down to a floor interval, even if the monkey later falls back; demo scene only
+- Falling Cobra Ramp: once unlocked after a long climb, it drops more often the higher the monkey has climbed, down to a floor interval, even if the monkey later falls back. Numbers and scene status are in [Mobs](mob-doc.md#falling-cobra)
 - Future Work: broader scaling, such as cobra speed or hazard frequency, is not yet designed
