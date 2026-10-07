@@ -1,7 +1,7 @@
 # Monkobra CHANGELOG
 
 <!--
-Todo write docs/
+Todo maintaining from current structure
 Todo update AGENTS.md, incl git working steps
 
 todo audio BGM
