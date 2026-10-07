@@ -1,8 +1,13 @@
 # Monkobra CHANGELOG
 
 <!--
-Fixme update per project assets rule
+FIXME proper game state management
+TODO full gameplay: restart
+FIXME add start tutorial screen
+FIXME re-add inf run
 
+Todo data collection system
+Fixme update per project assets rule
 
 todo audio BGM
 todo audio SFX
