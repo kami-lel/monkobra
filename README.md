@@ -21,6 +21,8 @@ Gamepad: left stick or D-pad moves, the north button grabs, the south button bre
 
 ## Mechanics
 
+Every hazard and what it does on touch is in [Mobs](docs/mob-doc.md), and how reaching and grabbing works is in the [Grab System](docs/grab-doc.md).
+
 - Movement and Climb: free vertical & trunk-circling movement, climbing costs most stamina, circling less, descending none
 - Cobra Chase: cobra coils up the trunk from below, any contact ends the run
 - Falling Cobra (demo scene): after a set climb distance, snakes warn from branches before falling, more often at new heights. Contact shakes the camera & knocks the monkey down
@@ -40,7 +42,7 @@ Webs are part of `Lv1Scene`; `WebDemo` is a smaller test scene with the same web
 
 ## Contributing
 
-Agent rules and the WebGL export steps are in [AGENTS.md](AGENTS.md), the system map and known gaps in [CONTEXT.md](CONTEXT.md), the design intent in the [Game Design Document](docs/monkobra-gdd.md), and version history in [CHANGELOG.md](CHANGELOG.md).
+Agent rules and the WebGL export steps are in [AGENTS.md](AGENTS.md), the system map and known gaps in [CONTEXT.md](CONTEXT.md), the design intent in the [Game Design Document](docs/monkobra-gdd.md), how the game is built in the [Technical Design Document](docs/monkobra-tdd.md), and version history in [CHANGELOG.md](CHANGELOG.md).
 
 ## Acknowledgments
 
