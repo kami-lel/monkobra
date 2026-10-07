@@ -1,7 +1,6 @@
 # Monkobra CHANGELOG
 
 <!--
-TODO update AGENTS.md, incl git working steps
 Fixme update per project assets rule
 
 
