@@ -112,3 +112,7 @@ InitTestScene*.unity*
 
 # macOS
 .DS_Store
+
+# Editor config, kept local
+.vsconfig
+.vscode/
