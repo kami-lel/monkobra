@@ -1,6 +1,4 @@
-# Monkobra Git 协作指南
-
-功能分支（feature branch）合并进 `dev`，`dev` 再合并进 `main`。以下用 GitHub Desktop 操作。
+# Monkobra: Work with Git
 
 ## 队友协作步骤
 
