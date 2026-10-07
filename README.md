@@ -6,16 +6,18 @@ Course project for USC CSCI-526, Fall 2026.
 
 ## Overview
 
-You play a monkey racing up a very tall tree. The cobra never stops climbing, and your stamina drains with every meter. Dodge branches, then hold Space to reach for a banana and release to grab it: a clean grab is the only way to refill the stamina bar before it runs dry. Every grab costs focus that would otherwise go to dodging, so each banana is a risk. Genre, design pillars, and the reasoning behind the twist are in the [Game Design Document](docs/monkobra-gdd.md).
+You play a monkey racing up a very tall tree. The cobra never stops climbing, and your stamina drains with every meter. Dodge branches, then hold E or Space to reach for a banana and release to grab it: a clean grab is the only way to refill the stamina bar before it runs dry. Every grab costs focus that would otherwise go to dodging, so each banana is a risk. Genre, design pillars, and the reasoning behind the twist are in the [Game Design Document](docs/monkobra-gdd.md).
 
 ### Controls
 
 | Input | Action |
 | --- | --- |
-| Up, Down | climb the tree |
-| Left, Right | circle around the tree |
-| Space (hold and release) | reach out and grab a banana |
+| Up, Down or W, S | climb the tree |
+| Left, Right or A, D | circle around the tree |
+| E or Space (hold and release) | reach out and grab a banana |
 | Space (press rapidly) | break free of a spider web |
+
+Gamepad: left stick or D-pad moves, the north button grabs, the south button breaks free of a web.
 
 ## Mechanics
 
@@ -34,7 +36,7 @@ Open the repository folder through Unity Hub with Editor `6000.3.22f1` (Unity 6,
 
 ### Testing the Spider Web
 
-Webs are part of `Lv1Scene`; `WebDemo` is a smaller test scene with the same web setup and no score. Open either and press Play. Webs only spawn from the middle of the tree up, so for a quick test select the `Tree` object and set `SpiderWebSpawner` > Start Progress to `0` (and Spawn Chance to `1`) to put webs right by the start, then leave the scene unsaved. With Gizmos on, yellow boxes mark each web's trigger and a cyan ring marks the start height. The first trap shows the hint text and bar, later traps the bar only, and reloading the scene brings the hint back.
+Webs are part of `Lv1Scene`; `WebDemo` is a smaller test scene with the same web setup and no score. Open either and press Play. Webs only spawn from the middle of the tree up, so for a quick test select the `Tree` object and set `SpiderWebSpawner` > Start Progress to `0` (and Spawn Chance to `1`) to put webs right by the start, then leave the scene unsaved. With Gizmos on, yellow boxes mark each web's trigger and a ring marks the start height. The first trap shows the hint text and bar, later traps the bar only, and reloading the scene brings the hint back.
 
 ## Contributing
 

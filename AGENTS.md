@@ -16,9 +16,9 @@ Unity course project (USC CSCI-526, Fall 2026). Overview in [README.md](README.m
 
 - The repository root is the Unity project root: `Assets/`, `Packages/`, and `ProjectSettings/` sit at the top level
 - Authored assets live under `Assets/_Monkobra/`, laid out `<Type>/<Module>/<asset>` per the `coder-unity-engine` skill (e.g. `Scripts/`, `Prefabs/`, `Scenes/`, `Settings/_Shared/`)
-- Unity template leftovers (`Assets/Readme.asset`) stay outside the game root
+- Unity template leftovers and imports (`Assets/Readme.asset`, `Assets/TextMesh Pro/`) stay outside the game root
 - Every asset under `Assets/` is committed with its `.meta` file, and a moved or renamed asset moves its `.meta` with it
-- Never commit `Library/`, `Temp/`, `Obj/`, `Build*/`, `Logs/`, or `UserSettings/`: all are already in `.gitignore`
+- Never commit `Library/`, `Temp/`, `Obj/`, `Build/`, `Builds/`, `Logs/`, or `UserSettings/` at the repository root: all are already in `.gitignore`
 
 ## Setup Commands
 
@@ -34,10 +34,10 @@ either there or here, the committed export is served as-is:
 - the WebGL export lives in `Monkobra/`, directly under the repo
   root (sibling to `Assets/`, never inside it), a complete,
   self-contained export holding `index.html`, `Build/`,
-  `TemplateData/`, and `StreamingAssets/` (if used); this name was
-  chosen specifically to avoid `.gitignore`'s `Build*/` rule (see
-  Layout & Naming above), which would otherwise silently drop a
-  committed export
+  `TemplateData/`, and `StreamingAssets/` (if used); never name it
+  `Build/` or `Builds/`, which `.gitignore` ignores at the repo root
+  (see Layout & Naming above) and would silently drop a committed
+  export
 - export via `File > Build Settings > WebGL > Build`, output
   directly into `Monkobra/`
 - serve locally before pushing (WebGL will not run from `file://`):
