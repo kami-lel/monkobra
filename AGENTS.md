@@ -12,6 +12,12 @@ Prescriptive rules for agents working in this project.
 
 Unity course project (USC CSCI-526, Fall 2026). Overview in [README.md](README.md), system knowledge in [CONTEXT.md](CONTEXT.md), game design intent in the [Game Design Document](docs/monkobra-gdd.md). Chat instructions override this file.
 
+Read these `docs/` files when their topic arises:
+
+- [Technical Design Document](docs/monkobra-tdd.md): engine, run lifecycle, monkey movement, tree, stamina, score, input, UI, and script conventions; start here for anything not covered below
+- [Mobs](docs/mob-doc.md): the cobra, falling cobra, branches, and spider webs, and what each does when the monkey touches it
+- [Grab System](docs/grab-doc.md): detection zones, arm reach, the release check, the camera swap, and fruit outlines
+
 ## Layout & Naming
 
 - The repository root is the Unity project root: `Assets/`, `Packages/`, and `ProjectSettings/` sit at the top level
@@ -86,4 +92,6 @@ No test suite exists yet. When one is added, record the exact scoped command her
 - Update [CONTEXT.md](CONTEXT.md) in the same change whenever entities, systems, or mechanics shift
 - Update [README.md](README.md) when controls, setup steps, or the mechanic list change
 - Update the [Game Design Document](docs/monkobra-gdd.md) when design intent shifts, ie pillars, the core twist, resources, or win and lose rules; read it before changing how a mechanic is meant to feel
+- Update [Mobs](docs/mob-doc.md) when a cobra, branch, or web changes how it spawns, moves, or reacts to a touch, and the [Grab System](docs/grab-doc.md) when detection, reach, or release rules change
+- Update the [Technical Design Document](docs/monkobra-tdd.md) when the architecture, run lifecycle, tuning assets, input bindings, or conventions change
 - Update this file when commands or conventions change

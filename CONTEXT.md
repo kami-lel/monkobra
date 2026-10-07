@@ -12,7 +12,7 @@ Descriptive knowledge of this repository for agents and developers.
 
 ## Project Overview
 
-Game concept, genre, twist, and design intent are in the [Game Design Document](docs/monkobra-gdd.md). The project descends from a paired prototype (`kami-lel/usc-csci-526-paired-prototype`).
+Game concept, genre, twist, and design intent are in the [Game Design Document](docs/monkobra-gdd.md), the build in the [Technical Design Document](docs/monkobra-tdd.md), the hazards in [Mobs](docs/mob-doc.md), and reaching in the [Grab System](docs/grab-doc.md). The project descends from a paired prototype (`kami-lel/usc-csci-526-paired-prototype`).
 
 | Aspect | Value |
 | --- | --- |
@@ -28,7 +28,7 @@ monkobra/
 ├── AGENTS.md          agent rules
 ├── CONTEXT.md         this file
 ├── CHANGELOG.md       version history, plus open triage tags in a comment
-├── docs/              monkobra-gdd.md, game design intent
+├── docs/              monkobra-gdd.md (design intent), monkobra-tdd.md (technical design), mob-doc.md (cobras, branches, webs), grab-doc.md (grab system)
 ├── Assets/
 │   ├── _Monkobra/     all authored assets, <Type>/<Module>/<asset>
 │   │   ├── Scenes/    Lv1Scene (main), CobraDemo, FallingCobraDemo, WebDemo (tests)
