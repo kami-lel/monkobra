@@ -1,9 +1,6 @@
 # Monkobra CHANGELOG
 
 <!--
-Bug check all files committing
-
-Todo maintaining from current structure
 Todo update AGENTS.md, incl git working steps
 
 todo audio BGM

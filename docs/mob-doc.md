@@ -20,7 +20,7 @@ Mobs and the monkey find each other with triggers and tags, never with direct re
 - Branch Sensor: `HitBranchDetection` is a trigger on the monkey prefab, reaching past the body, and reports any collider tagged `Branch`
 - Cobra Contact: `CobraCollisions` counts the monkey's body and tail (any non-trigger collider under the `Player`-tagged root) and its hands (anything under an `ArmRoot`), and ignores the monkey's trigger volumes, which reach far past the body
 - Web Contact: `SpiderWebTrap` counts only a non-trigger collider whose Rigidbody carries `SpiderWebStruggle`, so a hand brushing a web is ignored
-- Tags In Use: `Branch` (branches and the falling cobra's hit capsule), `Player` (the monkey root), `FruitCollider` (bananas, see the [Grab System](grab-doc.md))
+- Tags: `Branch` marks branches and the falling cobra's hit capsule, and `Player` marks the monkey root, see the [conventions](monkobra-tdd.md#conventions)
 
 ## Branch
 
@@ -148,7 +148,7 @@ A static trap on the trunk that holds the monkey in place while the cobra keeps 
 | Decay While Idle | 0.35 per s |
 | Immunity After Escape | 1 s |
 
-Space is bound to both Interact and Jump, which is why the struggle suspends interact. The struggle freezes while the game is paused or over.
+The struggle suspends interact because of a shared Space binding, see [Input](monkobra-tdd.md#input), and freezes while the game is paused or over.
 
 ### Testing
 
@@ -156,7 +156,6 @@ Webs are in `Lv1Scene`, and `WebDemo` is a smaller test scene with the same setu
 
 ## Known Gaps
 
-- The falling cobra is not placed in `Lv1Scene`
 - Mob tuning for the cobra and webs lives on scene components, not in a shared ScriptableObject
 - Stamina is not linked to branch hits
 - `Lv1Scene`'s Canvas holds 2 objects named `ProgressBar`, the climb progress and the web escape bar, so look them up by path

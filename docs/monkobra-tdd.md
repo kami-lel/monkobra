@@ -37,22 +37,7 @@ A system gets its own document when it spans several scripts and carries rules a
 | `FallingCobraDemo` | test scene for the falling cobra, the only scene that has one |
 | `WebDemo` | test scene for spider webs, no score |
 
-## Repository Layout
-
-Authored assets live in `Assets/_Monkobra/<Type>/<Module>/<asset>`.
-
-```text
-Assets/_Monkobra/
-├── Scenes/      the four scenes above
-├── Scripts/     ArmRoot, Cobra, Environment, Scoring, UI, GameController, GameConfig
-├── Prefabs/     Player, Cobra, Environment, UI
-├── Material/    Environment, Player
-├── Shaders/     Environment/FruitOutline
-└── Settings/    MonkeyConfig, GameConfig, BranchFruitPlacementConfig,
-                 Scoring/, _Shared/ (URP assets, input actions)
-```
-
-The repository root is the Unity project root. The WebGL export is committed in `Monkobra/`, served as-is by GitHub Pages, and described in [AGENTS.md](../AGENTS.md#github-pages-webgl-build).
+The folder layout and a script-by-script index are in [CONTEXT.md](../CONTEXT.md#repository-layout).
 
 ## Architecture
 
@@ -162,13 +147,7 @@ Three Cinemachine cameras (behind, look-left, look-right) are swapped by priorit
 
 ## Input
 
-One asset, `Settings/_Shared/InputSystem_Actions`, holds all bindings, referenced through `InputActionReference` fields.
-
-| Action | Keyboard | Gamepad |
-| --- | --- | --- |
-| Move | W, A, S, D or arrow keys | left stick, D-pad |
-| Interact | E or Space | north button |
-| Jump | Space | south button |
+One asset, `Settings/_Shared/InputSystem_Actions`, holds all bindings, referenced through `InputActionReference` fields. The keys and buttons are listed under Controls in the [README](../README.md#controls).
 
 - Move: shared by the body and both arms through `MonkeyConfig`
 - Interact: the grab, read by both arms and the camera rig
@@ -202,10 +181,4 @@ The only build is the WebGL export made from the Editor into `Monkobra/` and com
 
 ## Known Gaps
 
-- No tests, and no run command: verification means opening `Lv1Scene` in the Editor
-- The falling cobra is placed only in `FallingCobraDemo`
-- Difficulty scaling beyond branch density, web start, and the falling cobra interval is not designed ([Game Design Document](monkobra-gdd.md#difficulty))
-- The tree is finite, not endless
-- Stamina is not linked to branch hits
-
-The full list is in [CONTEXT.md](../CONTEXT.md#known-gaps--constraints).
+Project-wide gaps are in [CONTEXT.md](../CONTEXT.md#known-gaps--constraints), subsystem ones in [Mobs](mob-doc.md#known-gaps) and the [Grab System](grab-doc.md#known-gaps).
