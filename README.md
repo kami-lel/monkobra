@@ -48,4 +48,4 @@ Webs are part of `Lv1Scene`; `WebDemo` is a smaller test scene with the same web
 
 ## Contributing
 
-Agent rules and the WebGL export steps are in [AGENTS.md](AGENTS.md), the system map and known gaps in [CONTEXT.md](CONTEXT.md), and version history in [CHANGELOG.md](CHANGELOG.md).
+Agent rules and the WebGL export steps are in [AGENTS.md](AGENTS.md), the system map and known gaps in [CONTEXT.md](CONTEXT.md), the design intent in the [Game Design Document](docs/monkobra-gdd.md), and version history in [CHANGELOG.md](CHANGELOG.md).

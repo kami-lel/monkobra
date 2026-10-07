@@ -10,7 +10,7 @@ Prescriptive rules for agents working in this project.
 - Belongs in `docs/`: system documentation for users and agents alike; link it from here, never grow this file to hold it
 - Local Layer: put machine-specific or personal rules in `AGENTS.local.md`; create it if missing, never commit it
 
-Unity course project (USC CSCI-526, Fall 2026): a 3D vertical climbing game. Overview in [README.md](README.md), system knowledge in [CONTEXT.md](CONTEXT.md). Chat instructions override this file. No `docs/` folder exists yet.
+Unity course project (USC CSCI-526, Fall 2026). Overview in [README.md](README.md), system knowledge in [CONTEXT.md](CONTEXT.md), game design intent in the [Game Design Document](docs/monkobra-gdd.md). Chat instructions override this file.
 
 ## Layout & Naming
 
