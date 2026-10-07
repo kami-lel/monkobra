@@ -19,7 +19,6 @@ Game concept, genre, twist, and design intent are in the [Game Design Document](
 | Engine | Unity 6 (`6000.3.22f1`), URP |
 | Packages in play | Input System, Cinemachine (camera views, impulse shake), uGUI |
 | Course | USC CSCI-526, Fall 2026 |
-| Team | Yuqing Lu, Yangyi Lu (Erik), Houdong Pan, Wenhai Dong, Belle Dai |
 
 ## Repository Layout
 
@@ -29,6 +28,7 @@ monkobra/
 ├── AGENTS.md          agent rules
 ├── CONTEXT.md         this file
 ├── CHANGELOG.md       version history, plus open triage tags in a comment
+├── docs/              monkobra-gdd.md, game design intent
 ├── Assets/
 │   ├── _Monkobra/     all authored assets, <Type>/<Module>/<asset>
 │   │   ├── Scenes/    Lv1Scene (main), CobraDemo, FallingCobraDemo, WebDemo (tests)
@@ -53,9 +53,8 @@ The repository root is the Unity project root. `Library/`, `Temp/`, `Logs/`, `Us
 | Arms | `ArmRoot` drives a `ConfigurableJoint` per arm: an alternating hand-over-hand stroke while move input is held, or a reach that locks its aim at press and only stretches, with the hand reporting its own contacts | implemented |
 | Tree | stack of static and dynamic trunk segments under a `TreeTop`, each dynamic segment decorated with branches | implemented, finite height |
 | Branch hit | camera shake, then stun (input ignored) while the monkey drops a set distance, all tuned in `MonkeyConfig` | implemented |
-| Cobra | orbits and climbs the trunk on its own, trigger contact calls `GameController.LoseGame` | implemented |
+| Cobra | orbits and climbs the trunk on its own, coiling at least one full loop round it as a corkscrew; any trigger contact, side-on or by dropping onto the coil, calls `GameController.LoseGame` | implemented |
 | Falling cobra | in `FallingCobraDemo`, unlocks after a configured climb distance from the monkey's starting height, then periodically spawns from a nearby branch above the player, flashes a warning, and falls; its single `Branch` trigger causes the existing camera shake, stun and drop instead of ending the run | demo only; not in `Lv1Scene` |
-| Cobra | coils at least one full loop round the trunk as a corkscrew and climbs after the monkey; any trigger contact, side-on or by dropping onto the coil, calls `GameController.LoseGame` | implemented |
 | Stamina | `StaminaBar` slider drains on a timer and by movement (`MonkeyPrefabRoot` calls `DrainByMovement` each step: climbing costs most, orbiting less, descending and the stun fall nothing), `AddStaminaByFruit` restores a fixed amount, budget, rates and fruit restore come from `GameConfig` | grabs restore it, not yet tied to hits |
 | Grab | hold the interact action: camera swaps to a side view and the arm stretches toward the newest fruit at `ReachExtendSpeedU`; release grabs it iff the hand collider overlaps the fruit at that instant, else a miss (too short, or stretched past it). Fruit in a detection zone is outlined as reachable, fruit under the hand as grabbable | grab implemented: `ScorePickup.TryCollect` switches the fruit off and adds its points (a fruit without one is just switched off), then `ArmRoot` calls `StaminaBar.I.AddStaminaByFruit` |
 | Spider web | `SpiderWebSpawner` sticks webs flat on the trunk from `startProgress` of the climb up, clear of branches and fruit. The monkey's solid body touching a web's trigger holds it in place (`MonkeyPrefabRoot.IsHeld`) and pauses interact; each Jump (Space) press fills an escape bar that drains while idle, a full bar removes the web and grants a short immunity. `SpiderWebPrompt` shows the hint on the first trap per scene load, the bar on every trap, and hides both on escape or game over. The struggle freezes while paused or after game over | implemented in `Lv1Scene` and `WebDemo` |
@@ -107,8 +106,6 @@ All under `Assets/_Monkobra/Scripts/`.
 | `Environment/FruitOutlineListener` | on a banana's `FruitCollider` object: outlines its child meshes in 2 tiers by adding an outline material slot, reachable while the fruit sits in a detection zone and grabbable (wins) while a hand overlaps it so a release would grab it. Both materials use `Shaders/Environment/FruitOutline`, an inverted-hull Shader Graph |
 | `ArmRoot/DetectionZone` | side-tagged trigger volume that forwards enter and exit events |
 | `ArmRoot/CameraRigManager` | swaps behind, look-left, look-right cameras by Cinemachine priority |
-| `Cobra/CobraClimb` | spiral path around `pathCenter`, body segments trail the head |
-| `Cobra/CobraCollisions` | trigger enter ;calls `GameController.LoseGame` |
 | `Cobra/FallingCobraSpawner` | in `FallingCobraDemo`, permanently unlocks after the monkey climbs a configured distance above its starting height; tracks peak climb so spawn intervals gradually shorten to a configured floor even if the monkey later falls, while spawning one cobra at a time from a nearby branch above the player |
 | `Cobra/FallingCobra` | flashes before falling; disables segment colliders and uses one capsule trigger tagged `Branch` so `HitBranchDetection` applies the existing drop penalty once |
 | `Cobra/CobraClimb` | corkscrew path around `pathCenter`: the body spans `coilTurns` (≥ 1) loops rising `coilPitchU` per loop, and on `Awake` clones the last segment until no gap along the coil exceeds `maxSegmentGapU`. The cobra climbs nonstop and never descends (only slowing as the coil nears the player), so it runs on into the monkey, and a monkey moving or dropping down runs into the coil. Looks are code-only, no art assets: a chain of rounded beads with small gaps (`segmentFill`), slightly tapered by `thicknessProfile`, while each bead's capsule collider is stretched to reach its neighbours so the hit shape stays gapless; head flattened with primitive-sphere eyes, raised neck, a slow travelling slither wave; the body keeps its material's color, only the eyes are tinted black via `MaterialPropertyBlock` |

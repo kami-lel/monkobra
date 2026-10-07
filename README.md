@@ -6,37 +6,27 @@ Course project for USC CSCI-526, Fall 2026.
 
 ## Overview
 
-You play a monkey racing up an endless tree. The cobra never stops climbing, and your stamina drains with every meter. Dodge branches, then reach out and grab bananas to refill the stamina bar before it runs dry.
-
-- Genre: 3D obstacle-running, in the family of *Temple Run 2*, *Subway Surfers*, and *Minion Rush*
-- Engine: Unity
-- Camera: monkey held at the center of view, with an infinitely tall tree and a skybox behind
-
-### Core Twist
-
-Banana grabbing and stamina balancing.
-
-- Grab: hold the space key to stretch the monkey's arm toward a nearby banana, release at the right moment to pick it up
-- Restore: a successful grab refills the stamina bar by a large margin
-- Balance: climbing drains stamina, and grabbing costs focus that would otherwise go to dodging, so every pickup is a risk
+You play a monkey racing up a very tall tree. The cobra never stops climbing, and your stamina drains with every meter. Dodge branches, then hold Space to reach for a banana and release to grab it: a clean grab is the only way to refill the stamina bar before it runs dry. Every grab costs focus that would otherwise go to dodging, so each banana is a risk. Genre, design pillars, and the reasoning behind the twist are in the [Game Design Document](docs/monkobra-gdd.md).
 
 ### Controls
 
-- Up / Down: climb the tree
-- Left / Right: circle around the tree
-- Space (hold and release): reach out and grab a banana
-- Space (press rapidly): break free of a spider web
+| Input | Action |
+| --- | --- |
+| Up, Down | climb the tree |
+| Left, Right | circle around the tree |
+| Space (hold and release) | reach out and grab a banana |
+| Space (press rapidly) | break free of a spider web |
 
 ## Mechanics
 
-- Movement and Climb: free up-down and around-the-tree movement, with stamina spent on every climb and, at a lower rate, on every step around the trunk
-- Cobra Chase: a cobra tangles up the trunk from the bottom of the screen, and touching it ends the run
-- Falling Cobra (demo scene): after climbing a set distance from the start, snakes warn from branches before falling, appearing more often as the monkey reaches new heights; contact shakes the camera and briefly knocks the monkey downward
-- Branch Collision: hitting a branch shakes the camera, drops the monkey, and briefly takes away control
-- Banana Grab: hold-and-release timing sets how far the arm stretches, and a clean grab restores stamina
-- Stamina Bar: drains over time and with movement, topped up only by grabbing bananas
-- Score: each new meter of height earns points and each banana grabbed adds a bonus, the total shows on screen and on the win or lose panel
-- Spider Web: webs cling to the upper half of the trunk, touching one holds the monkey in place until Space is mashed to fill the escape bar, then the web vanishes and the monkey is briefly immune
+- Movement and Climb: free vertical & trunk-circling movement, climbing costs most stamina, circling less, descending none
+- Cobra Chase: cobra coils up the trunk from below, any contact ends the run
+- Falling Cobra (demo scene): after a set climb distance, snakes warn from branches before falling, more often at new heights. Contact shakes the camera & knocks the monkey down
+- Branch Collision: a hit shakes the camera, drops the monkey, briefly removes control
+- Banana Grab: hold to stretch the arm, release to grab, a clean grab restores stamina
+- Stamina Bar: drains over time & with movement, refilled only by grabbing bananas
+- Score: points for each new meter of height & each banana grabbed, total shows on screen & on the win or lose panel
+- Spider Web: webs cling to the upper half of the trunk. Touching one holds the monkey until Space is mashed to fill the escape bar, then the web vanishes & the monkey is briefly immune
 
 ## Getting Started
 
@@ -49,3 +39,7 @@ Webs are part of `Lv1Scene`; `WebDemo` is a smaller test scene with the same web
 ## Contributing
 
 Agent rules and the WebGL export steps are in [AGENTS.md](AGENTS.md), the system map and known gaps in [CONTEXT.md](CONTEXT.md), the design intent in the [Game Design Document](docs/monkobra-gdd.md), and version history in [CHANGELOG.md](CHANGELOG.md).
+
+## Acknowledgments
+
+Team: Yuqing Lu, Yangyi Lu (Erik), Houdong Pan, Wenhai Dong, Belle Dai.
