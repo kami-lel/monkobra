@@ -16,8 +16,8 @@ Game concept, genre, twist, and design intent are in the [Game Design Document](
 
 | Aspect | Value |
 | --- | --- |
-| Engine | Unity 6 (`6000.3.22f1`), URP |
-| Packages in play | Input System, Cinemachine (camera views, impulse shake), uGUI |
+| Engine | Unity 6 (`6000.3.22f1`), URP 17.3.0 |
+| Packages in play | Input System 1.20.0, Cinemachine 3.1.7 (camera views, impulse shake), uGUI 2.0.0 with TextMesh Pro |
 | Course | USC CSCI-526, Fall 2026 |
 
 ## Repository Layout
@@ -32,11 +32,12 @@ monkobra/
 ├── Assets/
 │   ├── _Monkobra/     all authored assets, <Type>/<Module>/<asset>
 │   │   ├── Scenes/    Lv1Scene (main), CobraDemo, FallingCobraDemo, WebDemo (tests)
-│   │   ├── Scripts/   ArmRoot/ (monkey body, arms, fruit detection, camera rig), Cobra/, Environment/, Scoring/, UI/, Editor/, GameController, GameConfig
-│   │   ├── Prefabs/   Monkey, Cobra/ (falling cobra), Environment/ (tree, branch, spider web), UI/StaminaBar
+│   │   ├── Scripts/   ArmRoot/ (monkey body, arms, fruit detection, camera rig), Cobra/, Environment/, Scoring/, UI/, GameController, GameConfig
+│   │   ├── Prefabs/   Player/ (Monkey, Arm), Cobra/ (FallingCobra), Environment/ (tree top and segments, branch, spider web), UI/StaminaBar
 │   │   ├── Material/  Environment/, Player/
 │   │   ├── Shaders/   Environment/FruitOutline (inverted-hull Shader Graph)
 │   │   └── Settings/  tuning assets (MonkeyConfig, GameConfig, BranchFruitPlacementConfig), Scoring/ (ScoreConfig, BananaScore), _Shared/ URP assets
+│   ├── TextMesh Pro/  imported TMP essentials, not authored
 │   └── Readme.asset   Unity template leftover
 ├── Monkobra/          committed WebGL export served by GitHub Pages
 ├── Packages/          manifest & lock
@@ -114,8 +115,8 @@ All under `Assets/_Monkobra/Scripts/`.
 | `Environment/SpiderWebSpawner` | on the tree root, after default execution order: rolls web slots per `DynamicTreeSegment` below it, lays each web flat on its segment's bark facing out, and drops spots below the start height, near another web, or whose trigger overlaps a branch or fruit. `PopulateSegment` decorates a segment added later |
 | `Environment/SpiderWebTrap` | web prefab root, 1 trigger `BoxCollider` deepened outward along local +X to reach the monkey; hands itself to the `SpiderWebStruggle` on a touching solid collider's Rigidbody, pulses on escape presses, `Release` destroys it |
 | `Environment/SpiderWebStruggle` | on the monkey root: trap state, escape progress and decay, post-escape protection, `Trapped`, `ProgressChanged`, `Escaped` events. Holds the body via `IsHeld` and disables interact from trap until protection ends |
-| `Environment/SpiderWebBuilder` | editor context-menu tool that builds the web prefab out of thin cubes |
-| `Environment/WinZoneHandler` | win-zone trigger, calls `GameController.WinGame` on the player |
+| `Environment/SpiderWebBuilder` | MonoBehaviour with a `Build Web` context menu that builds the web prefab's strands out of thin cubes; a one-off authoring aid, not used at runtime |
+| `Environment/WinZoneHandler` | on the `TreeTop` prefab: trigger that calls `GameController.WinGame` when the `Player`-tagged monkey enters |
 | `UI/ScreensManager` | singleton (`I`), shows the win or lose panel |
 | `UI/ProgressBarRoot` | player-height progress scrollbar |
 | `UI/SpiderWebPrompt` | on an always-active Canvas child, shows the first-trap hint and the escape bar from `SpiderWebStruggle` events, hides both once `GameController.IsGameOver` |
@@ -128,16 +129,16 @@ All under `Assets/_Monkobra/Scripts/`.
 
 ## Patterns & Conventions
 
-- Singletons are scene-scoped and self-destroy the duplicate component only: `GameController.I`, `ScreensManager.I`, `TreeManager.I`, `UpwardFruitDetection.I`, `StaminaBar.I`, `ScoreManager.I`
+- Singletons are scene-scoped and keep the first instance: `TreeManager.I`, `UpwardFruitDetection.I`, `StaminaBar.I`, and `ScoreManager.I` destroy the duplicate component only, while `GameController.I` and `ScreensManager.I` destroy the duplicate's whole GameObject
 - A consumer that may start before its singleton reads it in `Start`, not `Awake`, so Awake order never matters
 - Nothing about the monkey is mass or gravity driven: the body is kinematic and `MonkeyPrefabRoot` writes its position and rotation outright, so no arm joint or collision can move it, while each `ArmRoot` is posed purely by its joint drives, forces gravity off on its own Rigidbody, and ignores collisions with the body's colliders so a hand never reports the monkey itself
 - Detection scripts forward trigger events (`Entered`, `Exited`, `BranchHit`) rather than calling their consumers directly
-- Trigger matching relies on tags: `Branch`, `FruitCollider`. Webs are the exception: a web skips trigger colliders, the monkey's fruit zones and branch sensor, and looks for `SpiderWebStruggle` on the touching collider's Rigidbody, which an arm's own Rigidbody lacks
-- Input arrives through `InputActionReference` fields, each script enables and disables its own action, and the arms take theirs from `MonkeyConfig` so both read one action
+- Trigger matching relies on tags: `Branch`, `FruitCollider`, `WinZone`, and `Player` (the monkey root). Webs are the exception: a web skips trigger colliders, the monkey's fruit zones and branch sensor, and looks for `SpiderWebStruggle` on the touching collider's Rigidbody, which an arm's own Rigidbody lacks
+- Input arrives through `InputActionReference` fields into `Settings/_Shared/InputSystem_Actions`, each script enables and disables its own action, and the arms take theirs from `MonkeyConfig` so both read one action. Move is WASD, the arrow keys, or a stick, Interact is E or Space (gamepad north button), Jump is Space (gamepad south button)
 - Scripts guard required inspector fields in `Awake` with a logged error naming the field
 - Gameplay that must stop at the end checks both `Time.timeScale <= 0`, which also covers a pause, and `GameController.IsGameOver`: `ArmRoot.TryGrabFruit`, `ScorePickup`, `ScoreManager.CanScore`, `SpiderWebStruggle`
 - Tuning values stay in serialized fields, and shared tuning sits in a ScriptableObject: `MonkeyPrefabRoot` and `ArmRoot` hold only wiring references and which side an arm is, every number and the input action come from `MonkeyConfig`, while game-wide numbers such as stamina come from `GameConfig`
-- Two coding styles coexist: the newer scripts (`Environment/`, `ArmRoot/`, `GameController`, `Cobra/CobraClimb`, `Cobra/CobraCollisions`) follow the house Unity style, while older contributions may still be in the template style
+- Two coding styles coexist: `ArmRoot/`, `UI/StaminaBar`, `UI/ScreensManager`, `GameController`, `GameConfig`, `Cobra/CobraClimb`, `Cobra/CobraCollisions`, and most of `Environment/` follow the house Unity style, while `Scoring/`, `Cobra/FallingCobra`, `Cobra/FallingCobraSpawner`, and `Environment/SpiderWebBuilder` are still in the template style, some with Chinese comments
 
 ## Known Gaps & Constraints
 
@@ -146,7 +147,7 @@ All under `Assets/_Monkobra/Scripts/`.
 - `CobraDemo`, `FallingCobraDemo`, and `WebDemo` remain next to `Lv1Scene` as test scenes; the falling cobra is not yet placed in `Lv1Scene`, and `WebDemo` has no `ScoreManager`, so fruit grabbed there scores nothing
 - `Lv1Scene`'s Canvas holds 2 objects named `ProgressBar`, the climb progress and the web escape bar, so look them up by path
 - `SpiderWebSpawner` decorates only the segments present at load; a runtime segment generator must call `PopulateSegment`
-- Space is both interact and the web escape key, so `SpiderWebStruggle` escapes on the Jump action and keeps interact disabled while trapped
+- Space is bound to both Interact (alongside E) and Jump, the web escape key, so `SpiderWebStruggle` escapes on the Jump action and keeps interact disabled while trapped
 - The tree is finite (`TreeManager` min and max y), not the endless tree of the pitch
 - Branch count per segment and falling-cobra spawn frequency scale with climb distance in their respective scenes; broader difficulty scaling is not yet implemented
 - The prototype's WebGL link, gameplay video, and contributions belong to a different team's submission and do not describe this repository
