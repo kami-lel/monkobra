@@ -3,23 +3,22 @@
 <!--
 todo audio BGM
 todo audio SFX
-fixme cobra done as pool
 -->
 
 ## [Unreleased]
 
 ### Added
 
+- Spider web trap in `Lv1Scene`, also in the `WebDemo` test scene: webs spawn on the upper trunk clear of branches and fruit, hold the monkey on contact, and break on rapid Space presses, with a first-trap hint and an escape bar that hide on escape or game over, and a short immunity after escaping
+
 ### Changed
 
+- `MonkeyPrefabRoot` exposes `IsHeld` to freeze the body in place
 - falling cobra contact in `FallingCobraDemo` now uses the monkey's branch-hit stun and drop instead of ending the run
 - falling cobra spawning now unlocks after a configurable climb distance from the monkey's starting height instead of 60% of the finite tree
 - falling cobra spawn intervals now shorten with the monkey's highest climb, down to a configurable minimum
 - cobra coil fill: `CobraClimb` clones body segments so the coil has no gap
 - cobra look: bead-chain body w/ small gaps & slight taper, flat hooded head w/ eyes, raised neck, slow slither wave
-
-### Changed
-
 - cobra body coils ≥ 1 full loop round the trunk as a corkscrew, so dropping onto it or orbiting into it is always fatal
 - cobra coil shape tuned by `coilTurns`, `coilPitchU`, `maxSegmentGapU`, replacing per-segment angle & height spacing
 - `Cobra/` scripts → house Unity style
