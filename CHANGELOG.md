@@ -2,7 +2,7 @@
 
 <!--
 TODO update AGENTS.md, incl git working steps
-FIXME update per project assets rule
+Fixme update per project assets rule
 
 
 todo audio BGM
