@@ -12,13 +12,12 @@ Descriptive knowledge of this repository for agents and developers.
 
 ## Project Overview
 
-Monkobra is a 3D vertical upward-scrolling game: a monkey climbs a tall tree, chased by a cobra, and grabs bananas to restore stamina. It descends from a paired prototype (`kami-lel/usc-csci-526-paired-prototype`).
+Game concept, genre, twist, and design intent are in the [Game Design Document](docs/monkobra-gdd.md). The project descends from a paired prototype (`kami-lel/usc-csci-526-paired-prototype`).
 
 | Aspect | Value |
 | --- | --- |
 | Engine | Unity 6 (`6000.3.22f1`), URP |
 | Packages in play | Input System, Cinemachine (camera views, impulse shake), uGUI |
-| Genre | 3D obstacle-running (*Temple Run 2*, *Subway Surfers*, *Minion Rush*) |
 | Course | USC CSCI-526, Fall 2026 |
 | Team | Yuqing Lu, Yangyi Lu (Erik), Houdong Pan, Wenhai Dong, Belle Dai |
 
@@ -142,7 +141,6 @@ All under `Assets/_Monkobra/Scripts/`.
 - Gameplay that must stop at the end checks both `Time.timeScale <= 0`, which also covers a pause, and `GameController.IsGameOver`: `ArmRoot.TryGrabFruit`, `ScorePickup`, `ScoreManager.CanScore`, `SpiderWebStruggle`
 - Tuning values stay in serialized fields, and shared tuning sits in a ScriptableObject: `MonkeyPrefabRoot` and `ArmRoot` hold only wiring references and which side an arm is, every number and the input action come from `MonkeyConfig`, while game-wide numbers such as stamina come from `GameConfig`
 - Two coding styles coexist: the newer scripts (`Environment/`, `ArmRoot/`, `GameController`, `Cobra/CobraClimb`, `Cobra/CobraCollisions`) follow the house Unity style, while older contributions may still be in the template style
-- The core tension is escape vs. sustain: grabbing slows the monkey's reactions, so every pickup risks a branch or cobra collision
 
 ## Known Gaps & Constraints
 

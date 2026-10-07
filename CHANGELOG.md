@@ -1,6 +1,9 @@
 # Monkobra CHANGELOG
 
 <!--
+Todo write docs/
+Todo update AGENTS.md, incl git working steps
+
 todo audio BGM
 todo audio SFX
 -->
