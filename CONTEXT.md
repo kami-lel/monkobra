@@ -32,9 +32,9 @@ monkobra/
 ├── CHANGELOG.md       version history, plus open triage tags in a comment
 ├── Assets/
 │   ├── _Monkobra/     all authored assets, <Type>/<Module>/<asset>
-│   │   ├── Scenes/    Lv1Scene (main), CobraDemo (standalone cobra test), WebDemo (spider web test)
+│   │   ├── Scenes/    Lv1Scene (main), CobraDemo, FallingCobraDemo, WebDemo (tests)
 │   │   ├── Scripts/   ArmRoot/ (monkey body, arms, fruit detection, camera rig), Cobra/, Environment/, Scoring/, UI/, Editor/, GameController, GameConfig
-│   │   ├── Prefabs/   Monkey, Environment/ (tree, branch, spider web), UI/StaminaBar
+│   │   ├── Prefabs/   Monkey, Cobra/ (falling cobra), Environment/ (tree, branch, spider web), UI/StaminaBar
 │   │   ├── Material/  Environment/, Player/
 │   │   ├── Shaders/   Environment/FruitOutline (inverted-hull Shader Graph)
 │   │   └── Settings/  tuning assets (MonkeyConfig, GameConfig, BranchFruitPlacementConfig), Scoring/ (ScoreConfig, BananaScore), _Shared/ URP assets
@@ -55,6 +55,8 @@ The repository root is the Unity project root. `Library/`, `Temp/`, `Logs/`, `Us
 | Tree | stack of static and dynamic trunk segments under a `TreeTop`, each dynamic segment decorated with branches | implemented, finite height |
 | Branch hit | camera shake, then stun (input ignored) while the monkey drops a set distance, all tuned in `MonkeyConfig` | implemented |
 | Cobra | orbits and climbs the trunk on its own, trigger contact calls `GameController.LoseGame` | implemented |
+| Falling cobra | in `FallingCobraDemo`, unlocks after a configured climb distance from the monkey's starting height, then periodically spawns from a nearby branch above the player, flashes a warning, and falls; its single `Branch` trigger causes the existing camera shake, stun and drop instead of ending the run | demo only; not in `Lv1Scene` |
+| Cobra | coils at least one full loop round the trunk as a corkscrew and climbs after the monkey; any trigger contact, side-on or by dropping onto the coil, calls `GameController.LoseGame` | implemented |
 | Stamina | `StaminaBar` slider drains on a timer and by movement (`MonkeyPrefabRoot` calls `DrainByMovement` each step: climbing costs most, orbiting less, descending and the stun fall nothing), `AddStaminaByFruit` restores a fixed amount, budget, rates and fruit restore come from `GameConfig` | grabs restore it, not yet tied to hits |
 | Grab | hold the interact action: camera swaps to a side view and the arm stretches toward the newest fruit at `ReachExtendSpeedU`; release grabs it iff the hand collider overlaps the fruit at that instant, else a miss (too short, or stretched past it). Fruit in a detection zone is outlined as reachable, fruit under the hand as grabbable | grab implemented: `ScorePickup.TryCollect` switches the fruit off and adds its points (a fruit without one is just switched off), then `ArmRoot` calls `StaminaBar.I.AddStaminaByFruit` |
 | Spider web | `SpiderWebSpawner` sticks webs flat on the trunk from `startProgress` of the climb up, clear of branches and fruit. The monkey's solid body touching a web's trigger holds it in place (`MonkeyPrefabRoot.IsHeld`) and pauses interact; each Jump (Space) press fills an escape bar that drains while idle, a full bar removes the web and grants a short immunity. `SpiderWebPrompt` shows the hint on the first trap per scene load, the bar on every trap, and hides both on escape or game over. The struggle freezes while paused or after game over | implemented in `Lv1Scene` and `WebDemo` |
@@ -107,7 +109,11 @@ All under `Assets/_Monkobra/Scripts/`.
 | `ArmRoot/DetectionZone` | side-tagged trigger volume that forwards enter and exit events |
 | `ArmRoot/CameraRigManager` | swaps behind, look-left, look-right cameras by Cinemachine priority |
 | `Cobra/CobraClimb` | spiral path around `pathCenter`, body segments trail the head |
-| `Cobra/CobraCollisions` | trigger enter calls `GameController.LoseGame` |
+| `Cobra/CobraCollisions` | trigger enter ;calls `GameController.LoseGame` |
+| `Cobra/FallingCobraSpawner` | in `FallingCobraDemo`, permanently unlocks after the monkey climbs a configured distance above its starting height; tracks peak climb so spawn intervals gradually shorten to a configured floor even if the monkey later falls, while spawning one cobra at a time from a nearby branch above the player |
+| `Cobra/FallingCobra` | flashes before falling; disables segment colliders and uses one capsule trigger tagged `Branch` so `HitBranchDetection` applies the existing drop penalty once |
+| `Cobra/CobraClimb` | corkscrew path around `pathCenter`: the body spans `coilTurns` (≥ 1) loops rising `coilPitchU` per loop, and on `Awake` clones the last segment until no gap along the coil exceeds `maxSegmentGapU`. The cobra climbs nonstop and never descends (only slowing as the coil nears the player), so it runs on into the monkey, and a monkey moving or dropping down runs into the coil. Looks are code-only, no art assets: a chain of rounded beads with small gaps (`segmentFill`), slightly tapered by `thicknessProfile`, while each bead's capsule collider is stretched to reach its neighbours so the hit shape stays gapless; head flattened with primitive-sphere eyes, raised neck, a slow travelling slither wave; the body keeps its material's color, only the eyes are tinted black via `MaterialPropertyBlock` |
+| `Cobra/CobraCollisions` | on the cobra root beside its kinematic Rigidbody, so every segment's trigger reports to it; contact with any monkey part (body and tail under the `Player`-tagged root, or a hand under `ArmRoot`) calls `GameController.LoseGame`, while the monkey's detection triggers are ignored |
 | `UI/StaminaBar` | singleton (`I`), slider drained on a timer and by `DrainByMovement`, loses the game at 0, `AddStaminaByFruit` restores it on a grab |
 | `Environment/SpiderWebSpawner` | on the tree root, after default execution order: rolls web slots per `DynamicTreeSegment` below it, lays each web flat on its segment's bark facing out, and drops spots below the start height, near another web, or whose trigger overlaps a branch or fruit. `PopulateSegment` decorates a segment added later |
 | `Environment/SpiderWebTrap` | web prefab root, 1 trigger `BoxCollider` deepened outward along local +X to reach the monkey; hands itself to the `SpiderWebStruggle` on a touching solid collider's Rigidbody, pulses on escape presses, `Release` destroys it |
@@ -135,19 +141,19 @@ All under `Assets/_Monkobra/Scripts/`.
 - Scripts guard required inspector fields in `Awake` with a logged error naming the field
 - Gameplay that must stop at the end checks both `Time.timeScale <= 0`, which also covers a pause, and `GameController.IsGameOver`: `ArmRoot.TryGrabFruit`, `ScorePickup`, `ScoreManager.CanScore`, `SpiderWebStruggle`
 - Tuning values stay in serialized fields, and shared tuning sits in a ScriptableObject: `MonkeyPrefabRoot` and `ArmRoot` hold only wiring references and which side an arm is, every number and the input action come from `MonkeyConfig`, while game-wide numbers such as stamina come from `GameConfig`
-- Two coding styles coexist: the newer scripts (`Environment/`, `ArmRoot/`, `GameController`) follow the house Unity style, while `Cobra/` is an older contribution still in the template style
+- Two coding styles coexist: the newer scripts (`Environment/`, `ArmRoot/`, `GameController`, `Cobra/CobraClimb`, `Cobra/CobraCollisions`) follow the house Unity style, while older contributions may still be in the template style
 - The core tension is escape vs. sustain: grabbing slows the monkey's reactions, so every pickup risks a branch or cobra collision
 
 ## Known Gaps & Constraints
 
 - No tests or run commands exist: verification means opening `Lv1Scene` in the Editor
 - Stamina drains on a timer and by movement, but is not linked to branch hits
-- `CobraDemo` and `WebDemo` remain next to `Lv1Scene` as test scenes; `WebDemo` has no `ScoreManager`, so fruit grabbed there scores nothing
+- `CobraDemo`, `FallingCobraDemo`, and `WebDemo` remain next to `Lv1Scene` as test scenes; the falling cobra is not yet placed in `Lv1Scene`, and `WebDemo` has no `ScoreManager`, so fruit grabbed there scores nothing
 - `Lv1Scene`'s Canvas holds 2 objects named `ProgressBar`, the climb progress and the web escape bar, so look them up by path
 - `SpiderWebSpawner` decorates only the segments present at load; a runtime segment generator must call `PopulateSegment`
 - Space is both interact and the web escape key, so `SpiderWebStruggle` escapes on the Jump action and keeps interact disabled while trapped
 - The tree is finite (`TreeManager` min and max y), not the endless tree of the pitch
-- Difficulty does not scale with distance yet, apart from branch count per segment
+- Branch count per segment and falling-cobra spawn frequency scale with climb distance in their respective scenes; broader difficulty scaling is not yet implemented
 - The prototype's WebGL link, gameplay video, and contributions belong to a different team's submission and do not describe this repository
 
 ## Living Document Maintenance

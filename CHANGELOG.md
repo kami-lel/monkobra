@@ -3,7 +3,6 @@
 <!--
 todo audio BGM
 todo audio SFX
-fixme cobra done as pool
 -->
 
 ## [Unreleased]
@@ -15,12 +14,27 @@ fixme cobra done as pool
 ### Changed
 
 - `MonkeyPrefabRoot` exposes `IsHeld` to freeze the body in place
+- falling cobra contact in `FallingCobraDemo` now uses the monkey's branch-hit stun and drop instead of ending the run
+- falling cobra spawning now unlocks after a configurable climb distance from the monkey's starting height instead of 60% of the finite tree
+- falling cobra spawn intervals now shorten with the monkey's highest climb, down to a configurable minimum
+- cobra coil fill: `CobraClimb` clones body segments so the coil has no gap
+- cobra look: bead-chain body w/ small gaps & slight taper, flat hooded head w/ eyes, raised neck, slow slither wave
+- cobra body coils ≥ 1 full loop round the trunk as a corkscrew, so dropping onto it or orbiting into it is always fatal
+- cobra coil shape tuned by `coilTurns`, `coilPitchU`, `maxSegmentGapU`, replacing per-segment angle & height spacing
+- `Cobra/` scripts → house Unity style
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
+
+- cobra contact script class renamed `CobraCollisions` to match its file, so Unity can load it
+- cobra contact counts the monkey's tail & hands, not only its body; detection triggers no longer matter
+- cobra no longer retreats downward with a descending monkey, which let the monkey push it down and never touch it
+- cobra contact also checked while overlapping, not only on entry
+- monkey body collider height 1 → 2 to match its visible body, so contact registers from the monkey's bottom, not its middle (also reaches win zone & other triggers ~0.5 U sooner)
+- cobra no longer parks at the player's height waiting for its head to come round; the coil climbs on into the player, so body contact kills at once
 
 ### Security
 
