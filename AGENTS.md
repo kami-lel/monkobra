@@ -85,4 +85,5 @@ No test suite exists yet. When one is added, record the exact scoped command her
 
 - Update [CONTEXT.md](CONTEXT.md) in the same change whenever entities, systems, or mechanics shift
 - Update [README.md](README.md) when controls, setup steps, or the mechanic list change
+- Update the [Game Design Document](docs/monkobra-gdd.md) when design intent shifts, ie pillars, the core twist, resources, or win and lose rules; read it before changing how a mechanic is meant to feel
 - Update this file when commands or conventions change

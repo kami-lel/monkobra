@@ -90,12 +90,3 @@ The intended arc is steady tension broken by short bursts of risk. The player cl
 
 - Ramp: branches grow denser higher up the tree
 - Future Work: broader scaling, such as cobra speed or hazard frequency, is not yet designed
-
-## Controls
-
-| Input | Action |
-| --- | --- |
-| Up, Down | climb the tree |
-| Left, Right | circle around the tree |
-| Space (hold and release) | reach out and grab a banana |
-| Space (press rapidly) | break free of a spider web |
