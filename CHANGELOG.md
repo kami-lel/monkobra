@@ -1,7 +1,9 @@
 # Monkobra CHANGELOG
 
 <!--
-Todo update AGENTS.md, incl git working steps
+TODO update AGENTS.md, incl git working steps
+FIXME update per project assets rule
+
 
 todo audio BGM
 todo audio SFX
