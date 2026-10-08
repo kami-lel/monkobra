@@ -56,7 +56,7 @@ public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
     private BranchFruitPlacementConfig placementConfig;
 
     [SerializeField]
-    [Tooltip("game balance tuning; branch count")]
+    [Tooltip("game balance tuning; branch attempts & chance")]
     private GameBalanceConfig balanceConfig;
 
     // MonoBehaviour Lifecycle  ################################################
@@ -151,30 +151,34 @@ public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
         float segmentHeight = GetHeight();
         List<Vector3> placedPositions = new();
 
-        // higher segment in tree → more branches, max count reached at
-        // MaxCountProgress of the climb and kept above it
-        int minBranchCount = balanceConfig.MinBranchCount;
-        int maxBranchCount = balanceConfig.MaxBranchCount;
-        float maxCountProgress = placementConfig.MaxCountProgress;
-
-        float segmentY = segmentCollider.bounds.center.y;
-        float progress = Mathf.InverseLerp(
-            TreeManager.I.MinY,
-            TreeManager.I.MaxY,
-            segmentY
-        );
-        float countRatio =
-            maxCountProgress <= 0f
-                ? 1f
-                : Mathf.Clamp01(progress / maxCountProgress);
-        int branchCount = Mathf.RoundToInt(
-            Mathf.Lerp(minBranchCount, maxBranchCount, countRatio)
+        // fixed attempt count, each attempt spawns a branch by the chance the
+        // curve gives at this segment's ramped difficulty
+        float difficulty = RampedDifficultyService.I != null
+            ? RampedDifficultyService.I.GetRampedValueFromYPosition(
+                segmentCollider.bounds.center.y
+            )
+            : 0f;
+        float spawnProbability = Mathf.Clamp01(
+            balanceConfig.BranchSpawnProbabilityCurve.Evaluate(difficulty)
         );
 
-        for (int i = 0; i < branchCount; i++) {
-            SpawnBranch(segmentHeight, placedPositions);
+        int attemptCount = balanceConfig.BranchGenerationAttemptCount;
+        int branchCount = 0;
+        for (int i = 0; i < attemptCount; i++) {
+            if (Random.value < spawnProbability) {
+                SpawnBranch(segmentHeight, placedPositions);
+                branchCount++;
+            }
         }
 
+        if (Debug.isDebugBuild) {
+            Debug.Log(
+                "DynamicTreeSegmentPrefabRoot:\t"
+                    + $"branches {branchCount}/{attemptCount} "
+                    + $"(difficulty {difficulty:F2}, p {spawnProbability:F2})",
+                this
+            );
+        }
     }
 
     private void SpawnBranch(float segmentHeight, List<Vector3> placedPositions) {

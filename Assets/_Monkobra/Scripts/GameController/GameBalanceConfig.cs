@@ -2,7 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// Single home for the game balance knobs: stamina budget, climb speeds,
-/// branch-hit penalty, score rules and branch density.
+/// branch-hit penalty, score rules and branch generation.
 /// </summary>
 [CreateAssetMenu(
     fileName = "GameBalanceConfig",
@@ -60,11 +60,13 @@ public class GameBalanceConfig: ScriptableObject {
     /// <returns>points awarded per score reward pickup</returns>
     public int ScoreRewardPoints => scoreRewardPoints;
 
-    /// <returns>branches on a segment at the tree base</returns>
-    public int MinBranchCount => minBranchCount;
+    /// <returns>branch creation attempts rolled per segment</returns>
+    public int BranchGenerationAttemptCount => branchGenerationAttemptCount;
 
-    /// <returns>branches on a segment at the tree top</returns>
-    public int MaxBranchCount => maxBranchCount;
+    /// <returns>x: ramped difficulty 0~1; y: chance 0~1 that one attempt
+    /// creates a branch</returns>
+    public AnimationCurve BranchSpawnProbabilityCurve =>
+        branchSpawnProbabilityCurve;
 
     // Inspector Fields  #######################################################
     [Header("Stamina")]
@@ -144,14 +146,19 @@ public class GameBalanceConfig: ScriptableObject {
     [Tooltip("points awarded per score reward pickup")]
     private int scoreRewardPoints = 100;
 
-    [Header("Branch Count")]
+    [Header("Branch")]
     [SerializeField]
-    [Tooltip("branches on segment at tree base")]
-    private int minBranchCount = 2;
+    [Min(0)]
+    [Tooltip("branch creation attempts rolled per segment")]
+    private int branchGenerationAttemptCount = 9;
 
     [SerializeField]
-    [Tooltip("branches on segment at tree top")]
-    private int maxBranchCount = 9;
+    [Tooltip(
+        "x: ramped difficulty 0~1; y: chance 0~1 that one attempt "
+            + "creates a branch"
+    )]
+    private AnimationCurve branchSpawnProbabilityCurve =
+        AnimationCurve.Linear(0f, 0f, 1f, 1f);
 
     // Editor Validation  ######################################################
     private void OnValidate() {
@@ -171,7 +178,9 @@ public class GameBalanceConfig: ScriptableObject {
         pointsPerMeter = Mathf.Max(0, pointsPerMeter);
         unitsPerMeter = Mathf.Max(0.001f, unitsPerMeter);
         scoreRewardPoints = Mathf.Max(0, scoreRewardPoints);
-        minBranchCount = Mathf.Max(0, minBranchCount);
-        maxBranchCount = Mathf.Max(minBranchCount, maxBranchCount);
+        branchGenerationAttemptCount = Mathf.Max(
+            0,
+            branchGenerationAttemptCount
+        );
     }
 }

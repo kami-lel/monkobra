@@ -10,10 +10,6 @@ using UnityEngine;
 )]
 public class BranchFruitPlacementConfig: ScriptableObject {
     // Public Members  #########################################################
-    /// <returns>climb progress, 0~1, at/above which a segment gets the
-    /// max branch count of <see cref="GameBalanceConfig"/></returns>
-    public float MaxCountProgress => maxCountProgress;
-
     /// <returns>branch distance from the trunk axis; u</returns>
     public float BranchRadius => branchRadius;
 
@@ -25,12 +21,6 @@ public class BranchFruitPlacementConfig: ScriptableObject {
     public int MaxPlacementAttempts => maxPlacementAttempts;
 
     // Inspector Fields  #######################################################
-    [Header("Branch Count")]
-    [SerializeField]
-    [Range(0f, 1f)]
-    [Tooltip("climb progress at/above which segment gets max branches")]
-    private float maxCountProgress = 0.6f;
-
     [Header("Branch Position")]
     [SerializeField]
     [Tooltip("branch distance fr trunk axis; u")]

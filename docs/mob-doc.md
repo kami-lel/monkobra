@@ -43,7 +43,7 @@ A branch is a prefab (`Prefabs/Environment/BranchWithFruit`) holding a `Branch`-
 
 `DynamicTreeSegmentPrefabRoot` decorates each dynamic trunk segment with branches in its `Start`, after `TreeManager` exists. Placement tuning sits in `BranchFruitPlacementConfig`.
 
-- Count: grows linearly from the minimum at the tree base to the maximum at `maxCountProgress` of the climb, then stays there, so the tree gets denser with height
+- Count: a fixed `branchGenerationAttemptCount` per segment (`GameBalanceConfig`); each attempt samples `branchSpawnProbabilityCurve` at the segment's ramped difficulty (`RampedDifficultyService`, linear 0 to 1 by default) and spawns a branch if a random roll falls below that chance, so the tree gets denser with height
 - Position: a random angle round the trunk and a random height in the segment, at a fixed radius, retried until a spot keeps the minimum separation from branches already placed on that segment, else the last try is accepted
 - Banana: `BranchWithScriptRoot` rolls whether a branch bears a banana, then randomizes the stem length and banana rotation
 
