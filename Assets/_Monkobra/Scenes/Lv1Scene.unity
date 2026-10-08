@@ -912,7 +912,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 387742569}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.020249778, y: 0.97973335, z: 0.13797057, w: -0.14379433}
+  m_LocalRotation: {x: 0.020249778, y: 0.9797333, z: 0.13797057, w: -0.14379433}
   m_LocalPosition: {x: 0.000000029802322, y: -0.99999994, z: 10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1597,7 +1597,6 @@ GameObject:
   m_Component:
   - component: {fileID: 762143289}
   - component: {fileID: 762143290}
-  - component: {fileID: 762143291}
   m_Layer: 0
   m_Name: Tree
   m_TagString: Untagged
@@ -1635,27 +1634,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   minY: 0
   maxY: 100
---- !u!114 &762143291
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 762143288}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f3826980c87e542e68dfcb95a302dc45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SpiderWebSpawner
-  webPrefab: {fileID: -7967758877750076835, guid: 4cd205f4962424e6aa5c63515c047fde, type: 3}
-  startProgress: 0.5
-  maxWebsPerSegment: 2
-  spawnChance: 0.5
-  trunkRadiusU: 5
-  surfaceOffsetU: 0.02
-  minWebSeparationU: 4
-  clearanceU: 0.3
-  maxPlacementAttempts: 30
 --- !u!1001 &763019835
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2048,6 +2026,7 @@ GameObject:
   m_Component:
   - component: {fileID: 824126027}
   - component: {fileID: 824126028}
+  - component: {fileID: 824126029}
   m_Layer: 0
   m_Name: DTSPool
   m_TagString: Untagged
@@ -2087,6 +2066,28 @@ MonoBehaviour:
   segmentCount: 10
   firstSegmentY: -10
   lookAheadU: 20
+--- !u!114 &824126029
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 824126026}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3826980c87e542e68dfcb95a302dc45, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpiderWebSpawner
+  webPrefab: {fileID: -7967758877750076835, guid: 4cd205f4962424e6aa5c63515c047fde, type: 3}
+  balanceConfig: {fileID: 11400000, guid: 6ce5d249000443e49bba5365e143c660, type: 2}
+  trunkRadiusU: 5
+  surfaceOffsetU: 0.02
+  minWebSeparationU: 4
+  clearanceU: 0.3
+  maxPlacementAttempts: 30
+  useTestOverride: 0
+  testStartClimbU: 5
+  testSpawnChance: 1
 --- !u!1 &825330269
 GameObject:
   m_ObjectHideFlags: 0
