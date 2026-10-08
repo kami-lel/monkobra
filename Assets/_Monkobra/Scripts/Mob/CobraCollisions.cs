@@ -31,6 +31,11 @@ public class CobraCollisions: MonoBehaviour {
             return;
         }
 
+        // cheat flag: cobra contact is harmless
+        if (GameController.I.CobraNoClip) {
+            return;
+        }
+
         if (Debug.isDebugBuild) {
             Debug.Log(
                 $"CobraCollisions:\tplayer caught via {other.name}, "
