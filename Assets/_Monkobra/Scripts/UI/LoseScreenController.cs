@@ -2,12 +2,13 @@ using TMPro;
 using UnityEngine;
 
 /// <summary>
-/// Fills the lose screen's final height and final score labels each time the
-/// screen is enabled. Attach to the lose screen panel.
+/// Fills the lose screen's final height, final score, and banana collected
+/// labels each time the screen is enabled. Attach to the lose screen panel.
 /// <para>
 /// Height is the highest point reached, read from
 /// <see cref="RampedDifficultyService.HighestPlayerClimbedYDistance"/>, shown
-/// as whole units. Score is <see cref="ScoreManager.TotalScore"/>.
+/// as whole units. Score is <see cref="ScoreManager.TotalScore"/>, bananas
+/// <see cref="ScoreManager.BananaCollectedCount"/>.
 /// </para>
 /// </summary>
 public class LoseScreenController: MonoBehaviour {
@@ -21,12 +22,20 @@ public class LoseScreenController: MonoBehaviour {
     private TMP_Text finalScoreText;
 
     [SerializeField]
+    [Tooltip("label for the banana collected count")]
+    private TMP_Text bananaCollectedText;
+
+    [SerializeField]
     [Tooltip("text before the final height number")]
     private string heightPrefix = "Final Height: ";
 
     [SerializeField]
     [Tooltip("text before the final score number")]
     private string scorePrefix = "Final Score: ";
+
+    [SerializeField]
+    [Tooltip("text before the banana collected number")]
+    private string bananaPrefix = "Banana Collected: ";
 
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
@@ -45,11 +54,19 @@ public class LoseScreenController: MonoBehaviour {
                 this
             );
         }
+        if (bananaCollectedText == null) {
+            Debug.LogError(
+                "LoseScreenController:\tmust assign Inspector Field: "
+                    + "Banana Collected Text",
+                this
+            );
+        }
     }
 
     private void OnEnable() {
         RefreshFinalHeight();
         RefreshFinalScore();
+        RefreshBananaCollected();
     }
 
     // private methods  ########################################################
@@ -95,6 +112,26 @@ public class LoseScreenController: MonoBehaviour {
 
         if (Debug.isDebugBuild) {
             Debug.Log($"LoseScreenController:\tfinal score {score}");
+        }
+    }
+
+    private void RefreshBananaCollected() {
+        if (bananaCollectedText == null) {
+            return;
+        }
+        if (ScoreManager.I == null) {
+            Debug.LogWarning(
+                "LoseScreenController:\tScoreManager not found",
+                this
+            );
+            return;
+        }
+
+        int count = ScoreManager.I.BananaCollectedCount;
+        bananaCollectedText.text = bananaPrefix + count.ToString("N0");
+
+        if (Debug.isDebugBuild) {
+            Debug.Log($"LoseScreenController:\tbanana collected {count}");
         }
     }
 }

@@ -6,6 +6,7 @@ public class ScoreManager: MonoBehaviour {
     public long TotalScore => DistanceScore + RewardScore;
     public long DistanceScore { get; private set; }
     public long RewardScore { get; private set; }
+    public int BananaCollectedCount { get; private set; }
     public double HighestClimbedMeters => highestClimbedUnits / unitsPerMeter;
     public bool IsRunEnded => isRunEnded;
     public event Action<long> ScoreChanged;
@@ -26,6 +27,8 @@ public class ScoreManager: MonoBehaviour {
 
         long oldScore = TotalScore;
         RewardScore += Math.Min((long)reward.Points, long.MaxValue - TotalScore);
+        // every reward is a banana pickup
+        BananaCollectedCount++;
         NotifyIfChanged(oldScore);
         return true;
     }
@@ -59,6 +62,7 @@ public class ScoreManager: MonoBehaviour {
         highestClimbedUnits = 0d;
         DistanceScore = 0;
         RewardScore = 0;
+        BananaCollectedCount = 0;
         isRunEnded = GameController.I != null
             && GameController.I.State == GameState.Lost;
         hasStarted = true;
