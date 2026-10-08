@@ -3,7 +3,6 @@
 <!--
 Fixme clear SO organize
 FIXME update per project assets rule
-FIXME rename cobra as great cobra
 
 Bug falling cobra gone
 -->
