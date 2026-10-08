@@ -19,17 +19,10 @@ public class StaminaBar: MonoBehaviour {
     /// </summary>
     public void AddStaminaByFruit() {
         AddStamina(config.FruitStaminaRestore);
-        if (Debug.isDebugBuild) {
-            Debug.Log(
-                $"StaminaBar:\tfruit grabbed, stamina {currentStamina}",
-                this
-            );
-        }
     }
 
     public void AddStamina(float amount) {
-        // a drained bar means the run is lost, the drain loop is gone too
-        if (amount <= 0f || !HasStamina) {
+        if (amount <= 0f) {
             return;
         }
 
@@ -62,10 +55,6 @@ public class StaminaBar: MonoBehaviour {
 
         currentStamina = Mathf.Max(0f, currentStamina - amount);
         staminaSlider.value = currentStamina;
-
-        if (currentStamina <= 0f) {
-            LoseByDepletion();
-        }
     }
 
     // Inspector Fields  #######################################################
@@ -117,14 +106,14 @@ public class StaminaBar: MonoBehaviour {
 
     // private members  ########################################################
     private float currentStamina;
-    private bool isDepletionHandled; // timer and movement both can empty bar
 
     // cached references  ------------------------------------------------------
     private Slider staminaSlider;
 
     // private methods  ########################################################
     private IEnumerator DecreaseStaminaOverTime() {
-        while (currentStamina > 0f) {
+        // an empty bar only slows the monkey, so the tick keeps running
+        while (true) {
             yield return new WaitForSeconds(config.StaminaDecreaseIntervalS);
 
             currentStamina = Mathf.Max(
@@ -133,32 +122,6 @@ public class StaminaBar: MonoBehaviour {
             );
 
             staminaSlider.value = currentStamina;
-
-            if (currentStamina <= 0f) {
-                LoseByDepletion();
-                yield break;
-            }
-        }
-    }
-
-    // run is lost once, whichever of timer or movement empties the bar
-    private void LoseByDepletion() {
-        if (isDepletionHandled) {
-            return;
-        }
-        isDepletionHandled = true;
-
-        if (GameController.I != null) {
-            if (Debug.isDebugBuild) {
-                Debug.Log("StaminaBar:\tstamina depleted, losing game", this);
-            }
-
-            GameController.I.LoseGame();
-        } else {
-            Debug.LogWarning(
-                "StaminaBar:\tGameController instance not found",
-                this
-            );
         }
     }
 }

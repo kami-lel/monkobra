@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+// Bug web spawner fail to work
+
 /// <summary>
 /// Sticks <see cref="SpiderWebTrap"/> webs flat on the trunk of every
 /// <see cref="DynamicTreeSegmentPrefabRoot"/> below this object, from
@@ -43,6 +46,9 @@ public class SpiderWebSpawner: MonoBehaviour {
         // branches were posed through their transforms this frame, push the
         // poses into physics so the overlap test can see them
         Physics.SyncTransforms();
+
+        // webs die with a restarted segment, so the list must not grow
+        spawnedWebs.RemoveAll(web => web == null);
 
         int spawnedCount = 0;
         for (int slot = 0; slot < maxWebsPerSegment; slot++) {

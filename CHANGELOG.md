@@ -1,11 +1,16 @@
 # Monkobra CHANGELOG
 
 <!--
+Todo RampedDifficulty
+Fixme update scoring system
+Todo data collection system
+Todo add final score & high score in UI
+
+Fixme clear SO organize
 Fixme update per project assets rule
+Fixme rename cobra as great cobra
 
-
-todo audio BGM
-todo audio SFX
+Bug falling cobra gone
 -->
 
 ## [Unreleased]
@@ -14,8 +19,11 @@ todo audio SFX
 
 - Spider web trap in `Lv1Scene`, also in the `WebDemo` test scene: webs spawn on the upper trunk clear of branches and fruit, hold the monkey on contact, and break on rapid Space presses, with a first-trap hint and an escape bar that hide on escape or game over, and a short immunity after escaping
 
+- `DTSPool`: recycles the lowest tree segment over the top as the monkey climbs, for an endless tree; deactivates an optional mock tree at runtime
+
 ### Changed
 
+- `DynamicTreeSegmentPrefabRoot.Restart` moves a segment and re-rolls its branches, clearing the old branches and webs
 - `MonkeyPrefabRoot` exposes `IsHeld` to freeze the body in place
 - falling cobra contact in `FallingCobraDemo` now uses the monkey's branch-hit stun and drop instead of ending the run
 - falling cobra spawning now unlocks after a configurable climb distance from the monkey's starting height instead of 60% of the finite tree

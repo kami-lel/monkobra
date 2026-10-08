@@ -125,7 +125,7 @@ A static trap on the trunk that holds the monkey in place while the cobra keeps 
 
 - Slots: each dynamic segment rolls a fixed number of slots, each with a spawn chance, only above `startProgress` of the climb
 - Spot: a web lies flat on its segment's bark facing outward. A spot is dropped if it is below the start height, too close to another web, or its trigger volume (plus clearance) overlaps a branch or fruit. After the retry cap the web is skipped rather than placed overlapping
-- Runtime Segments: the pass covers segments present at load, so a runtime generator must call `PopulateSegment`
+- Runtime Segments: the pass covers segments present at load, so a runtime generator must call `PopulateSegment`; `DTSPool` does so after each segment restart
 
 | Setting (`Lv1Scene`) | Value |
 | --- | --- |

@@ -311,14 +311,12 @@ public class ArmRoot: MonoBehaviour {
         isReaching = true;
         reachFruit = fruit;
         reachExtensionU = 0f;
+        fruitDetection.SetLockedTarget(fruit);
         // aim once, the arm then only stretches along that line
         SetAimWorld(fruit.transform.position - ShoulderWorld);
         // a settled arm sleeps, a new drive target alone will not wake it
         if (body != null) {
             body.WakeUp();
-        }
-        if (Debug.isDebugBuild) {
-            Debug.Log($"ArmRoot:\treaching for {fruit.name}", this);
         }
     }
 
@@ -426,6 +424,10 @@ public class ArmRoot: MonoBehaviour {
     }
 
     private void EndReach() {
+        // only the reaching arm holds the pin, an idle arm must not clear it
+        if (isReaching && UpwardFruitDetection.I != null) {
+            UpwardFruitDetection.I.SetLockedTarget(null);
+        }
         isReaching = false;
         reachFruit = null;
         reachExtensionU = 0f;
@@ -459,7 +461,8 @@ public class ArmRoot: MonoBehaviour {
     private void TryGrabFruit() 
     {
         if (Time.timeScale <= 0f
-            || (GameController.I != null && GameController.I.IsGameOver)) {
+            || (GameController.I != null
+                && GameController.I.State != GameState.Playing)) {
             return;
         }//暂停或游戏结束后，不再摘水果
         if (!isReaching || reachFruit == null) {
@@ -513,9 +516,6 @@ public class ArmRoot: MonoBehaviour {
             staminaBar.AddStaminaByFruit();
         } else {
             Debug.LogError("ArmRoot:\tfail to get singleton: StaminaBar", this);
-        }
-        if (Debug.isDebugBuild) {
-            Debug.Log($"ArmRoot:\tgrabbed {fruit.name}", this);
         }
     }
 
