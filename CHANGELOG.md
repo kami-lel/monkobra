@@ -2,8 +2,8 @@
 
 <!--
 Fixme clear SO organize
-Fixme update per project assets rule
-Fixme rename cobra as great cobra
+FIXME update per project assets rule
+FIXME rename cobra as great cobra
 
 Bug falling cobra gone
 -->
