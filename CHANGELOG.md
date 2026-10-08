@@ -2,6 +2,8 @@
 
 <!--
 Bug falling cobra gone
+Fixme ramp difficulty for: branch, spider web, & falling cobra
+Fixme collect web encounter for analytics
 -->
 
 ## [Unreleased]
