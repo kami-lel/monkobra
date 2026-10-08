@@ -80,7 +80,7 @@ graph TD
 
 ## Fruit Supply
 
-Bananas come from branches, not their own spawner. `BranchWithScriptRoot` rolls once on `Awake` per branch: with the banana chance it keeps the banana and stem, scaling the stem between 0.5x and 2x and rotating the banana randomly, otherwise it disables both. Branch density by height is in [Mobs](mob-doc.md#placement).
+Bananas come from branches, not their own spawner. `BranchWithScriptRoot` rolls once per branch in `Initialize`, called by the segment after placing it: with the banana chance (from the difficulty curve) it keeps the banana and stem, scaling the stem between 0.5x and 2x and rotating the banana randomly, otherwise it disables both. Branch density by height is in [Mobs](mob-doc.md#placement).
 
 ## Tuning
 

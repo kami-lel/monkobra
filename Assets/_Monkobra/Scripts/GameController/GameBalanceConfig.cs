@@ -68,6 +68,11 @@ public class GameBalanceConfig: ScriptableObject {
     public AnimationCurve BranchSpawnProbabilityCurve =>
         branchSpawnProbabilityCurve;
 
+    /// <returns>x: ramped difficulty 0~1; y: chance 0~1 that a generated
+    /// branch bears a banana</returns>
+    public AnimationCurve BananaSpawnProbabilityCurve =>
+        bananaSpawnProbabilityCurve;
+
     // Inspector Fields  #######################################################
     [Header("Stamina")]
     [SerializeField]
@@ -158,6 +163,14 @@ public class GameBalanceConfig: ScriptableObject {
             + "creates a branch"
     )]
     private AnimationCurve branchSpawnProbabilityCurve =
+        AnimationCurve.Linear(0f, 0f, 1f, 1f);
+
+    [SerializeField]
+    [Tooltip(
+        "x: ramped difficulty 0~1; y: chance 0~1 that a generated branch "
+            + "bears a banana"
+    )]
+    private AnimationCurve bananaSpawnProbabilityCurve =
         AnimationCurve.Linear(0f, 0f, 1f, 1f);
 
     // Editor Validation  ######################################################

@@ -45,7 +45,7 @@ A branch is a prefab (`Prefabs/Environment/BranchWithFruit`) holding a `Branch`-
 
 - Count: a fixed `branchGenerationAttemptCount` per segment (`GameBalanceConfig`); each attempt samples `branchSpawnProbabilityCurve` at the segment's ramped difficulty (`RampedDifficultyService`, linear 0 to 1 by default) and spawns a branch if a random roll falls below that chance, so the tree gets denser with height
 - Position: a random angle round the trunk and a random height in the segment, at a fixed radius, retried until a spot keeps the minimum separation from branches already placed on that segment, else the last try is accepted
-- Banana: `BranchWithScriptRoot` rolls whether a branch bears a banana, then randomizes the stem length and banana rotation
+- Banana: `DynamicTreeSegmentPrefabRoot` samples `bananaSpawnProbabilityCurve` (`GameBalanceConfig`, linear 0 to 1 by default) at each placed branch's ramped difficulty and passes the chance to `BranchWithScriptRoot.Initialize`, which rolls whether the branch bears a banana, then randomizes the stem length and banana rotation
 
 | Setting | Value | Asset |
 | --- | --- | --- |
