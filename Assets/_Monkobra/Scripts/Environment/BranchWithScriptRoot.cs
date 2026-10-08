@@ -1,11 +1,30 @@
 using UnityEngine;
 
 /// <summary>
-/// Prefab root for one branch. Decides on initialization whether this
-/// branch bears a banana, disabling the Banana + Banana Stem children when
+/// Prefab root for one branch. Decides on <see cref="Initialize"/> whether
+/// this branch bears a banana, disabling the Banana + Banana Stem children when
 /// it does not, or scaling/repositioning them into place when it does.
 /// </summary>
 public class BranchWithScriptRoot: MonoBehaviour {
+    // Public Methods  #########################################################
+    /// <summary>
+    /// Rolls whether this branch bears a banana, then shows or hides the
+    /// banana children. Called once by the spawner after the branch is placed.
+    /// </summary>
+    /// <param name="bananaProbability">chance of a banana; 0~1</param>
+    public void Initialize(float bananaProbability) {
+        if (banana == null || bananaStem == null) {
+            return;
+        }
+
+        if (Random.value < bananaProbability) {
+            AttachBanana();
+        } else {
+            banana.SetActive(false);
+            bananaStem.SetActive(false);
+        }
+    }
+
     // Inspector Fields  #######################################################
     [SerializeField]
     [Tooltip("banana child; disabled w/o banana")]
@@ -14,12 +33,6 @@ public class BranchWithScriptRoot: MonoBehaviour {
     [SerializeField]
     [Tooltip("banana stem child; scaled w/ banana")]
     private GameObject bananaStem;
-
-    [Header("Banana Spawn")]
-    [SerializeField]
-    [Tooltip("chance branch bears banana; 0~1")]
-    [Range(0f, 1f)]
-    private float bananaSpawnProbability = 0.5f;
 
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
@@ -36,17 +49,6 @@ public class BranchWithScriptRoot: MonoBehaviour {
                     + "must assign Inspector Field: bananaStem",
                 this
             );
-        }
-
-        if (banana == null || bananaStem == null) {
-            return;
-        }
-
-        if (Random.value <= bananaSpawnProbability) {
-            AttachBanana();
-        } else {
-            banana.SetActive(false);
-            bananaStem.SetActive(false);
         }
     }
 

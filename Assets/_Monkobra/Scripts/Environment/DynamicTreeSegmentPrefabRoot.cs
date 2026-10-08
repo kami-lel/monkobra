@@ -153,11 +153,9 @@ public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
 
         // fixed attempt count, each attempt spawns a branch by the chance the
         // curve gives at this segment's ramped difficulty
-        float difficulty = RampedDifficultyService.I != null
-            ? RampedDifficultyService.I.GetRampedValueFromYPosition(
-                segmentCollider.bounds.center.y
-            )
-            : 0f;
+        float difficulty = GetRampedDifficulty(
+            segmentCollider.bounds.center.y
+        );
         float spawnProbability = Mathf.Clamp01(
             balanceConfig.BranchSpawnProbabilityCurve.Evaluate(difficulty)
         );
@@ -205,6 +203,31 @@ public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
             branchPosition,
             branchRotation
         );
+
+        // banana chance follows the difficulty at the branch's own height
+        float bananaProbability = Mathf.Clamp01(
+            balanceConfig.BananaSpawnProbabilityCurve.Evaluate(
+                GetRampedDifficulty(branch.transform.position.y)
+            )
+        );
+        BranchWithScriptRoot branchRoot =
+            branch.GetComponent<BranchWithScriptRoot>();
+        if (branchRoot == null) {
+            Debug.LogWarning(
+                "DynamicTreeSegmentPrefabRoot:\t"
+                    + "branchWithFruitPrefab lacks BranchWithScriptRoot",
+                this
+            );
+        } else {
+            branchRoot.Initialize(bananaProbability);
+        }
+    }
+
+    // 0 when no service in scene
+    private float GetRampedDifficulty(float worldY) {
+        return RampedDifficultyService.I != null
+            ? RampedDifficultyService.I.GetRampedValueFromYPosition(worldY)
+            : 0f;
     }
 
     private bool IsFarEnoughFromExisting(
