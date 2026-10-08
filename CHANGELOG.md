@@ -1,8 +1,6 @@
 # Monkobra CHANGELOG
 
 <!--
-FIXME use ramp position
-FIXME update scoring system
 TODO data collection system
 TODO add final score & high score in UI
 
