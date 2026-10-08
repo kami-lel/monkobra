@@ -19,12 +19,6 @@ public class StaminaBar: MonoBehaviour {
     /// </summary>
     public void AddStaminaByFruit() {
         AddStamina(config.FruitStaminaRestore);
-        if (Debug.isDebugBuild) {
-            Debug.Log(
-                $"StaminaBar:\tfruit grabbed, stamina {currentStamina}",
-                this
-            );
-        }
     }
 
     public void AddStamina(float amount) {

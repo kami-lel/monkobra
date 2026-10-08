@@ -1,8 +1,6 @@
 # Monkobra CHANGELOG
 
 <!--
-FIXME re-add inf run
-HACK rm winnable
 BUG stigma bar wrong
 
 Bug progress bar anchor
