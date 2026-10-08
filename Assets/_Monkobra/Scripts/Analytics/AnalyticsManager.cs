@@ -61,7 +61,8 @@ public class AnalyticsManager: MonoBehaviour {
             );
             File.WriteAllText(
                 SessionFilePath,
-                "# MonKobra Analytics: Session: " + title + "\n\n",
+                "# MonKobra Analytics: Session: " + title + "\n\n"
+                    + "MonKobra v" + Application.version + "\n\n",
                 new UTF8Encoding(false)
             );
         } catch (Exception e) {
@@ -120,7 +121,7 @@ public class AnalyticsManager: MonoBehaviour {
         }
 
         SceneManager.sceneLoaded -= OnSceneLoaded;
-        Observe(null, null, null);
+        Observe(null, null, null, null);
         I = null;
     }
 
@@ -136,47 +137,68 @@ public class AnalyticsManager: MonoBehaviour {
             runStartClock = DateTime.Now;
             bananaClocks.Clear();
             webClocks.Clear();
+            branchClocks.Clear();
         } else if (state == GameState.Lost) {
             AppendRun();
         }
     }
 
     private void OnBananaCollected() {
-        bananaClocks.Add(DateTime.Now);
+        bananaClocks.Add(CreateStamp());
     }
 
     private void OnWebTrapped(bool _) {
-        webClocks.Add(DateTime.Now);
+        webClocks.Add(CreateStamp());
+    }
+
+    private void OnBranchHit(Collider _) {
+        branchClocks.Add(CreateStamp());
     }
 
     // constants  ##############################################################
     private const string FOLDER_NAME = "Analytics";
     private const string CLOCK_FORMAT = "HH:mm:ss";
 
+    // nested types  ###########################################################
+    private readonly struct EventStamp {
+        public readonly DateTime Clock;
+        // height above the run start y; world u
+        public readonly float Height;
+
+        public EventStamp(DateTime clock, float height) {
+            Clock = clock;
+            Height = height;
+        }
+    }
+
     // private members  ########################################################
     private float runStartTime;
     private DateTime runStartClock;
-    private readonly List<DateTime> bananaClocks = new List<DateTime>();
-    private readonly List<DateTime> webClocks = new List<DateTime>();
+    private readonly List<EventStamp> bananaClocks = new List<EventStamp>();
+    private readonly List<EventStamp> webClocks = new List<EventStamp>();
+    private readonly List<EventStamp> branchClocks = new List<EventStamp>();
 
     // cached references  ------------------------------------------------------
     private GameController observedGame;
     private ScoreManager observedScore;
     private SpiderWebStruggle observedWeb;
+    private HitBranchDetection observedBranch;
 
     // private methods  ########################################################
     private void ObserveScene() {
         Observe(
             GameController.I,
             ScoreManager.I,
-            FindFirstObjectByType<SpiderWebStruggle>()
+            FindFirstObjectByType<SpiderWebStruggle>(),
+            FindFirstObjectByType<HitBranchDetection>()
         );
     }
 
     private void Observe(
         GameController game,
         ScoreManager score,
-        SpiderWebStruggle web
+        SpiderWebStruggle web,
+        HitBranchDetection branch
     ) {
         if (observedGame != null) {
             observedGame.StateChanged -= OnGameStateChanged;
@@ -187,10 +209,14 @@ public class AnalyticsManager: MonoBehaviour {
         if (observedWeb != null) {
             observedWeb.Trapped -= OnWebTrapped;
         }
+        if (observedBranch != null) {
+            observedBranch.BranchHit -= OnBranchHit;
+        }
 
         observedGame = game;
         observedScore = score;
         observedWeb = web;
+        observedBranch = branch;
 
         if (observedGame != null) {
             observedGame.StateChanged += OnGameStateChanged;
@@ -200,6 +226,9 @@ public class AnalyticsManager: MonoBehaviour {
         }
         if (observedWeb != null) {
             observedWeb.Trapped += OnWebTrapped;
+        }
+        if (observedBranch != null) {
+            observedBranch.BranchHit += OnBranchHit;
         }
     }
 
@@ -216,15 +245,40 @@ public class AnalyticsManager: MonoBehaviour {
         return total.ToString(CultureInfo.InvariantCulture);
     }
 
+    // snapshot of the moment and the height climbed above the run start
+    private static EventStamp CreateStamp() {
+        RampedDifficultyService ramp = RampedDifficultyService.I;
+        return new EventStamp(
+            DateTime.Now,
+            ramp != null ? ramp.CurrentPlayerClimbedYDistance : 0f
+        );
+    }
+
+    // each stamp as time elapsed since the run started, then its height
+    // iff hasHeight
     private static void AppendClockList(
         StringBuilder sb,
-        List<DateTime> clocks
+        List<EventStamp> stamps,
+        DateTime start,
+        bool hasHeight
     ) {
-        for (int i = 0; i < clocks.Count; i++) {
-            sb.Append(i + 1).Append(". ").Append(FormatClock(clocks[i]));
+        for (int i = 0; i < stamps.Count; i++) {
+            TimeSpan elapsed = stamps[i].Clock - start;
+            sb.Append(i + 1).Append(". +");
+            sb.Append(elapsed.ToString(
+                @"hh\:mm\:ss",
+                CultureInfo.InvariantCulture
+            ));
+            if (hasHeight) {
+                sb.Append("    y=");
+                sb.Append(stamps[i].Height.ToString(
+                    "+0.0;-0.0;+0.0",
+                    CultureInfo.InvariantCulture
+                ));
+            }
             sb.Append('\n');
         }
-        if (clocks.Count > 0) {
+        if (stamps.Count > 0) {
             sb.Append('\n');
         }
     }
@@ -270,11 +324,15 @@ public class AnalyticsManager: MonoBehaviour {
 
         sb.Append("#### Banana Count: ").Append(bananaClocks.Count);
         sb.Append("\n\n");
-        AppendClockList(sb, bananaClocks);
+        AppendClockList(sb, bananaClocks, runStartClock, true);
 
         sb.Append("#### Web Encounter: ").Append(webClocks.Count);
         sb.Append("\n\n");
-        AppendClockList(sb, webClocks);
+        AppendClockList(sb, webClocks, runStartClock, false);
+
+        sb.Append("#### Branch Hit: ").Append(branchClocks.Count);
+        sb.Append("\n\n");
+        AppendClockList(sb, branchClocks, runStartClock, true);
 
         try {
             File.AppendAllText(
