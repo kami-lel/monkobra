@@ -1,71 +1,38 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-
-// Bug web spawner fail to work
-
 /// <summary>
-/// Sticks <see cref="SpiderWebTrap"/> webs flat on the trunk of every
-/// <see cref="DynamicTreeSegmentPrefabRoot"/> below this object, from
-/// <c>startProgress</c> of the climb upward. Put it on the tree root.
+/// Sticks <see cref="SpiderWebTrap"/> webs flat on the trunk of each
+/// <see cref="DynamicTreeSegmentPrefabRoot"/> as soon as it has rolled its
+/// branches, on its first Start and after every restart by
+/// <see cref="DTSPool"/>, by listening to
+/// <see cref="DynamicTreeSegmentPrefabRoot.BranchesGenerated"/>. Put one on
+/// any object active from scene load, never under the pool's mock tree,
+/// which is deactivated at runtime.
+/// <para>
+/// The spawn rate comes from the Spider Web group of
+/// <see cref="GameBalanceConfig"/>: no web below the start climb, then each
+/// slot's chance, read at the segment's middle, follows the chance curve up
+/// to the max chance at the full-chance climb and stays there. A climb
+/// height is a spot's height above the player's start y, from
+/// <see cref="RampedDifficultyService"/>, so it is the distance the monkey
+/// climbs to meet the web, whatever the world y.
+/// </para>
 /// <para>
 /// A web lies on its segment's own stretch of bark facing outward: the
 /// prefab's strands sit in its local YZ plane, so local +X, the face normal,
 /// is turned away from the trunk axis. A candidate spot is dropped if it is
-/// below the start height, too close to another web, or its trigger volume
+/// below the start climb, too close to another web, or its trigger volume
 /// overlaps any branch or fruit. Out of retries, the web is skipped rather
 /// than placed overlapping.
 /// </para>
 /// <para>
-/// Every segment is placed in the scene, not generated during the climb, so
-/// one pass at load covers the tree. The pass runs after the default
-/// execution order, once each segment has spawned its branches in its own
-/// Start. A segment created later at runtime is decorated by calling
-/// <see cref="PopulateSegment"/> once its branches are in.
+/// Webs are children of their segment, so a restart's clear removes them.
+/// The spawner also drops a segment's previous webs before rolling it again,
+/// so none linger and none double up.
 /// </para>
 /// </summary>
-[DefaultExecutionOrder(100)]
 public class SpiderWebSpawner: MonoBehaviour {
-    // Public Methods  #########################################################
-    /// <summary>
-    /// Rolls this spawner's web slots for <paramref name="segment"/>, which
-    /// must already hold its branches.
-    /// </summary>
-    public void PopulateSegment(DynamicTreeSegmentPrefabRoot segment) {
-        if (segment == null || prefabTrigger == null) {
-            return;
-        }
-        if (TreeManager.I == null) {
-            Debug.LogWarning(
-                "SpiderWebSpawner:\tno TreeManager in scene, skip webs",
-                this
-            );
-            return;
-        }
-
-        // branches were posed through their transforms this frame, push the
-        // poses into physics so the overlap test can see them
-        Physics.SyncTransforms();
-
-        // webs die with a restarted segment, so the list must not grow
-        spawnedWebs.RemoveAll(web => web == null);
-
-        int spawnedCount = 0;
-        for (int slot = 0; slot < maxWebsPerSegment; slot++) {
-            if (Random.value < spawnChance && TrySpawnWeb(segment)) {
-                spawnedCount++;
-            }
-        }
-
-        if (Debug.isDebugBuild && spawnedCount > 0) {
-            Debug.Log(
-                $"SpiderWebSpawner:\tspawned {spawnedCount} web(s) on "
-                    + segment.name,
-                segment
-            );
-        }
-    }
-
     // Inspector Fields  #######################################################
     [Header("Wiring")]
     [SerializeField]
@@ -75,23 +42,9 @@ public class SpiderWebSpawner: MonoBehaviour {
     )]
     private SpiderWebTrap webPrefab;
 
-    [Header("Web Count")]
     [SerializeField]
-    [Range(0f, 1f)]
-    [Tooltip(
-        "climb progress below which no web spawns; 0~1. Set 0 to test webs "
-            + "from the tree base"
-    )]
-    private float startProgress = 0.5f;
-
-    [SerializeField]
-    [Tooltip("web slots rolled per segment")]
-    private int maxWebsPerSegment = 2;
-
-    [SerializeField]
-    [Range(0f, 1f)]
-    [Tooltip("chance each slot gets a web; 0~1")]
-    private float spawnChance = 0.5f;
+    [Tooltip("game balance tuning; web slots, start climb & chance ramp")]
+    private GameBalanceConfig balanceConfig;
 
     [Header("Web Position")]
     [SerializeField]
@@ -120,6 +73,27 @@ public class SpiderWebSpawner: MonoBehaviour {
     [Tooltip("position retries per web b4 skipping it")]
     private int maxPlacementAttempts = 30;
 
+    [Header("Testing")]
+    [SerializeField]
+    [Tooltip(
+        "replace the balance start climb and chance ramp w/ the 2 test "
+            + "values below. Tick it b4 Play to cover the first stack, and "
+            + "leave the scene unsaved"
+    )]
+    private bool useTestOverride = false;
+
+    [SerializeField]
+    [Tooltip(
+        "start climb above the player's start y while testing; u. 0 may put "
+            + "a web on the monkey's start spot"
+    )]
+    private float testStartClimbU = 5f;
+
+    [SerializeField]
+    [Range(0f, 1f)]
+    [Tooltip("chance 0~1 that one slot gets a web while testing, any height")]
+    private float testSpawnChance = 1f;
+
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
         // Inspector Assignment Guard  -----------------------------------------
@@ -128,6 +102,15 @@ public class SpiderWebSpawner: MonoBehaviour {
                 "SpiderWebSpawner:\tmust assign Inspector Field: webPrefab",
                 this
             );
+        }
+        if (balanceConfig == null) {
+            Debug.LogWarning(
+                "SpiderWebSpawner:\tmust assign Inspector Field: "
+                    + "balanceConfig",
+                this
+            );
+        }
+        if (webPrefab == null || balanceConfig == null) {
             enabled = false;
             return;
         }
@@ -140,39 +123,51 @@ public class SpiderWebSpawner: MonoBehaviour {
             Vector3.Scale(prefabTrigger.size, prefabScale) * 0.5f;
     }
 
-    // default-order Starts have run by now, so every segment has branches
-    private void Start() {
-        foreach (
-            DynamicTreeSegmentPrefabRoot segment
-            in GetComponentsInChildren<DynamicTreeSegmentPrefabRoot>()
-        ) {
-            PopulateSegment(segment);
+    // scene OnEnables all run b4 any Start, so no segment rolls unheard.
+    // First wins: a 2nd listener would roll every segment twice
+    private void OnEnable() {
+        if (listener != null && listener != this) {
+            Debug.LogWarning(
+                "SpiderWebSpawner:\tanother spawner already listens, this "
+                    + "one stays idle",
+                this
+            );
+            return;
         }
+        listener = this;
+        DynamicTreeSegmentPrefabRoot.BranchesGenerated += OnBranchesGenerated;
     }
 
-    // trigger volume of every spawned web, plus a ring at the start height,
-    // visible in the Scene view, and in the Game view with Gizmos on
+    private void OnDisable() {
+        if (listener != this) {
+            return;
+        }
+        DynamicTreeSegmentPrefabRoot.BranchesGenerated -= OnBranchesGenerated;
+        listener = null;
+    }
+
+    // trigger volume of every spawned web, plus a ring at the start climb
+    // once the run's start y is known, visible in the Scene view, and in the
+    // Game view with Gizmos on
     private void OnDrawGizmos() {
         if (prefabTrigger == null) {
             return;
         }
 
         Gizmos.color = GIZMO_WEB_COLOR;
-        foreach (Transform web in spawnedWebs) {
+        foreach (SpiderWebTrap web in spawnedWebs) {
             if (web == null) {
                 continue;
             }
-            Gizmos.matrix = web.localToWorldMatrix;
+            Gizmos.matrix = web.transform.localToWorldMatrix;
             Gizmos.DrawWireCube(prefabTrigger.center, prefabTrigger.size);
         }
         Gizmos.matrix = Matrix4x4.identity;
 
-        if (TreeManager.I != null) {
-            float startY = Mathf.Lerp(
-                TreeManager.I.MinY,
-                TreeManager.I.MaxY,
-                startProgress
-            );
+        if (balanceConfig != null && RampedDifficultyService.I != null) {
+            float startY =
+                RampedDifficultyService.I.PlayerGameStartYPosition
+                + StartClimbU;
             Gizmos.color = GIZMO_START_COLOR;
             DrawRing(
                 new Vector3(transform.position.x, startY, transform.position.z),
@@ -183,12 +178,17 @@ public class SpiderWebSpawner: MonoBehaviour {
 
     // Editor Validation  ######################################################
     private void OnValidate() {
-        maxWebsPerSegment = Mathf.Max(0, maxWebsPerSegment);
         trunkRadiusU = Mathf.Max(0f, trunkRadiusU);
         surfaceOffsetU = Mathf.Max(0f, surfaceOffsetU);
         minWebSeparationU = Mathf.Max(0f, minWebSeparationU);
         clearanceU = Mathf.Max(0f, clearanceU);
         maxPlacementAttempts = Mathf.Max(1, maxPlacementAttempts);
+        testStartClimbU = Mathf.Max(0f, testStartClimbU);
+    }
+
+    // Event Handlers  #########################################################
+    private void OnBranchesGenerated(DynamicTreeSegmentPrefabRoot segment) {
+        PopulateSegment(segment);
     }
 
     // constants  ##############################################################
@@ -200,15 +200,115 @@ public class SpiderWebSpawner: MonoBehaviour {
     private static readonly Color GIZMO_START_COLOR = Color.cyan;
 
     // private members  ########################################################
+    private static SpiderWebSpawner listener; // the one spawner subscribed
+
     private Vector3 webTriggerCenter; // web-local, prefab scale applied
     private Vector3 webTriggerHalfSize; // web-local, prefab scale applied
-    private readonly List<Transform> spawnedWebs = new();
+    private bool hasWarnedNoDifficulty; // missing service logged once
+    private readonly List<SpiderWebTrap> spawnedWebs = new();
+
+    // start climb in force, the test one while overriding; u
+    private float StartClimbU =>
+        useTestOverride ? testStartClimbU : balanceConfig.WebStartClimbU;
 
     // cached references  ------------------------------------------------------
     private BoxCollider prefabTrigger;
 
     // private methods  ########################################################
-    private bool TrySpawnWeb(DynamicTreeSegmentPrefabRoot segment) {
+    // rolls this spawner's web slots for segment, which already holds its
+    // branches
+    private void PopulateSegment(DynamicTreeSegmentPrefabRoot segment) {
+        if (segment == null || prefabTrigger == null) {
+            return;
+        }
+        RampedDifficultyService difficulty = RampedDifficultyService.I;
+        if (difficulty == null) {
+            if (!hasWarnedNoDifficulty) {
+                Debug.LogWarning(
+                    "SpiderWebSpawner:\tno RampedDifficultyService in scene, "
+                        + "skip webs",
+                    this
+                );
+                hasWarnedNoDifficulty = true;
+            }
+            return;
+        }
+
+        ClearWebs(segment);
+
+        // pivots sit mid-segment, so this is the segment's middle climb
+        float climbedU =
+            difficulty.GetClimbedYDistance(segment.transform.position.y);
+        float chance = GetSpawnChance(climbedU);
+        if (chance <= 0f) {
+            return;
+        }
+
+        // branches were posed through their transforms this frame, push the
+        // poses into physics so the overlap test can see them
+        Physics.SyncTransforms();
+
+        int slotCount = balanceConfig.WebSlotsPerSegment;
+        int spawnedCount = 0;
+        for (int slot = 0; slot < slotCount; slot++) {
+            if (Random.value < chance && TrySpawnWeb(segment, difficulty)) {
+                spawnedCount++;
+            }
+        }
+
+        if (Debug.isDebugBuild) {
+            Debug.Log(
+                $"SpiderWebSpawner:\twebs {spawnedCount}/{slotCount} on "
+                    + $"{segment.name} (climb {climbedU:F0}u, p {chance:F2})",
+                segment
+            );
+        }
+    }
+
+    // a segment's previous webs go b4 it rolls again: its restart has
+    // already cleared them, any still active are destroyed here, so a
+    // segment never carries 2 rolls. Destroyed webs, e.g. broken free, are
+    // forgotten on the way
+    private void ClearWebs(DynamicTreeSegmentPrefabRoot segment) {
+        for (int i = spawnedWebs.Count - 1; i >= 0; i--) {
+            SpiderWebTrap web = spawnedWebs[i];
+            if (web != null && web.transform.parent != segment.transform) {
+                continue;
+            }
+            // inactive first, Destroy only lands at the end of the frame
+            if (web != null && web.gameObject.activeSelf) {
+                web.gameObject.SetActive(false);
+                Destroy(web.gameObject);
+            }
+            spawnedWebs.RemoveAt(i);
+        }
+    }
+
+    // chance 0~1 that one slot gets a web at climbedU above the start y
+    private float GetSpawnChance(float climbedU) {
+        if (climbedU < StartClimbU) {
+            return 0f;
+        }
+        if (useTestOverride) {
+            return testSpawnChance;
+        }
+
+        float startU = balanceConfig.WebStartClimbU;
+        float fullU = balanceConfig.WebFullChanceClimbU;
+        // a zero-length ramp is at its top as soon as it starts
+        float progress = fullU > startU
+            ? Mathf.InverseLerp(startU, fullU, climbedU)
+            : 1f;
+        return Mathf.Clamp01(
+            balanceConfig.WebMaxSpawnChance
+                * balanceConfig.WebSpawnChanceCurve.Evaluate(progress)
+        );
+    }
+
+    private bool TrySpawnWeb(
+        DynamicTreeSegmentPrefabRoot segment,
+        RampedDifficultyService difficulty
+    ) {
         Transform segmentXfm = segment.transform;
 
         // the trunk cylinder is centered on the segment pivot, so this keeps
@@ -231,7 +331,7 @@ public class SpiderWebSpawner: MonoBehaviour {
 
             Vector3 position = segmentXfm.TransformPoint(localPosition);
             Quaternion rotation = segmentXfm.rotation * localRotation;
-            if (!IsSpotClear(position, rotation)) {
+            if (!IsSpotClear(position, rotation, difficulty)) {
                 continue;
             }
 
@@ -241,27 +341,30 @@ public class SpiderWebSpawner: MonoBehaviour {
                 rotation,
                 segmentXfm
             );
-            spawnedWebs.Add(web.transform);
+            spawnedWebs.Add(web);
             return true;
         }
 
         return false;
     }
 
-    private bool IsSpotClear(Vector3 position, Quaternion rotation) {
-        float progress = Mathf.InverseLerp(
-            TreeManager.I.MinY,
-            TreeManager.I.MaxY,
-            position.y
-        );
-        if (progress < startProgress) {
+    private bool IsSpotClear(
+        Vector3 position,
+        Quaternion rotation,
+        RampedDifficultyService difficulty
+    ) {
+        if (difficulty.GetClimbedYDistance(position.y) < StartClimbU) {
             return false;
         }
 
-        foreach (Transform web in spawnedWebs) {
+        // a web already cleared off a restarted segment is inactive and
+        // never counts
+        foreach (SpiderWebTrap web in spawnedWebs) {
             if (
                 web != null
-                && Vector3.Distance(web.position, position) < minWebSeparationU
+                && web.gameObject.activeInHierarchy
+                && Vector3.Distance(web.transform.position, position)
+                    < minWebSeparationU
             ) {
                 return false;
             }

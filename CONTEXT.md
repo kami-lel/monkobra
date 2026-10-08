@@ -36,7 +36,7 @@ monkobra/
 ├── docs/              design, technical, mob, and grab documents
 ├── Assets/
 │   ├── _Monkobra/     all authored assets, <Type>/<Module>/<asset>
-│   │   ├── Scenes/    Lv1Scene (main), CobraDemo, FallingCobraDemo, WebDemo
+│   │   ├── Scenes/    Lv1Scene (main), CobraDemo, FallingCobraDemo
 │   │   ├── Scripts/   ArmRoot/, Cobra/, Environment/, Scoring/, UI/, GameController, GameConfig
 │   │   ├── Prefabs/   Player/, Cobra/, Environment/, UI/
 │   │   ├── Material/  Environment/, Player/
@@ -72,7 +72,9 @@ graph LR
   Stamina[StaminaBar] --> Game
   Game --> Screens[ScreensManager]
   Game -->|EndRun| Score
-  Spawner[SpiderWebSpawner] --> Web[SpiderWebTrap]
+  Pool[DTSPool] -->|Restart| Segment[DynamicTreeSegmentPrefabRoot]
+  Segment -->|BranchesGenerated| Spawner[SpiderWebSpawner]
+  Spawner --> Web[SpiderWebTrap]
   Web -->|TryTrap| Struggle[SpiderWebStruggle]
   Struggle -->|IsHeld| Root
   Struggle --> Prompt[SpiderWebPrompt]
@@ -94,22 +96,22 @@ All under `Assets/_Monkobra/Scripts/`. Each row names the owner of the detail.
 | `ArmRoot/CameraRigManager` | swaps the three Cinemachine cameras | [Grab](docs/grab-doc.md#camera) |
 | `Cameras/CameraLookUp` | on the behind camera: tilts the aim point up while climbing | none |
 | `ArmRoot/HitBranchDetection` | branch sensor: raises `BranchHit`, shakes the camera | [Mobs](docs/mob-doc.md#hit-penalty) |
-| `Environment/TreeManager` | singleton, tree `MinY` and `MaxY` | [TDD](docs/monkobra-tdd.md#tree) |
-| `Environment/DynamicTreeSegmentPrefabRoot` | places branches on a segment | [Mobs](docs/mob-doc.md#placement) |
+| `Environment/TreeManager` | singleton on the mock tree, marks the trunk axis; its `MinY` and `MaxY` are no longer read | [TDD](docs/monkobra-tdd.md#tree) |
+| `Environment/DynamicTreeSegmentPrefabRoot` | places branches on a segment, then raises the static `BranchesGenerated` | [Mobs](docs/mob-doc.md#placement) |
 | `Environment/DTSPool` | on an empty base marker: instantiates the segments, then recycles the lowest segment over the top, restarting it, for an endless tree | [TDD](docs/monkobra-tdd.md#tree) |
 | `Environment/BranchFruitPlacementConfig` | ScriptableObject of branch placement | [Mobs](docs/mob-doc.md#placement) |
 | `Environment/BranchWithScriptRoot` | decides whether a branch bears a banana | [Grab](docs/grab-doc.md#fruit-supply) |
 | `Environment/FruitOutlineListener` | two-tier banana outline | [Grab](docs/grab-doc.md#feedback) |
-| `Environment/SpiderWebSpawner` | places webs on the trunk | [Mobs](docs/mob-doc.md#placement-1) |
-| `Environment/SpiderWebTrap` | web prefab root with one deepened trigger box | [Mobs](docs/mob-doc.md#trap-and-escape) |
-| `Environment/SpiderWebStruggle` | on the monkey: trap state, escape bar, immunity | [Mobs](docs/mob-doc.md#trap-and-escape) |
-| `Environment/SpiderWebBuilder` | `Build Web` context menu that builds the web strands out of cubes, a one-off authoring aid | none |
+| `MobSpiderWeb/SpiderWebSpawner` | on `Envs/DTSPool`: on each `BranchesGenerated`, places webs on that segment's trunk by a chance that ramps with climb height | [Mobs](docs/mob-doc.md#placement-1) |
+| `MobSpiderWeb/SpiderWebTrap` | web prefab root with one deepened trigger box | [Mobs](docs/mob-doc.md#trap-and-escape) |
+| `MobSpiderWeb/SpiderWebStruggle` | on the monkey: trap state, escape bar, immunity | [Mobs](docs/mob-doc.md#trap-and-escape) |
+| `MobSpiderWeb/SpiderWebBuilder` | `Build Web` context menu that builds the web strands out of cubes, a one-off authoring aid | none |
 | `Environment/WinZoneHandler` | empty leftover on `TreeTop`, win removed, to delete | [TDD](docs/monkobra-tdd.md#run-lifecycle) |
 | `Cobra/CobraClimb` | chasing cobra path, coil, and look | [Mobs](docs/mob-doc.md#cobra) |
 | `Cobra/CobraCollisions` | cobra contact calls `LoseGame` | [Mobs](docs/mob-doc.md#contact) |
 | `Cobra/FallingCobraSpawner` | unlock, rhythm, and branch pick | [Mobs](docs/mob-doc.md#falling-cobra) |
 | `Cobra/FallingCobra` | warning, fall, and hit capsule | [Mobs](docs/mob-doc.md#falling-cobra) |
-| `Difficulty/RampedDifficultyService` | singleton, maps player y to a 0~1 ramped difficulty via the `rampedDifficultyCurve` in `GameBalanceConfig` | none |
+| `Difficulty/RampedDifficultyService` | singleton, measures any y above the player's start y (`GetClimbedYDistance`), the one climb baseline, and maps it to a 0~1 ramped difficulty via the `rampedDifficultyCurve` in `GameBalanceConfig` | [TDD](docs/monkobra-tdd.md#tree) |
 | `Analytics/AnalyticsManager` | scene-placed singleton kept across reloads: one markdown file per launch in `persistentDataPath/Analytics/`, a run entry appended on each game over, F9 starts a new session | none |
 | `Scoring/ScoreManager` | singleton, distance and reward score | [TDD](docs/monkobra-tdd.md#score) |
 | `Scoring/ScoreConfig`, `Scoring/ScoreReward` | ScriptableObjects of score rules and pickup points | [TDD](docs/monkobra-tdd.md#score) |
@@ -123,8 +125,8 @@ All under `Assets/_Monkobra/Scripts/`. Each row names the owner of the detail.
 Gaps that belong to one subsystem are listed in [Mobs](docs/mob-doc.md#known-gaps) and the [Grab System](docs/grab-doc.md#known-gaps). Project-wide ones:
 
 - No tests or run commands exist: verification means opening `Lv1Scene` in the Editor
-- `CobraDemo`, `FallingCobraDemo`, and `WebDemo` remain next to `Lv1Scene` as test scenes
-- The tree is finite, not the endless tree of the pitch
+- `CobraDemo` and `FallingCobraDemo` remain next to `Lv1Scene` as test scenes
+- `DTSPool` deactivates its mock tree, `Envs/Tree`, at runtime, so a component that must run cannot sit under it
 - Broader difficulty scaling is not yet designed, see the [Game Design Document](docs/monkobra-gdd.md#difficulty)
 - The prototype's WebGL link, gameplay video, and contributions belong to a different team's submission and do not describe this repository
 

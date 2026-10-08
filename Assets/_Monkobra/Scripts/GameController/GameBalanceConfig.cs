@@ -2,7 +2,8 @@ using UnityEngine;
 
 /// <summary>
 /// Single home for the game balance knobs: stamina budget, climb speeds,
-/// branch-hit penalty, score rules and branch generation.
+/// branch-hit penalty, score rules, branch generation and spider web
+/// generation.
 /// </summary>
 [CreateAssetMenu(
     fileName = "GameBalanceConfig",
@@ -76,6 +77,24 @@ public class GameBalanceConfig: ScriptableObject {
     /// branch bears a banana</returns>
     public AnimationCurve BananaSpawnProbabilityCurve =>
         bananaSpawnProbabilityCurve;
+
+    /// <returns>web slots rolled per tree segment</returns>
+    public int WebSlotsPerSegment => webSlotsPerSegment;
+
+    /// <returns>climb height above the player's start y below which no web
+    /// spawns; world u</returns>
+    public float WebStartClimbU => webStartClimbU;
+
+    /// <returns>climb height above the player's start y where the web chance
+    /// reaches its max; world u</returns>
+    public float WebFullChanceClimbU => webFullChanceClimbU;
+
+    /// <returns>highest chance 0~1 that one slot gets a web</returns>
+    public float WebMaxSpawnChance => webMaxSpawnChance;
+
+    /// <returns>x: progress 0~1 from the start climb to the full-chance
+    /// climb; y: share 0~1 of the max web chance</returns>
+    public AnimationCurve WebSpawnChanceCurve => webSpawnChanceCurve;
 
     // Inspector Fields  #######################################################
     [Header("Stamina")]
@@ -183,6 +202,41 @@ public class GameBalanceConfig: ScriptableObject {
     private AnimationCurve bananaSpawnProbabilityCurve =
         AnimationCurve.Linear(0f, 0f, 1f, 1f);
 
+    [Header("Spider Web")]
+    [SerializeField]
+    [Min(0)]
+    [Tooltip("web slots rolled per tree segment")]
+    private int webSlotsPerSegment = 2;
+
+    [SerializeField]
+    [Min(0f)]
+    [Tooltip(
+        "climb height above the player's start y below which no web "
+            + "spawns; u"
+    )]
+    private float webStartClimbU = 50f;
+
+    [SerializeField]
+    [Min(0f)]
+    [Tooltip(
+        "climb height above the player's start y where the web chance "
+            + "reaches its max, never below the start climb; u"
+    )]
+    private float webFullChanceClimbU = 300f;
+
+    [SerializeField]
+    [Range(0f, 1f)]
+    [Tooltip("highest chance 0~1 that one slot gets a web")]
+    private float webMaxSpawnChance = 0.5f;
+
+    [SerializeField]
+    [Tooltip(
+        "x: progress 0~1 from the start climb to the full-chance climb; "
+            + "y: share 0~1 of the max web chance. Flat past x = 1"
+    )]
+    private AnimationCurve webSpawnChanceCurve =
+        AnimationCurve.Linear(0f, 0.2f, 1f, 1f);
+
     // Editor Validation  ######################################################
     private void OnValidate() {
         maxStamina = Mathf.Max(1f, maxStamina);
@@ -205,5 +259,9 @@ public class GameBalanceConfig: ScriptableObject {
             0,
             branchGenerationAttemptCount
         );
+        webSlotsPerSegment = Mathf.Max(0, webSlotsPerSegment);
+        webStartClimbU = Mathf.Max(0f, webStartClimbU);
+        webFullChanceClimbU = Mathf.Max(webStartClimbU, webFullChanceClimbU);
+        webMaxSpawnChance = Mathf.Clamp01(webMaxSpawnChance);
     }
 }

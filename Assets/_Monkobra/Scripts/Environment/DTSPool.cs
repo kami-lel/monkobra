@@ -9,13 +9,16 @@ using UnityEngine;
 /// height <c>firstSegmentY</c>.
 /// <para>
 /// The pool holds exactly <c>segmentCount</c> segments and never makes more.
-/// Its own web pass covers the first stack, so keep it out from under a
-/// <see cref="SpiderWebSpawner"/>, which would roll them a second time.
 /// Whenever the stack top reaches less than <c>lookAheadU</c> above the
 /// player, and the lowest segment lies wholly under the player, only that
 /// lowest one is carried over the top and restarted there, so its branches
-/// (and webs, through <see cref="SpiderWebSpawner"/>) are rolled again for
-/// the new height. The pool thus climbs with the player forever.
+/// are rolled again for the new height. The pool thus climbs with the player
+/// forever.
+/// </para>
+/// <para>
+/// The pool knows nothing of webs: a <see cref="SpiderWebSpawner"/> hears
+/// each segment's <see cref="DynamicTreeSegmentPrefabRoot.BranchesGenerated"/>
+/// and redoes its webs then, so it must stay off the deactivated mock tree.
 /// </para>
 /// </summary>
 // after every segment's own Start, which rolls its branches
@@ -26,12 +29,6 @@ public class DTSPool: MonoBehaviour {
     [SerializeField]
     [Tooltip("segment prefab instantiated segmentCount times")]
     private DynamicTreeSegmentPrefabRoot segmentPrefab;
-
-    [Tooltip(
-        "decorates a restarted segment with webs, dft the one in the scene; "
-            + "empty for no webs"
-    )]
-    private SpiderWebSpawner webSpawner;
 
     [SerializeField]
     [Tooltip(
@@ -72,6 +69,18 @@ public class DTSPool: MonoBehaviour {
                     this
                 );
             } else {
+                // a web spawner left on the stand-in would go dark with it
+                if (
+                    mockTree.GetComponentInChildren<SpiderWebSpawner>(true)
+                    != null
+                ) {
+                    Debug.LogWarning(
+                        "DTSPool:\ta SpiderWebSpawner under mockTree is "
+                            + "deactivated with it, no webs will spawn; move "
+                            + "it off the mock tree",
+                        mockTree
+                    );
+                }
                 mockTree.SetActive(false);
             }
         }
@@ -103,17 +112,6 @@ public class DTSPool: MonoBehaviour {
     }
 
     private void Start() {
-        if (webSpawner == null) {
-            webSpawner = FindFirstObjectByType<SpiderWebSpawner>();
-        }
-
-        // every segment has rolled its branches in its own Start by now
-        if (webSpawner != null) {
-            foreach (DynamicTreeSegmentPrefabRoot segment in segments) {
-                webSpawner.PopulateSegment(segment);
-            }
-        }
-
         if (Debug.isDebugBuild) {
             Debug.Log(
                 $"DTSPool:\tready, {segments.Count} segments, "
@@ -214,10 +212,6 @@ public class DTSPool: MonoBehaviour {
         lowest.Restart(newPosition);
         segments.Enqueue(lowest);
         newestSegment = lowest;
-
-        if (webSpawner != null) {
-            webSpawner.PopulateSegment(lowest);
-        }
         return true;
     }
 }

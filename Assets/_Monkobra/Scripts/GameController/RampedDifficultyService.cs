@@ -17,6 +17,18 @@ public class RampedDifficultyService: MonoBehaviour {
 
     // Public Methods
     /// <summary>
+    /// Height of <paramref name="y"/> above the player's game start y, the
+    /// one baseline every climb height is measured from. A future world
+    /// origin shift only has to move <see cref="PlayerGameStartYPosition"/>
+    /// along with the world.
+    /// </summary>
+    /// <param name="y">any y position; world u</param>
+    /// <returns>climbed height, negative below the start; world u</returns>
+    public float GetClimbedYDistance(float y) {
+        return y - PlayerGameStartYPosition;
+    }
+
+    /// <summary>
     /// Samples the ramp curve at the height climbed since game start.
     /// </summary>
     /// <param name="y">player y position; world u</param>
@@ -25,7 +37,7 @@ public class RampedDifficultyService: MonoBehaviour {
         if (balanceConfig == null) {
             return 0f;
         }
-        float climbedY = y - PlayerGameStartYPosition;
+        float climbedY = GetClimbedYDistance(y);
         return Mathf.Clamp01(
             balanceConfig.RampedDifficultyCurve.Evaluate(climbedY)
         );
@@ -81,8 +93,7 @@ public class RampedDifficultyService: MonoBehaviour {
         if (player == null) {
             return;
         }
-        CurrentPlayerClimbedYDistance =
-            player.position.y - PlayerGameStartYPosition;
+        CurrentPlayerClimbedYDistance = GetClimbedYDistance(player.position.y);
         HighestPlayerClimbedYDistance = Mathf.Max(
             HighestPlayerClimbedYDistance,
             CurrentPlayerClimbedYDistance

@@ -4,9 +4,21 @@ using UnityEngine;
 /// <summary>
 /// Prefab root for one dynamic tree segment. Procedurally decorates itself
 /// with Branch With Fruit prefabs on creation, and again each time
-/// <see cref="Restart"/> moves it to a new place.
+/// <see cref="Restart"/> moves it to a new place, raising
+/// <see cref="BranchesGenerated"/> after each roll.
 /// </summary>
 public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
+    // Public Members  #########################################################
+    /// <summary>
+    /// Raised with the segment each time it has rolled its branches, on its
+    /// first Start and after every <see cref="Restart"/>, so decorators that
+    /// must keep clear of branches, e.g. <see cref="SpiderWebSpawner"/>, add
+    /// theirs then, whoever created or moved the segment.
+    /// </summary>
+    // System qualified: a using System would make Random ambiguous here
+    public static event System.Action<DynamicTreeSegmentPrefabRoot>
+        BranchesGenerated;
+
     // Public Methods  #########################################################
     /// <returns>the segment's world-space height, read from its Collider
     /// bounds</returns>
@@ -17,8 +29,9 @@ public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
     /// <summary>
     /// Moves the segment to <paramref name="worldPosition"/> and starts it
     /// over: everything spawned onto it (branches, webs) is removed and the
-    /// branches are rolled again for the new height. Callers that add more
-    /// decoration, e.g. <see cref="SpiderWebSpawner"/>, redo theirs after.
+    /// branches are rolled again for the new height. Decorators listening to
+    /// <see cref="BranchesGenerated"/>, e.g. <see cref="SpiderWebSpawner"/>,
+    /// redo theirs then.
     /// </summary>
     public void Restart(Vector3 worldPosition) {
         if (!isReady) {
@@ -177,6 +190,9 @@ public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
                 this
             );
         }
+
+        // branches are in and posed, decorators may now keep clear of them
+        BranchesGenerated?.Invoke(this);
     }
 
     private void SpawnBranch(float segmentHeight, List<Vector3> placedPositions) {
