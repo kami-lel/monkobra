@@ -109,6 +109,7 @@ The tree is a stack of static and dynamic trunk segments under a `TreeTop`.
 
 - Extent: `TreeManager` (singleton `I`) holds the tree's `MinY` and `MaxY`, 0 and 100 by default, and everything that maps a height to progress reads it: branch density, web start, the progress bar. The tree is finite
 - Segments: each `DynamicTreeSegmentPrefabRoot` places branches on itself in `Start` ([Mobs](mob-doc.md#placement)), and `SpiderWebSpawner` places webs after that ([Mobs](mob-doc.md#placement-1))
+- Pool: `DTSPool` sits on an empty parent of stacked segments and follows the object tagged `Player`, found once in `Start`. It keeps `segmentCount` segments in a FIFO; once the player is above the lowest segment's top, only that one is moved over the stack top by `DynamicTreeSegmentPrefabRoot.Restart`, which clears its branches and webs and rolls branches again; `SpiderWebSpawner.PopulateSegment` then redoes the webs. Its `mockTree` field names an editor-only stand-in that is deactivated at runtime
 - Top: the `TreeTop` prefab carries the win zone
 
 ## Stamina

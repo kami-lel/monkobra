@@ -96,6 +96,7 @@ All under `Assets/_Monkobra/Scripts/`. Each row names the owner of the detail.
 | `ArmRoot/HitBranchDetection` | branch sensor: raises `BranchHit`, shakes the camera | [Mobs](docs/mob-doc.md#hit-penalty) |
 | `Environment/TreeManager` | singleton, tree `MinY` and `MaxY` | [TDD](docs/monkobra-tdd.md#tree) |
 | `Environment/DynamicTreeSegmentPrefabRoot` | places branches on a segment | [Mobs](docs/mob-doc.md#placement) |
+| `Environment/DTSPool` | on an empty parent of segments: recycles the lowest segment over the top, restarting it, for an endless tree | [TDD](docs/monkobra-tdd.md#tree) |
 | `Environment/BranchFruitPlacementConfig` | ScriptableObject of branch placement | [Mobs](docs/mob-doc.md#placement) |
 | `Environment/BranchWithScriptRoot` | decides whether a branch bears a banana | [Grab](docs/grab-doc.md#fruit-supply) |
 | `Environment/FruitOutlineListener` | two-tier banana outline | [Grab](docs/grab-doc.md#feedback) |
