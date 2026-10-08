@@ -1,0 +1,152 @@
+using System;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Utilities;
+using UnityEngine.SceneManagement;
+
+public class GameController: MonoBehaviour {
+    // Public Members  #########################################################
+    public static GameController I {
+        get; private set;
+    }
+
+    public GameState State {
+        get; private set;
+    }
+
+    public event Action<GameState> StateChanged;
+
+    /// <summary>
+    /// whether cobra collisions are ignored entirely, a debug cheat; warns
+    /// each time it is switched on
+    /// </summary>
+    public bool CobraNoClip {
+        get => cobraNoClip;
+        set {
+            cobraNoClip = value;
+            WarnIfCobraNoClip();
+        }
+    }
+
+    // Public Methods  #########################################################
+    public void LoseGame() {
+        if (State != GameState.Playing) {
+            return;
+        }
+
+        // settle score first
+        if (ScoreManager.I != null) {
+            ScoreManager.I.EndRun();
+        }
+
+        SetState(GameState.Lost);
+        Debug.Log("GameController:\tgame lost", this);
+    }
+
+    // Inspector Fields  #######################################################
+    [SerializeField]
+    [Tooltip("shared input tuning, its interact action restarts the scene on "
+        + "the lose screen")]
+    private MonkeyConfig monkeyConfig;
+
+    [SerializeField]
+    [Min(0f)]
+    [Tooltip("unscaled seconds the lose screen ignores restart input")]
+    private float restartInputDelay = 0.5f;
+
+    [SerializeField]
+    [Tooltip("debug cheat: cobra collisions never kill the monkey")]
+    private bool cobraNoClip;
+
+    // MonoBehaviour Lifecycle  ################################################
+    private void Awake() {
+        // Inspector Assignment Guard  -----------------------------------------
+        if (monkeyConfig == null) {
+            Debug.LogError(
+                "GameController:\tmust assign Inspector Field: Monkey Config",
+                this
+            );
+        } else if (monkeyConfig.InteractAction == null) {
+            Debug.LogError(
+                "GameController:\tmust assign MonkeyConfig field: "
+                    + "interactAction",
+                monkeyConfig
+            );
+        }
+
+        if (I != null && I != this) {
+            Debug.LogWarning(
+                "GameController:\tduplicate instance destroyed",
+                this
+            );
+
+            Destroy(gameObject);
+            return;
+        }
+
+        I = this;
+        WarnIfCobraNoClip();
+        SetState(GameState.Tutorial);
+        anyPressSub = InputSystem.onAnyButtonPress.CallOnce(OnAnyPressed);
+    }
+
+    private void Update() {
+        if (State != GameState.Lost || InteractAction == null) {
+            return;
+        }
+
+        if (Time.unscaledTime - lostTime < restartInputDelay) {
+            return;
+        }
+
+        if (InteractAction.action.WasPressedThisFrame()) {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
+    }
+
+    private void OnDestroy() {
+        anyPressSub?.Dispose();
+
+        if (I == this) {
+            I = null;
+            Time.timeScale = 1f;
+        }
+    }
+
+    // Event Handlers  #########################################################
+    private void OnAnyPressed(InputControl _) {
+        anyPressSub = null;
+        if (State == GameState.Tutorial) {
+            SetState(GameState.Playing);
+        }
+    }
+
+    // private methods  ########################################################
+    private void WarnIfCobraNoClip() {
+        if (cobraNoClip) {
+            Debug.LogWarning(
+                "GameController:\tCobra No Clip is set, cobra collisions "
+                    + "cannot kill the monkey",
+                this
+            );
+        }
+    }
+
+    private void SetState(GameState next) {
+        State = next;
+        Time.timeScale = next == GameState.Playing ? 1f : 0f;
+
+        if (next == GameState.Lost) {
+            lostTime = Time.unscaledTime;
+        }
+
+        StateChanged?.Invoke(next);
+    }
+
+    // private members  ########################################################
+    private IDisposable anyPressSub;
+    private float lostTime;
+
+    private InputActionReference InteractAction =>
+        monkeyConfig != null ? monkeyConfig.InteractAction : null;
+}

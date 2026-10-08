@@ -94,7 +94,7 @@ public class SpiderWebPrompt: MonoBehaviour {
         if (
             isVisible
             && GameController.I != null
-            && GameController.I.IsGameOver
+            && GameController.I.State != GameState.Playing
         ) {
             SetVisible(showPrompt: false, showBar: false);
         }

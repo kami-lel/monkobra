@@ -49,7 +49,7 @@ graph LR
   Grab --> Score[ScoreManager]
   Mobs[Mobs] -->|touch| Monkey
   Mobs -->|cobra contact| Game[GameController]
-  Stamina -->|empty| Game
+  Stamina -->|empty| Monkey
   Tree[Tree and TreeTop] -->|win zone| Game
   Game --> Screens[ScreensManager]
   Game -->|EndRun| Score
@@ -62,18 +62,25 @@ Subsystems talk through scene singletons, C# events, and trigger callbacks, not 
 
 ## Run Lifecycle
 
-`GameController` is the scene singleton that owns the end state.
+`GameController` is the scene singleton that owns the `GameState` machine, exposed as `State` with a `StateChanged` event. A run only loses, it never wins.
 
-1. Start: `Awake` sets `Time.timeScale` to 1 and registers `GameController.I`. `ScreensManager` hides both end panels in `Start`, and `ScoreManager` records the starting height
-2. Play: movement, stamina drain, scoring, and the mobs run
-3. End: `WinGame` or `LoseGame` runs once. Whichever arrives first sets `IsGameOver`, calls `ScoreManager.EndRun` so the score settles, shows the win or lose panel, and sets `Time.timeScale` to 0
+```mermaid
+stateDiagram-v2
+  [*] --> Tutorial: scene load
+  Tutorial --> Playing: any button
+  Playing --> Lost: LoseGame
+  Lost --> [*]: interact, reload scene
+```
 
-| Outcome | Trigger |
-| --- | --- |
-| Win | the monkey enters the win zone: `WinZoneHandler` on the `TreeTop` prefab, or `MonkeyPrefabRoot` on a `WinZone`-tagged trigger |
-| Lose | the cobra touches the monkey ([Mobs](mob-doc.md#contact)), or stamina reaches 0 |
+| State | Time Scale | Screen |
+| --- | --- | --- |
+| Tutorial | 0 | tutorial panel, any button starts the run |
+| Playing | 1 | none, never paused |
+| Lost | 0 | lose panel, interact reloads the scene after `restartInputDelay` |
 
-Gameplay that must stop at the end checks both `Time.timeScale <= 0`, which also covers a pause, and `GameController.IsGameOver`. Current checkers: `ArmRoot.TryGrabFruit`, `ScorePickup`, `ScoreManager.CanScore`, `SpiderWebStruggle`.
+`LoseGame` runs once, from Playing only: the cobra touches the monkey ([Mobs](mob-doc.md#contact)). It calls `ScoreManager.EndRun` so the score settles, then enters Lost. `ScreensManager` owns the panels: they start deactivated, and it shows the current state's panel in `Start` and on every `StateChanged`.
+
+Gameplay that must stop outside a run checks both `Time.timeScale <= 0` and `GameController.State != GameState.Playing`. Current checkers: `ArmRoot.TryGrabFruit`, `ScorePickup`, `ScoreManager.CanScore`, `SpiderWebStruggle`.
 
 ## Monkey Movement
 
@@ -85,7 +92,6 @@ Gameplay that must stop at the end checks both `Time.timeScale <= 0`, which also
 - Held: `IsHeld` freezes the body in place, set by the web trap ([Mobs](mob-doc.md#trap-and-escape))
 - Stun: after a branch hit the input is ignored and the body falls a set distance ([Mobs](mob-doc.md#hit-penalty))
 - Stamina Cost: each step reports upward and sideways distance to `StaminaBar.DrainByMovement`. The stun fall and descending cost nothing
-- Win: entering a `WinZone`-tagged trigger calls `GameController.WinGame`
 
 | Setting | Value |
 | --- | --- |
@@ -103,6 +109,7 @@ The tree is a stack of static and dynamic trunk segments under a `TreeTop`.
 
 - Extent: `TreeManager` (singleton `I`) holds the tree's `MinY` and `MaxY`, 0 and 100 by default, and everything that maps a height to progress reads it: branch density, web start, the progress bar. The tree is finite
 - Segments: each `DynamicTreeSegmentPrefabRoot` places branches on itself in `Start` ([Mobs](mob-doc.md#placement)), and `SpiderWebSpawner` places webs after that ([Mobs](mob-doc.md#placement-1))
+- Pool: `DTSPool` sits on an empty object, finds the `Player`-tagged object once, and instantiates `segmentCount` copies of `segmentPrefab` end to end, the first (lowest) one created at the world height `firstSegmentY`. It keeps them in a FIFO: only when the stack top is less than `lookAheadU` above the player, and the lowest segment lies wholly under the player, that lowest one is moved over the stack top by `DynamicTreeSegmentPrefabRoot.Restart`, which clears its branches and webs and rolls branches again; `SpiderWebSpawner.PopulateSegment` then redoes the webs. Its `mockTree` field names an editor-only stand-in that is deactivated at runtime
 - Top: the `TreeTop` prefab carries the win zone
 
 ## Stamina
@@ -112,7 +119,8 @@ The tree is a stack of static and dynamic trunk segments under a `TreeTop`.
 - Timer Drain: a fixed amount every interval, as a coroutine started in `Start`
 - Movement Drain: `DrainByMovement` per physics step, upward distance costs more than sideways
 - Restore: `AddStaminaByFruit` adds the per-banana amount, capped at the maximum ([Grab System](grab-doc.md#on-a-successful-grab))
-- Depletion: reaching 0 from either drain calls `LoseGame` once
+- Idle Recovery: `MonkeyPrefabRoot` adds `MonkeyConfig.IdleStaminaRecoveryPerS` per second while no move key is pressed
+- Depletion: reaching 0 does not end the run: `MonkeyPrefabRoot` scales upward climb speed only by `MonkeyConfig.ExhaustedSpeedMultiplier` (0.2) until stamina is above 0 again
 
 | Setting | Value | Note |
 | --- | --- | --- |
@@ -131,7 +139,7 @@ All values live in `Settings/GameConfig.asset`. The fields the asset does not li
 - Distance Score: whole meters of the highest point climbed times points per meter. Only a new high counts, so falling and re-climbing earns nothing
 - Reward Score: points from each banana collected through its `ScorePickup`
 - Gate: `CanScore` is true only after start, before `EndRun`, while unpaused, and while the game is not over
-- Display: `ScoreDisplay` shows the total on the HUD and on both end panels
+- Display: `ScoreDisplay` shows the total on the HUD and on the lose panel
 
 | Setting | Value | Asset |
 | --- | --- | --- |
@@ -160,8 +168,8 @@ One asset, `Settings/_Shared/InputSystem_Actions`, holds all bindings, reference
 | --- | --- | --- |
 | Stamina Bar | `UI/StaminaBar` | current stamina |
 | Climb Progress | `UI/ProgressBarRoot` | the monkey's height as a share of the tree, with a cobra marker |
-| Score | `UI/ScoreDisplay` | total score, on the HUD and each end panel |
-| End Panels | `UI/ScreensManager` | win and lose panels |
+| Score | `UI/ScoreDisplay` | total score, on the HUD and the lose panel |
+| Screens | `UI/ScreensManager` | tutorial and lose panels |
 | Web Prompt | `UI/SpiderWebPrompt` | first-trap hint and the escape bar ([Mobs](mob-doc.md#trap-and-escape)) |
 
 ## Conventions
@@ -169,7 +177,7 @@ One asset, `Settings/_Shared/InputSystem_Actions`, holds all bindings, reference
 - Singletons: scene-scoped and first-wins. `TreeManager`, `UpwardFruitDetection`, `StaminaBar`, and `ScoreManager` destroy a duplicate component only. `GameController` and `ScreensManager` destroy the duplicate's whole GameObject
 - Start Over Awake: a consumer that may start before its singleton reads it in `Start`, so Awake order never matters
 - Events Over Calls: detection scripts forward trigger events (`Entered`, `Exited`, `BranchHit`) rather than calling their consumers
-- Tags: `Branch`, `FruitCollider`, `WinZone`, and `Player` drive trigger matching. Webs match by a Rigidbody component instead
+- Tags: `Branch`, `FruitCollider`, and `Player` drive trigger matching. Webs match by a Rigidbody component instead
 - Tuning In Data: values stay in serialized fields, and shared tuning sits in a ScriptableObject (`MonkeyConfig`, `GameConfig`, `ScoreConfig`, `ScoreReward`, `BranchFruitPlacementConfig`). Gameplay values are never hard-coded
 - Field Guards: required inspector fields are checked in `Awake` with a logged message naming the field
 - Kinematic Body: nothing about the monkey is mass or gravity driven. Each arm is posed purely by its joint drives

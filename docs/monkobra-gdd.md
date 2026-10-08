@@ -59,7 +59,7 @@ graph TD
 
 ## Resources and Pressures
 
-- Stamina: the survival resource, drained by time and by movement, restored only by grabbing, and the run ends at zero
+- Stamina: the survival resource, drained by time and by movement, restored by grabbing or slowly by resting, and an empty bar slows the monkey instead of ending the run
 - The Cobra: a pressure that never relents, it climbs nonstop and ends the run on any contact
 - Height: both the goal and the measure of progress, the canopy is the win condition
 - Attention: the hidden resource, since every grab spends focus that dodging would otherwise use
