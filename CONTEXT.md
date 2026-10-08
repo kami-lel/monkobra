@@ -109,6 +109,7 @@ All under `Assets/_Monkobra/Scripts/`. Each row names the owner of the detail.
 | `Cobra/CobraCollisions` | cobra contact calls `LoseGame` | [Mobs](docs/mob-doc.md#contact) |
 | `Cobra/FallingCobraSpawner` | unlock, rhythm, and branch pick | [Mobs](docs/mob-doc.md#falling-cobra) |
 | `Cobra/FallingCobra` | warning, fall, and hit capsule | [Mobs](docs/mob-doc.md#falling-cobra) |
+| `Difficulty/RampedDifficultyService` | singleton, maps player y to a 0~1 ramped difficulty via an inspector curve | none |
 | `Scoring/ScoreManager` | singleton, distance and reward score | [TDD](docs/monkobra-tdd.md#score) |
 | `Scoring/ScoreConfig`, `Scoring/ScoreReward` | ScriptableObjects of score rules and pickup points | [TDD](docs/monkobra-tdd.md#score) |
 | `Scoring/ScorePickup` | on a fruit: hands points over once | [Grab](docs/grab-doc.md#on-a-successful-grab) |
