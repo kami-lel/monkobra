@@ -6,9 +6,12 @@ public class ScoreManager: MonoBehaviour {
     public long TotalScore => DistanceScore + RewardScore;
     public long DistanceScore { get; private set; }
     public long RewardScore { get; private set; }
+    public int BananaCollectedCount { get; private set; }
     public double HighestClimbedMeters => highestClimbedUnits / unitsPerMeter;
     public bool IsRunEnded => isRunEnded;
     public event Action<long> ScoreChanged;
+    // raised once per banana pickup that scored
+    public event Action BananaCollected;
 
     public bool CanScore => isActiveAndEnabled && hasStarted && !isRunEnded && Time.timeScale > 0f && (GameController.I == null || GameController.I.State == GameState.Playing);
     //必须满足：组件启用、已经开局、尚未结束、没有暂停，才允许计分
@@ -26,7 +29,10 @@ public class ScoreManager: MonoBehaviour {
 
         long oldScore = TotalScore;
         RewardScore += Math.Min((long)reward.Points, long.MaxValue - TotalScore);
+        // every reward is a banana pickup
+        BananaCollectedCount++;
         NotifyIfChanged(oldScore);
+        BananaCollected?.Invoke();
         return true;
     }
 
@@ -37,13 +43,6 @@ public class ScoreManager: MonoBehaviour {
         }
         isRunEnded = true;
         SampleHeight();
-    }
-
-    public void ApplyWorldOriginShift(float worldDeltaY) {
-        if (hasStarted && !float.IsNaN(worldDeltaY)
-            && !float.IsInfinity(worldDeltaY)) {
-            startY += worldDeltaY;
-        }
     }
 
     private void Awake() {
@@ -58,16 +57,15 @@ public class ScoreManager: MonoBehaviour {
             return;
         }
         I = this;
-        playerBody = player.GetComponent<Rigidbody>();
     }
 
     private void Start() {
         pointsPerMeter = config.PointsPerMeter;
         unitsPerMeter = config.UnitsPerMeter;
-        startY = ReadPlayerY();
         highestClimbedUnits = 0d;
         DistanceScore = 0;
         RewardScore = 0;
+        BananaCollectedCount = 0;
         isRunEnded = GameController.I != null
             && GameController.I.State == GameState.Lost;
         hasStarted = true;
@@ -94,21 +92,16 @@ public class ScoreManager: MonoBehaviour {
 
     private bool hasStarted;
     private bool isRunEnded;
-    private Rigidbody playerBody;
-    private double startY;
     private double highestClimbedUnits;
     private double unitsPerMeter = 1d;
     private int pointsPerMeter;
 
-    private float ReadPlayerY() {
-        return playerBody != null ? playerBody.position.y : player.position.y;
-    }
-
     private void SampleHeight() {
-        if (player == null) {
+        if (RampedDifficultyService.I == null) {
             return;
         }
-        double climbedUnits = (double)ReadPlayerY() - startY;
+        double climbedUnits =
+            RampedDifficultyService.I.CurrentPlayerClimbedYDistance;
         //如果数值无效，或者没超过之前的最高高度，就直接退出。不能刷分
         if (double.IsNaN(climbedUnits) || double.IsInfinity(climbedUnits)
             || climbedUnits <= highestClimbedUnits) {

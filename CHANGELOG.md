@@ -1,11 +1,6 @@
 # Monkobra CHANGELOG
 
 <!--
-Todo RampedDifficulty
-Fixme update scoring system
-Todo data collection system
-Todo add final score & high score in UI
-
 Fixme clear SO organize
 Fixme update per project assets rule
 Fixme rename cobra as great cobra
