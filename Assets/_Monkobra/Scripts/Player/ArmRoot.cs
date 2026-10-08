@@ -311,6 +311,7 @@ public class ArmRoot: MonoBehaviour {
         isReaching = true;
         reachFruit = fruit;
         reachExtensionU = 0f;
+        fruitDetection.SetLockedTarget(fruit);
         // aim once, the arm then only stretches along that line
         SetAimWorld(fruit.transform.position - ShoulderWorld);
         // a settled arm sleeps, a new drive target alone will not wake it
@@ -426,6 +427,10 @@ public class ArmRoot: MonoBehaviour {
     }
 
     private void EndReach() {
+        // only the reaching arm holds the pin, an idle arm must not clear it
+        if (isReaching && UpwardFruitDetection.I != null) {
+            UpwardFruitDetection.I.SetLockedTarget(null);
+        }
         isReaching = false;
         reachFruit = null;
         reachExtensionU = 0f;

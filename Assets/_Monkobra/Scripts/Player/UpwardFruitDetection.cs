@@ -36,7 +36,23 @@ public class UpwardFruitDetection: MonoBehaviour {
     /// changes</summary>
     public event Action<Collider, Collider> GrabbableFruitChanged;
 
+    /// <summary>the single fruit a reach would aim at now, else null</summary>
+    public Collider ReachTarget => reachTarget;
+
+    /// <summary>raised w/ (previous, current) when the reach target changes
+    /// </summary>
+    public event Action<Collider, Collider> ReachTargetChanged;
+
     // Public Methods  #########################################################
+    /// <summary>
+    /// pins the reach target to <paramref name="fruit"/> while an arm reaches,
+    /// null to release the pin
+    /// </summary>
+    public void SetLockedTarget(Collider fruit) {
+        lockedTarget = fruit;
+        RefreshReachTarget();
+    }
+
     /// <summary>
     /// sets the fruit a hand overlaps, null for none; raises
     /// <see cref="GrabbableFruitChanged"/> iff it differs
@@ -97,6 +113,10 @@ public class UpwardFruitDetection: MonoBehaviour {
         if (fruit == grabbableFruit) {
             SetGrabbableFruit(null);
         }
+        if (fruit == lockedTarget) {
+            lockedTarget = null;
+        }
+        RefreshReachTarget();
     }
 
     // Inspector Fields  #######################################################
@@ -178,6 +198,7 @@ public class UpwardFruitDetection: MonoBehaviour {
             if (!wasInReach) {
                 FruitReachChanged?.Invoke(other, true);
             }
+            RefreshReachTarget();
         }
     }
 
@@ -193,6 +214,7 @@ public class UpwardFruitDetection: MonoBehaviour {
             if (!IsFruitInReach(other)) {
                 FruitReachChanged?.Invoke(other, false);
             }
+            RefreshReachTarget();
         }
     }
 
@@ -207,8 +229,23 @@ public class UpwardFruitDetection: MonoBehaviour {
     private readonly List<Collider> fruitOrder = new List<Collider>();
 
     private Collider grabbableFruit;
+    private Collider reachTarget;
+    private Collider lockedTarget; // fruit an arm is reaching for, else null
 
     // Private Methods  ########################################################
+    // pinned fruit wins, else the one ArmRoot would pick on the reach side
+    private void RefreshReachTarget() {
+        Collider next =
+            lockedTarget != null ? lockedTarget : GetNewestFruit(ReachSide);
+        if (next == reachTarget) {
+            return;
+        }
+
+        Collider previous = reachTarget;
+        reachTarget = next;
+        ReachTargetChanged?.Invoke(previous, next);
+    }
+
     private void LogReachChanged(DetectionSide side) {
         bool reach = side == DetectionSide.Left ? ReachForLeft : ReachForRight;
         if (Debug.isDebugBuild) {

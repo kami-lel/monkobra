@@ -4,9 +4,10 @@ using UnityEngine.Serialization;
 /// <summary>
 /// Sits on the "FruitCollider" object of a banana. Listens to
 /// <see cref="UpwardFruitDetection"/> and outlines every child mesh renderer
-/// in 1 of 2 tiers, grabbable winning over reachable:
+/// in 1 of 2 tiers, grabbable winning over reachable. Only the single
+/// targeted fruit is ever outlined:
 /// <list type="bullet">
-/// <item>reachable: the fruit sits in a detection zone</item>
+/// <item>reachable: the fruit is the one a reach would aim at</item>
 /// <item>grabbable: a hand overlaps the fruit, so a release grabs it</item>
 /// </list>
 /// The outline is an extra material slot, added only while a tier applies.
@@ -75,9 +76,9 @@ public class FruitOutlineListener: MonoBehaviour {
             return;
         }
 
-        detection.FruitReachChanged += OnFruitReachChanged;
+        detection.ReachTargetChanged += OnReachTargetChanged;
         detection.GrabbableFruitChanged += OnGrabbableFruitChanged;
-        isReachable = detection.IsFruitInReach(fruitCollider);
+        isReachable = detection.ReachTarget == fruitCollider;
         isGrabbable = detection.GrabbableFruit == fruitCollider;
         ApplyOutline();
     }
@@ -85,18 +86,20 @@ public class FruitOutlineListener: MonoBehaviour {
     private void OnDestroy() {
         UpwardFruitDetection detection = UpwardFruitDetection.I;
         if (detection != null) {
-            detection.FruitReachChanged -= OnFruitReachChanged;
+            detection.ReachTargetChanged -= OnReachTargetChanged;
             detection.GrabbableFruitChanged -= OnGrabbableFruitChanged;
         }
     }
 
     // Event Handlers  #########################################################
-    private void OnFruitReachChanged(Collider fruit, bool isInReach) {
-        if (fruit != fruitCollider) {
+    private void OnReachTargetChanged(Collider previous, Collider current) {
+        if (current == fruitCollider) {
+            isReachable = true;
+        } else if (previous == fruitCollider) {
+            isReachable = false;
+        } else {
             return;
         }
-
-        isReachable = isInReach;
         ApplyOutline();
     }
 
