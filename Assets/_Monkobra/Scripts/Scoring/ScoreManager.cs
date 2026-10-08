@@ -94,7 +94,7 @@ public class ScoreManager: MonoBehaviour {
             return;
         }
         double climbedUnits =
-            RampedDifficultyService.I.CalcPlayerClimbedYDistance();
+            RampedDifficultyService.I.CurrentPlayerClimbedYDistance;
         //如果数值无效，或者没超过之前的最高高度，就直接退出。不能刷分
         if (double.IsNaN(climbedUnits) || double.IsInfinity(climbedUnits)
             || climbedUnits <= highestClimbedUnits) {
