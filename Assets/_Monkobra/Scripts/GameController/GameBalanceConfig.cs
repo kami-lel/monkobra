@@ -60,6 +60,10 @@ public class GameBalanceConfig: ScriptableObject {
     /// <returns>points awarded per score reward pickup</returns>
     public int ScoreRewardPoints => scoreRewardPoints;
 
+    /// <returns>x: player y above start y; world u; y: ramped difficulty
+    /// 0~1</returns>
+    public AnimationCurve RampedDifficultyCurve => rampedDifficultyCurve;
+
     /// <returns>branch creation attempts rolled per segment</returns>
     public int BranchGenerationAttemptCount => branchGenerationAttemptCount;
 
@@ -150,6 +154,12 @@ public class GameBalanceConfig: ScriptableObject {
     [Min(0)]
     [Tooltip("points awarded per score reward pickup")]
     private int scoreRewardPoints = 100;
+
+    [Header("Ramped Difficulty")]
+    [SerializeField]
+    [Tooltip("x: player y above start y; world u; y: ramped difficulty 0~1")]
+    private AnimationCurve rampedDifficultyCurve =
+        AnimationCurve.Linear(20f, 0f, 100f, 1f);
 
     [Header("Branch")]
     [SerializeField]

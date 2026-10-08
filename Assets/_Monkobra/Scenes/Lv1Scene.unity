@@ -912,7 +912,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 387742569}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.013721906, y: 0.98497325, z: 0.09349331, w: -0.14456339}
+  m_LocalRotation: {x: 0.020249778, y: 0.97973335, z: 0.13797057, w: -0.14379433}
   m_LocalPosition: {x: 0.000000029802322, y: -0.99999994, z: 10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -941,7 +941,7 @@ MonoBehaviour:
       Size: {x: 0.8, y: 0.8}
       Offset: {x: 0, y: 0}
   CenterOnActivate: 1
-  TargetOffset: {x: -3, y: 1, z: 0}
+  TargetOffset: {x: -3, y: 2, z: 0}
   Damping: {x: 0.5, y: 0.5}
   Lookahead:
     Enabled: 0
@@ -3369,7 +3369,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1836741339}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.01372191, y: 0.9849732, z: 0.09349335, w: 0.14456342}
+  m_LocalRotation: {x: -0.020249767, y: 0.97973335, z: 0.13797049, w: 0.14379431}
   m_LocalPosition: {x: 0.000000029802322, y: -0.99999994, z: 10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -3398,7 +3398,7 @@ MonoBehaviour:
       Size: {x: 0.8, y: 0.8}
       Offset: {x: 0, y: 0}
   CenterOnActivate: 1
-  TargetOffset: {x: 3, y: 1, z: 0}
+  TargetOffset: {x: 3, y: 2, z: 0}
   Damping: {x: 0.5, y: 0.5}
   Lookahead:
     Enabled: 0
@@ -3892,30 +3892,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f16464034bd75ec4db90c71b53e356e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RampedDifficultyService
-  rampCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 20
-      value: 0
-      inSlope: 0
-      outSlope: 0.0125
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 100
-      value: 1
-      inSlope: 0.0125
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
+  balanceConfig: {fileID: 11400000, guid: 6ce5d249000443e49bba5365e143c660, type: 2}
 --- !u!114 &2100000003
 MonoBehaviour:
   m_ObjectHideFlags: 0
