@@ -59,7 +59,7 @@ public class MonkeyConfig: ScriptableObject {
     /// <returns>ramp rate toward target velocity while idle; u/s²</returns>
     public float DecelerationU => decelerationU;
 
-    /// <returns>multiplier on climb and orbit speed while stamina is empty
+    /// <returns>multiplier on upward climb speed while stamina is empty
     /// </returns>
     public float ExhaustedSpeedMultiplier => exhaustedSpeedMultiplier;
 
@@ -145,7 +145,7 @@ public class MonkeyConfig: ScriptableObject {
 
     [Header("Exhaustion")]
     [SerializeField]
-    [Tooltip("climb and orbit speed multiplier while stamina is empty")]
+    [Tooltip("upward climb speed multiplier while stamina is empty")]
     private float exhaustedSpeedMultiplier = 0.2f;
 
     [SerializeField]
