@@ -121,7 +121,7 @@ public class AnalyticsManager: MonoBehaviour {
         }
 
         SceneManager.sceneLoaded -= OnSceneLoaded;
-        Observe(null, null, null);
+        Observe(null, null, null, null);
         I = null;
     }
 
@@ -137,6 +137,7 @@ public class AnalyticsManager: MonoBehaviour {
             runStartClock = DateTime.Now;
             bananaClocks.Clear();
             webClocks.Clear();
+            branchClocks.Clear();
         } else if (state == GameState.Lost) {
             AppendRun();
         }
@@ -150,6 +151,10 @@ public class AnalyticsManager: MonoBehaviour {
         webClocks.Add(DateTime.Now);
     }
 
+    private void OnBranchHit(Collider _) {
+        branchClocks.Add(DateTime.Now);
+    }
+
     // constants  ##############################################################
     private const string FOLDER_NAME = "Analytics";
     private const string CLOCK_FORMAT = "HH:mm:ss";
@@ -159,25 +164,29 @@ public class AnalyticsManager: MonoBehaviour {
     private DateTime runStartClock;
     private readonly List<DateTime> bananaClocks = new List<DateTime>();
     private readonly List<DateTime> webClocks = new List<DateTime>();
+    private readonly List<DateTime> branchClocks = new List<DateTime>();
 
     // cached references  ------------------------------------------------------
     private GameController observedGame;
     private ScoreManager observedScore;
     private SpiderWebStruggle observedWeb;
+    private HitBranchDetection observedBranch;
 
     // private methods  ########################################################
     private void ObserveScene() {
         Observe(
             GameController.I,
             ScoreManager.I,
-            FindFirstObjectByType<SpiderWebStruggle>()
+            FindFirstObjectByType<SpiderWebStruggle>(),
+            FindFirstObjectByType<HitBranchDetection>()
         );
     }
 
     private void Observe(
         GameController game,
         ScoreManager score,
-        SpiderWebStruggle web
+        SpiderWebStruggle web,
+        HitBranchDetection branch
     ) {
         if (observedGame != null) {
             observedGame.StateChanged -= OnGameStateChanged;
@@ -188,10 +197,14 @@ public class AnalyticsManager: MonoBehaviour {
         if (observedWeb != null) {
             observedWeb.Trapped -= OnWebTrapped;
         }
+        if (observedBranch != null) {
+            observedBranch.BranchHit -= OnBranchHit;
+        }
 
         observedGame = game;
         observedScore = score;
         observedWeb = web;
+        observedBranch = branch;
 
         if (observedGame != null) {
             observedGame.StateChanged += OnGameStateChanged;
@@ -201,6 +214,9 @@ public class AnalyticsManager: MonoBehaviour {
         }
         if (observedWeb != null) {
             observedWeb.Trapped += OnWebTrapped;
+        }
+        if (observedBranch != null) {
+            observedBranch.BranchHit += OnBranchHit;
         }
     }
 
@@ -276,6 +292,10 @@ public class AnalyticsManager: MonoBehaviour {
         sb.Append("#### Web Encounter: ").Append(webClocks.Count);
         sb.Append("\n\n");
         AppendClockList(sb, webClocks);
+
+        sb.Append("#### Branch Hit: ").Append(branchClocks.Count);
+        sb.Append("\n\n");
+        AppendClockList(sb, branchClocks);
 
         try {
             File.AppendAllText(
