@@ -16,7 +16,7 @@ public class ScoreManager: MonoBehaviour {
     public bool CanScore => isActiveAndEnabled && hasStarted && !isRunEnded && Time.timeScale > 0f && (GameController.I == null || GameController.I.State == GameState.Playing);
     //必须满足：组件启用、已经开局、尚未结束、没有暂停，才允许计分
     [SerializeField]
-    private GameBalanceConfig config;
+    private GameBalanceConfig balanceConfig;
 
     [SerializeField]
     private Transform player;
@@ -28,7 +28,7 @@ public class ScoreManager: MonoBehaviour {
         }
 
         long oldScore = TotalScore;
-        RewardScore += Math.Min((long)config.ScoreRewardPoints, long.MaxValue - TotalScore);
+        RewardScore += Math.Min((long)balanceConfig.ScoreRewardPoints, long.MaxValue - TotalScore);
         // every reward is a banana pickup
         BananaCollectedCount++;
         NotifyIfChanged(oldScore);
@@ -51,8 +51,8 @@ public class ScoreManager: MonoBehaviour {
             Destroy(this);
             return;
         }
-        if (config == null || player == null) {
-            Debug.LogError("ScoreManager: assign config and player in Inspector.", this);
+        if (balanceConfig == null || player == null) {
+            Debug.LogError("ScoreManager: assign balanceConfig and player in Inspector.", this);
             enabled = false;
             return;
         }
@@ -60,8 +60,8 @@ public class ScoreManager: MonoBehaviour {
     }
 
     private void Start() {
-        pointsPerMeter = config.PointsPerMeter;
-        unitsPerMeter = config.UnitsPerMeter;
+        pointsPerMeter = balanceConfig.PointsPerMeter;
+        unitsPerMeter = balanceConfig.UnitsPerMeter;
         highestClimbedUnits = 0d;
         DistanceScore = 0;
         RewardScore = 0;

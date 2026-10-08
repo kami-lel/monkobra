@@ -218,6 +218,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MonkeyPrefabRoot
   hitBranchDetection: {fileID: 6025946792045646429}
   config: {fileID: 11400000, guid: 807cabe9104f1f948afe0b58847b456f, type: 2}
+  balanceConfig: {fileID: 11400000, guid: 6ce5d249000443e49bba5365e143c660, type: 2}
 --- !u!114 &9198043481806832196
 MonoBehaviour:
   m_ObjectHideFlags: 0
