@@ -2,7 +2,6 @@
 
 <!--
 TODO full gameplay: restart
-FIXME add start tutorial screen
 FIXME re-add inf run
 
 Bug progress bar anchor

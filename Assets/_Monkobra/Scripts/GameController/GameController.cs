@@ -33,8 +33,9 @@ public class GameController: MonoBehaviour {
 
     // Inspector Fields  #######################################################
     [SerializeField]
-    [Tooltip("interact action, restarts the scene on the lose screen")]
-    private InputActionReference interactAction;
+    [Tooltip("shared input tuning, its interact action restarts the scene on "
+        + "the lose screen")]
+    private MonkeyConfig monkeyConfig;
 
     [SerializeField]
     [Min(0f)]
@@ -44,10 +45,16 @@ public class GameController: MonoBehaviour {
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
         // Inspector Assignment Guard  -----------------------------------------
-        if (interactAction == null) {
+        if (monkeyConfig == null) {
             Debug.LogError(
-                "GameController:\tmust assign Inspector Field: Interact Action",
+                "GameController:\tmust assign Inspector Field: Monkey Config",
                 this
+            );
+        } else if (monkeyConfig.InteractAction == null) {
+            Debug.LogError(
+                "GameController:\tmust assign MonkeyConfig field: "
+                    + "interactAction",
+                monkeyConfig
             );
         }
 
@@ -67,7 +74,7 @@ public class GameController: MonoBehaviour {
     }
 
     private void Update() {
-        if (State != GameState.Lost || interactAction == null) {
+        if (State != GameState.Lost || InteractAction == null) {
             return;
         }
 
@@ -75,7 +82,7 @@ public class GameController: MonoBehaviour {
             return;
         }
 
-        if (interactAction.action.WasPressedThisFrame()) {
+        if (InteractAction.action.WasPressedThisFrame()) {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
     }
@@ -112,4 +119,7 @@ public class GameController: MonoBehaviour {
     // private members  ########################################################
     private IDisposable anyPressSub;
     private float lostTime;
+
+    private InputActionReference InteractAction =>
+        monkeyConfig != null ? monkeyConfig.InteractAction : null;
 }
