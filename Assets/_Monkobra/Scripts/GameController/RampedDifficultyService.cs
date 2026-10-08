@@ -22,17 +22,28 @@ public class RampedDifficultyService: MonoBehaviour {
     /// <param name="y">player y position; world u</param>
     /// <returns>ramped difficulty, clamped to 0~1</returns>
     public float GetRampedValueFromYPosition(float y) {
+        if (balanceConfig == null) {
+            return 0f;
+        }
         float climbedY = y - PlayerGameStartYPosition;
-        return Mathf.Clamp01(rampCurve.Evaluate(climbedY));
+        return Mathf.Clamp01(
+            balanceConfig.RampedDifficultyCurve.Evaluate(climbedY)
+        );
     }
 
     // Inspector Fields
     [SerializeField]
-    [Tooltip("x: player y above start y; y: ramped difficulty 0~1")]
-    private AnimationCurve rampCurve = AnimationCurve.Linear(20f, 0f, 100f, 1f);
+    [Tooltip("game balance tuning; ramp curve")]
+    private GameBalanceConfig balanceConfig;
 
     // MonoBehaviour Lifecycle
     private void Awake() {
+        if (balanceConfig == null) {
+            Debug.LogError(
+                "RampedDifficulty:\tmust assign Inspector Field: "
+                + "balanceConfig", this);
+        }
+
         if (I != null && I != this) {
             if (Debug.isDebugBuild) {
                 Debug.Log("RampedDifficulty:\tduplicate removed");

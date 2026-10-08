@@ -92,10 +92,11 @@ Every game balance number lives in one asset, `Settings/GameBalanceConfig.asset`
 | Movement | `upSpeedU`, `downSpeedU`, `exhaustedSpeedMultiplier`, `idleStaminaRecoveryPerS` | `MonkeyPrefabRoot` |
 | Branch Hit | `hitStunDurationS`, `hitDropDistanceU`, `hitDropSpeedU` | `MonkeyPrefabRoot` |
 | Score | `pointsPerMeter`, `unitsPerMeter`, `scoreRewardPoints` | `ScoreManager` |
-| Branch Count | `minBranchCount`, `maxBranchCount` | `DynamicTreeSegmentPrefabRoot` |
+| Ramped Difficulty | `rampedDifficultyCurve` | `RampedDifficultyService` |
+| Branch | `branchGenerationAttemptCount`, `branchSpawnProbabilityCurve`, `bananaSpawnProbabilityCurve` | `DynamicTreeSegmentPrefabRoot` |
 
-- Wiring: each reader holds a `GameBalanceConfig` inspector field (`balanceConfig` on `StaminaBar`, `ScoreManager`, `MonkeyPrefabRoot`, and `DynamicTreeSegmentPrefabRoot`), all pointing at the same asset
-- Not Balance: the arm stroke and reach, orbit speed, acceleration, and input actions stay in `MonkeyConfig`; branch radius, spacing, retries, and the progress at which the branch count peaks stay in `BranchFruitPlacementConfig`
+- Wiring: each reader holds a `GameBalanceConfig` inspector field (`balanceConfig` on `StaminaBar`, `ScoreManager`, `MonkeyPrefabRoot`, `DynamicTreeSegmentPrefabRoot`, and `RampedDifficultyService`), all pointing at the same asset
+- Not Balance: the arm stroke and reach, orbit speed, acceleration, and input actions stay in `MonkeyConfig`; branch radius, spacing, and retries stay in `BranchFruitPlacementConfig`
 - Retired: `GameConfig`, `ScoreConfig`, and `ScoreReward` were folded into `GameBalanceConfig` and removed
 - Suffixes: `U` is world units, `S` is seconds, `Deg` is degrees, `PerU` is per world unit travelled
 
