@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-// BUG dont fit the pool
+// Bug web spawner fail to work
 
 /// <summary>
 /// Sticks <see cref="SpiderWebTrap"/> webs flat on the trunk of every
