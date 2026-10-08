@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+// BUG dont fit the pool
+
 /// <summary>
 /// Sticks <see cref="SpiderWebTrap"/> webs flat on the trunk of every
 /// <see cref="DynamicTreeSegmentPrefabRoot"/> below this object, from

@@ -16,6 +16,18 @@ public class GameController: MonoBehaviour {
 
     public event Action<GameState> StateChanged;
 
+    /// <summary>
+    /// whether cobra collisions are ignored entirely, a debug cheat; warns
+    /// each time it is switched on
+    /// </summary>
+    public bool CobraNoClip {
+        get => cobraNoClip;
+        set {
+            cobraNoClip = value;
+            WarnIfCobraNoClip();
+        }
+    }
+
     // Public Methods  #########################################################
     public void LoseGame() {
         if (State != GameState.Playing) {
@@ -41,6 +53,10 @@ public class GameController: MonoBehaviour {
     [Min(0f)]
     [Tooltip("unscaled seconds the lose screen ignores restart input")]
     private float restartInputDelay = 0.5f;
+
+    [SerializeField]
+    [Tooltip("debug cheat: cobra collisions never kill the monkey")]
+    private bool cobraNoClip;
 
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
@@ -69,6 +85,7 @@ public class GameController: MonoBehaviour {
         }
 
         I = this;
+        WarnIfCobraNoClip();
         SetState(GameState.Tutorial);
         anyPressSub = InputSystem.onAnyButtonPress.CallOnce(OnAnyPressed);
     }
@@ -105,6 +122,16 @@ public class GameController: MonoBehaviour {
     }
 
     // private methods  ########################################################
+    private void WarnIfCobraNoClip() {
+        if (cobraNoClip) {
+            Debug.LogWarning(
+                "GameController:\tCobra No Clip is set, cobra collisions "
+                    + "cannot kill the monkey",
+                this
+            );
+        }
+    }
+
     private void SetState(GameState next) {
         State = next;
         Time.timeScale = next == GameState.Playing ? 1f : 0f;

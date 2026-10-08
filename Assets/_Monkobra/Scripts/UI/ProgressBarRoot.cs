@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+
+// BUG progress bar wrong logic
+
 [RequireComponent(typeof(Scrollbar))]
 public class ProgressBarRoot : MonoBehaviour
 {
