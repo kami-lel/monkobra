@@ -10,15 +10,8 @@ using UnityEngine;
 )]
 public class BranchFruitPlacementConfig: ScriptableObject {
     // Public Members  #########################################################
-    /// <returns>branches on a segment at the tree base</returns>
-    public int MinBranchCount => minBranchCount;
-
-    /// <returns>branches on a segment at or above
-    /// <see cref="MaxCountProgress"/></returns>
-    public int MaxBranchCount => maxBranchCount;
-
-    /// <returns>climb progress, 0~1, at/above which a segment gets
-    /// <see cref="MaxBranchCount"/></returns>
+    /// <returns>climb progress, 0~1, at/above which a segment gets the
+    /// max branch count of <see cref="GameBalanceConfig"/></returns>
     public float MaxCountProgress => maxCountProgress;
 
     /// <returns>branch distance from the trunk axis; u</returns>
@@ -33,14 +26,6 @@ public class BranchFruitPlacementConfig: ScriptableObject {
 
     // Inspector Fields  #######################################################
     [Header("Branch Count")]
-    [SerializeField]
-    [Tooltip("branches on segment at tree base")]
-    private int minBranchCount = 2;
-
-    [SerializeField]
-    [Tooltip("branches on segment at tree top")]
-    private int maxBranchCount = 9;
-
     [SerializeField]
     [Range(0f, 1f)]
     [Tooltip("climb progress at/above which segment gets max branches")]
@@ -61,8 +46,6 @@ public class BranchFruitPlacementConfig: ScriptableObject {
 
     // Editor Validation  ######################################################
     private void OnValidate() {
-        minBranchCount = Mathf.Max(0, minBranchCount);
-        maxBranchCount = Mathf.Max(minBranchCount, maxBranchCount);
         branchRadius = Mathf.Max(0f, branchRadius);
         minBranchSeparation = Mathf.Max(0f, minBranchSeparation);
         maxPlacementAttempts = Mathf.Max(1, maxPlacementAttempts);

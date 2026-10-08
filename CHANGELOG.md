@@ -1,9 +1,6 @@
 # Monkobra CHANGELOG
 
 <!--
-Fixme clear SO organize
-FIXME update per project assets rule
-
 Bug falling cobra gone
 -->
 

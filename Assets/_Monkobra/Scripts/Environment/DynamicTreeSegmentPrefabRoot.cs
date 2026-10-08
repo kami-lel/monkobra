@@ -55,6 +55,10 @@ public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
     [Tooltip("shared branch placement tuning")]
     private BranchFruitPlacementConfig placementConfig;
 
+    [SerializeField]
+    [Tooltip("game balance tuning; branch count")]
+    private GameBalanceConfig balanceConfig;
+
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
         // Inspector Assignment Guard  -----------------------------------------
@@ -81,10 +85,19 @@ public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
             );
         }
 
+        if (balanceConfig == null) {
+            Debug.LogWarning(
+                "DynamicTreeSegmentPrefabRoot:	"
+                    + "must assign Inspector Field: balanceConfig",
+                this
+            );
+        }
+
         if (
             segmentCollider == null
             || branchWithFruitPrefab == null
             || placementConfig == null
+            || balanceConfig == null
         ) {
             enabled = false;
             return;
@@ -140,8 +153,8 @@ public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
 
         // higher segment in tree → more branches, max count reached at
         // MaxCountProgress of the climb and kept above it
-        int minBranchCount = placementConfig.MinBranchCount;
-        int maxBranchCount = placementConfig.MaxBranchCount;
+        int minBranchCount = balanceConfig.MinBranchCount;
+        int maxBranchCount = balanceConfig.MaxBranchCount;
         float maxCountProgress = placementConfig.MaxCountProgress;
 
         float segmentY = segmentCollider.bounds.center.y;

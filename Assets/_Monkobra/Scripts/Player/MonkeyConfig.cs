@@ -2,8 +2,9 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Shared tuning for the monkey: arm stroke and reach, climb and orbit speeds,
-/// branch-hit stun, and the input actions every consumer reads. Consumed by
+/// Shared tuning for the monkey: arm stroke and reach, orbit speed, and the
+/// input actions every consumer reads. Climb speed, exhaustion and branch-hit
+/// numbers live in <see cref="GameBalanceConfig"/>. Consumed by
 /// <see cref="ArmRoot"/> and <see cref="MonkeyPrefabRoot"/>.
 /// <para>
 /// <see cref="ArmRoot"/> takes nothing physical from here, springs, limits,
@@ -43,12 +44,6 @@ public class MonkeyConfig: ScriptableObject {
     /// <returns>arm cube thickness across its 2 short axes; u</returns>
     public float ArmWidthU => armWidthU;
 
-    /// <returns>climb speed moving up; u/s</returns>
-    public float UpSpeedU => upSpeedU;
-
-    /// <returns>climb speed moving down; u/s</returns>
-    public float DownSpeedU => downSpeedU;
-
     /// <returns>orbit speed around the trunk; deg/s</returns>
     public float RotationSpeedDeg => rotationSpeedDeg;
 
@@ -58,23 +53,6 @@ public class MonkeyConfig: ScriptableObject {
 
     /// <returns>ramp rate toward target velocity while idle; u/s²</returns>
     public float DecelerationU => decelerationU;
-
-    /// <returns>multiplier on upward climb speed while stamina is empty
-    /// </returns>
-    public float ExhaustedSpeedMultiplier => exhaustedSpeedMultiplier;
-
-    /// <returns>stamina regained per s while the monkey gives no movement
-    /// input</returns>
-    public float IdleStaminaRecoveryPerS => idleStaminaRecoveryPerS;
-
-    /// <returns>how long control is lost after a branch hit; s</returns>
-    public float HitStunDurationS => hitStunDurationS;
-
-    /// <returns>how far the monkey falls on a branch hit; u</returns>
-    public float HitDropDistanceU => hitDropDistanceU;
-
-    /// <returns>how fast the monkey falls on a branch hit; u/s</returns>
-    public float HitDropSpeedU => hitDropSpeedU;
 
     /// <returns>directional input action every consumer reads, a Vector2
     /// where x orbits and y climbs</returns>
@@ -124,14 +102,6 @@ public class MonkeyConfig: ScriptableObject {
 
     [Header("Movement")]
     [SerializeField]
-    [Tooltip("climb speed moving up; u/s")]
-    private float upSpeedU = 6f;
-
-    [SerializeField]
-    [Tooltip("climb speed moving down; u/s")]
-    private float downSpeedU = 12f;
-
-    [SerializeField]
     [Tooltip("orbit speed around the trunk; deg/s")]
     private float rotationSpeedDeg = 50f;
 
@@ -142,28 +112,6 @@ public class MonkeyConfig: ScriptableObject {
     [SerializeField]
     [Tooltip("ramp rate toward target velocity while idle; u/s²")]
     private float decelerationU = 30f;
-
-    [Header("Exhaustion")]
-    [SerializeField]
-    [Tooltip("upward climb speed multiplier while stamina is empty")]
-    private float exhaustedSpeedMultiplier = 0.2f;
-
-    [SerializeField]
-    [Tooltip("stamina regained per s while no movement key is pressed")]
-    private float idleStaminaRecoveryPerS = 2f;
-
-    [Header("Branch Hit")]
-    [SerializeField]
-    [Tooltip("control lost after a branch hit; s")]
-    private float hitStunDurationS = 0.75f;
-
-    [SerializeField]
-    [Tooltip("distance fallen on a branch hit; u")]
-    private float hitDropDistanceU = 10f;
-
-    [SerializeField]
-    [Tooltip("fall speed on a branch hit; u/s")]
-    private float hitDropSpeedU = 8f;
 
     [Header("Input")]
     [SerializeField]
@@ -186,15 +134,8 @@ public class MonkeyConfig: ScriptableObject {
         strokeSpeedDeg = Mathf.Max(0f, strokeSpeedDeg);
         reachExtendSpeedU = Mathf.Max(0f, reachExtendSpeedU);
         armWidthU = Mathf.Max(0.001f, armWidthU);
-        upSpeedU = Mathf.Max(0f, upSpeedU);
-        downSpeedU = Mathf.Max(0f, downSpeedU);
         rotationSpeedDeg = Mathf.Max(0f, rotationSpeedDeg);
         accelerationU = Mathf.Max(0f, accelerationU);
         decelerationU = Mathf.Max(0f, decelerationU);
-        exhaustedSpeedMultiplier = Mathf.Clamp01(exhaustedSpeedMultiplier);
-        idleStaminaRecoveryPerS = Mathf.Max(0f, idleStaminaRecoveryPerS);
-        hitStunDurationS = Mathf.Max(0f, hitStunDurationS);
-        hitDropDistanceU = Mathf.Max(0f, hitDropDistanceU);
-        hitDropSpeedU = Mathf.Max(0f, hitDropSpeedU);
     }
 }

@@ -16,19 +16,19 @@ public class ScoreManager: MonoBehaviour {
     public bool CanScore => isActiveAndEnabled && hasStarted && !isRunEnded && Time.timeScale > 0f && (GameController.I == null || GameController.I.State == GameState.Playing);
     //必须满足：组件启用、已经开局、尚未结束、没有暂停，才允许计分
     [SerializeField]
-    private ScoreConfig config;
+    private GameBalanceConfig config;
 
     [SerializeField]
     private Transform player;
     //添加水果等奖励分
-    public bool TryAddReward(ScoreReward reward) {
-        if (!CanScore || reward == null) 
+    public bool TryAddReward() {
+        if (!CanScore) 
         {
             return false;
         }
 
         long oldScore = TotalScore;
-        RewardScore += Math.Min((long)reward.Points, long.MaxValue - TotalScore);
+        RewardScore += Math.Min((long)config.ScoreRewardPoints, long.MaxValue - TotalScore);
         // every reward is a banana pickup
         BananaCollectedCount++;
         NotifyIfChanged(oldScore);
