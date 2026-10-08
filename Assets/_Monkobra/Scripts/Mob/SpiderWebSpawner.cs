@@ -44,6 +44,9 @@ public class SpiderWebSpawner: MonoBehaviour {
         // poses into physics so the overlap test can see them
         Physics.SyncTransforms();
 
+        // webs die with a restarted segment, so the list must not grow
+        spawnedWebs.RemoveAll(web => web == null);
+
         int spawnedCount = 0;
         for (int slot = 0; slot < maxWebsPerSegment; slot++) {
             if (Random.value < spawnChance && TrySpawnWeb(segment)) {
