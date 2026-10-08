@@ -1,13 +1,14 @@
 # Monkobra CHANGELOG
 
 <!--
-FIXME proper game state management
 TODO full gameplay: restart
 FIXME add start tutorial screen
 FIXME re-add inf run
 
+Bug progress bar anchor
 Todo data collection system
 Fixme update per project assets rule
+Todo add final score & high score
 
 todo audio BGM
 todo audio SFX

@@ -138,13 +138,6 @@ public class CameraRigManager: MonoBehaviour {
 
         activeView = desiredView;
         ApplyPriorities();
-
-        if (Debug.isDebugBuild) {
-            Debug.Log(
-                $"CameraRigManager:\tview switched, activeView={activeView}",
-                this
-            );
-        }
     }
 
     private void ApplyPriorities() {
