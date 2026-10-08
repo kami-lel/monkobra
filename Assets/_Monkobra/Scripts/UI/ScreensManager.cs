@@ -51,10 +51,28 @@ public class ScreensManager: MonoBehaviour {
         I = this;
     }
 
-    // GameController may set its first state before this singleton exists
+    // panels start deactivated, this manager alone turns them on. Sync to the
+    // state GameController set in Awake, then follow its changes
     private void Start() {
+        if (GameController.I == null) {
+            Debug.LogError(
+                "ScreensManager:\tGameController instance not found",
+                this
+            );
+            return;
+        }
+
+        ShowScreenFor(GameController.I.State);
+        GameController.I.StateChanged += ShowScreenFor;
+    }
+
+    private void OnDestroy() {
+        if (I == this) {
+            I = null;
+        }
+
         if (GameController.I != null) {
-            ShowScreenFor(GameController.I.State);
+            GameController.I.StateChanged -= ShowScreenFor;
         }
     }
 

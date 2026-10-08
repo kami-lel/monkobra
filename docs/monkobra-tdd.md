@@ -78,7 +78,7 @@ stateDiagram-v2
 | Playing | 1 | none, never paused |
 | Lost | 0 | lose panel, interact reloads the scene after `restartInputDelay` |
 
-`LoseGame` runs once, from Playing only: the cobra touches the monkey ([Mobs](mob-doc.md#contact)), or stamina reaches 0. It calls `ScoreManager.EndRun` so the score settles, then enters Lost. `ScreensManager.ShowScreenFor` swaps the panels on every state change.
+`LoseGame` runs once, from Playing only: the cobra touches the monkey ([Mobs](mob-doc.md#contact)), or stamina reaches 0. It calls `ScoreManager.EndRun` so the score settles, then enters Lost. `ScreensManager` owns the panels: they start deactivated, and it shows the current state's panel in `Start` and on every `StateChanged`.
 
 Gameplay that must stop outside a run checks both `Time.timeScale <= 0` and `GameController.State != GameState.Playing`. Current checkers: `ArmRoot.TryGrabFruit`, `ScorePickup`, `ScoreManager.CanScore`, `SpiderWebStruggle`.
 
@@ -92,7 +92,6 @@ Gameplay that must stop outside a run checks both `Time.timeScale <= 0` and `Gam
 - Held: `IsHeld` freezes the body in place, set by the web trap ([Mobs](mob-doc.md#trap-and-escape))
 - Stun: after a branch hit the input is ignored and the body falls a set distance ([Mobs](mob-doc.md#hit-penalty))
 - Stamina Cost: each step reports upward and sideways distance to `StaminaBar.DrainByMovement`. The stun fall and descending cost nothing
-- Win: entering a `WinZone`-tagged trigger calls `GameController.WinGame`
 
 | Setting | Value |
 | --- | --- |
@@ -138,7 +137,7 @@ All values live in `Settings/GameConfig.asset`. The fields the asset does not li
 - Distance Score: whole meters of the highest point climbed times points per meter. Only a new high counts, so falling and re-climbing earns nothing
 - Reward Score: points from each banana collected through its `ScorePickup`
 - Gate: `CanScore` is true only after start, before `EndRun`, while unpaused, and while the game is not over
-- Display: `ScoreDisplay` shows the total on the HUD and on both end panels
+- Display: `ScoreDisplay` shows the total on the HUD and on the lose panel
 
 | Setting | Value | Asset |
 | --- | --- | --- |
@@ -167,8 +166,8 @@ One asset, `Settings/_Shared/InputSystem_Actions`, holds all bindings, reference
 | --- | --- | --- |
 | Stamina Bar | `UI/StaminaBar` | current stamina |
 | Climb Progress | `UI/ProgressBarRoot` | the monkey's height as a share of the tree, with a cobra marker |
-| Score | `UI/ScoreDisplay` | total score, on the HUD and each end panel |
-| End Panels | `UI/ScreensManager` | win and lose panels |
+| Score | `UI/ScoreDisplay` | total score, on the HUD and the lose panel |
+| Screens | `UI/ScreensManager` | tutorial and lose panels |
 | Web Prompt | `UI/SpiderWebPrompt` | first-trap hint and the escape bar ([Mobs](mob-doc.md#trap-and-escape)) |
 
 ## Conventions
@@ -176,7 +175,7 @@ One asset, `Settings/_Shared/InputSystem_Actions`, holds all bindings, reference
 - Singletons: scene-scoped and first-wins. `TreeManager`, `UpwardFruitDetection`, `StaminaBar`, and `ScoreManager` destroy a duplicate component only. `GameController` and `ScreensManager` destroy the duplicate's whole GameObject
 - Start Over Awake: a consumer that may start before its singleton reads it in `Start`, so Awake order never matters
 - Events Over Calls: detection scripts forward trigger events (`Entered`, `Exited`, `BranchHit`) rather than calling their consumers
-- Tags: `Branch`, `FruitCollider`, `WinZone`, and `Player` drive trigger matching. Webs match by a Rigidbody component instead
+- Tags: `Branch`, `FruitCollider`, and `Player` drive trigger matching. Webs match by a Rigidbody component instead
 - Tuning In Data: values stay in serialized fields, and shared tuning sits in a ScriptableObject (`MonkeyConfig`, `GameConfig`, `ScoreConfig`, `ScoreReward`, `BranchFruitPlacementConfig`). Gameplay values are never hard-coded
 - Field Guards: required inspector fields are checked in `Awake` with a logged message naming the field
 - Kinematic Body: nothing about the monkey is mass or gravity driven. Each arm is posed purely by its joint drives

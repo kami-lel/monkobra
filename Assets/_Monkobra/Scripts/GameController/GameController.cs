@@ -106,10 +106,6 @@ public class GameController: MonoBehaviour {
             lostTime = Time.unscaledTime;
         }
 
-        if (ScreensManager.I != null) {
-            ScreensManager.I.ShowScreenFor(next);
-        }
-
         StateChanged?.Invoke(next);
     }
 
