@@ -63,7 +63,7 @@ graph TD
 
 1. `ScorePickup.TryCollect` refuses if the game is over, paused, or the fruit was already collected. Otherwise it hands its reward to `ScoreManager` once and switches the fruit off. A fruit with no `ScorePickup` is just switched off
 2. every collider of that fruit is removed from the detection sets
-3. `StaminaBar.I.AddStaminaByFruit` restores stamina, capped at the maximum, and does nothing once stamina is empty
+3. `StaminaBar.I.AddStaminaByFruit` restores stamina, capped at the maximum, and works from empty too
 
 ## Camera
 

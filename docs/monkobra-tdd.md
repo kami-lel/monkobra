@@ -49,7 +49,7 @@ graph LR
   Grab --> Score[ScoreManager]
   Mobs[Mobs] -->|touch| Monkey
   Mobs -->|cobra contact| Game[GameController]
-  Stamina -->|empty| Game
+  Stamina -->|empty| Monkey
   Tree[Tree and TreeTop] -->|win zone| Game
   Game --> Screens[ScreensManager]
   Game -->|EndRun| Score
@@ -78,7 +78,7 @@ stateDiagram-v2
 | Playing | 1 | none, never paused |
 | Lost | 0 | lose panel, interact reloads the scene after `restartInputDelay` |
 
-`LoseGame` runs once, from Playing only: the cobra touches the monkey ([Mobs](mob-doc.md#contact)), or stamina reaches 0. It calls `ScoreManager.EndRun` so the score settles, then enters Lost. `ScreensManager` owns the panels: they start deactivated, and it shows the current state's panel in `Start` and on every `StateChanged`.
+`LoseGame` runs once, from Playing only: the cobra touches the monkey ([Mobs](mob-doc.md#contact)). It calls `ScoreManager.EndRun` so the score settles, then enters Lost. `ScreensManager` owns the panels: they start deactivated, and it shows the current state's panel in `Start` and on every `StateChanged`.
 
 Gameplay that must stop outside a run checks both `Time.timeScale <= 0` and `GameController.State != GameState.Playing`. Current checkers: `ArmRoot.TryGrabFruit`, `ScorePickup`, `ScoreManager.CanScore`, `SpiderWebStruggle`.
 
@@ -119,7 +119,8 @@ The tree is a stack of static and dynamic trunk segments under a `TreeTop`.
 - Timer Drain: a fixed amount every interval, as a coroutine started in `Start`
 - Movement Drain: `DrainByMovement` per physics step, upward distance costs more than sideways
 - Restore: `AddStaminaByFruit` adds the per-banana amount, capped at the maximum ([Grab System](grab-doc.md#on-a-successful-grab))
-- Depletion: reaching 0 from either drain calls `LoseGame` once
+- Idle Recovery: `MonkeyPrefabRoot` adds `MonkeyConfig.IdleStaminaRecoveryPerS` per second while no move key is pressed
+- Depletion: reaching 0 does not end the run: `MonkeyPrefabRoot` scales climb and orbit speed by `MonkeyConfig.ExhaustedSpeedMultiplier` (0.2) until stamina is above 0 again
 
 | Setting | Value | Note |
 | --- | --- | --- |

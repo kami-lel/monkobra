@@ -2,14 +2,12 @@
 
 <!--
 BUG stigma bar wrong
+TODO add final score & high score
 
 Bug progress bar anchor
 Todo data collection system
+Fixme clear SO organize
 Fixme update per project assets rule
-Todo add final score & high score
-
-todo audio BGM
-todo audio SFX
 -->
 
 ## [Unreleased]
