@@ -10,7 +10,7 @@ public class ScoreManager: MonoBehaviour {
     public bool IsRunEnded => isRunEnded;
     public event Action<long> ScoreChanged;
 
-    public bool CanScore => isActiveAndEnabled && hasStarted && !isRunEnded && Time.timeScale > 0f && (GameController.I == null || !GameController.I.IsGameOver);
+    public bool CanScore => isActiveAndEnabled && hasStarted && !isRunEnded && Time.timeScale > 0f && (GameController.I == null || GameController.I.State == GameState.Playing);
     //必须满足：组件启用、已经开局、尚未结束、没有暂停，才允许计分
     [SerializeField]
     private ScoreConfig config;
@@ -68,7 +68,8 @@ public class ScoreManager: MonoBehaviour {
         highestClimbedUnits = 0d;
         DistanceScore = 0;
         RewardScore = 0;
-        isRunEnded = GameController.I != null && GameController.I.IsGameOver;
+        isRunEnded = GameController.I != null
+            && GameController.I.State == GameState.Lost;
         hasStarted = true;
         ScoreChanged?.Invoke(TotalScore);
     }

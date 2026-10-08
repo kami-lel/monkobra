@@ -62,18 +62,25 @@ Subsystems talk through scene singletons, C# events, and trigger callbacks, not 
 
 ## Run Lifecycle
 
-`GameController` is the scene singleton that owns the end state.
+`GameController` is the scene singleton that owns the `GameState` machine, exposed as `State` with a `StateChanged` event. A run only loses, it never wins.
 
-1. Start: `Awake` sets `Time.timeScale` to 1 and registers `GameController.I`. `ScreensManager` hides both end panels in `Start`, and `ScoreManager` records the starting height
-2. Play: movement, stamina drain, scoring, and the mobs run
-3. End: `WinGame` or `LoseGame` runs once. Whichever arrives first sets `IsGameOver`, calls `ScoreManager.EndRun` so the score settles, shows the win or lose panel, and sets `Time.timeScale` to 0
+```mermaid
+stateDiagram-v2
+  [*] --> Tutorial: scene load
+  Tutorial --> Playing: any button
+  Playing --> Lost: LoseGame
+  Lost --> [*]: interact, reload scene
+```
 
-| Outcome | Trigger |
-| --- | --- |
-| Win | the monkey enters the win zone: `WinZoneHandler` on the `TreeTop` prefab, or `MonkeyPrefabRoot` on a `WinZone`-tagged trigger |
-| Lose | the cobra touches the monkey ([Mobs](mob-doc.md#contact)), or stamina reaches 0 |
+| State | Time Scale | Screen |
+| --- | --- | --- |
+| Tutorial | 0 | tutorial panel, any button starts the run |
+| Playing | 1 | none, never paused |
+| Lost | 0 | lose panel, interact reloads the scene after `restartInputDelay` |
 
-Gameplay that must stop at the end checks both `Time.timeScale <= 0`, which also covers a pause, and `GameController.IsGameOver`. Current checkers: `ArmRoot.TryGrabFruit`, `ScorePickup`, `ScoreManager.CanScore`, `SpiderWebStruggle`.
+`LoseGame` runs once, from Playing only: the cobra touches the monkey ([Mobs](mob-doc.md#contact)), or stamina reaches 0. It calls `ScoreManager.EndRun` so the score settles, then enters Lost. `ScreensManager.ShowScreenFor` swaps the panels on every state change.
+
+Gameplay that must stop outside a run checks both `Time.timeScale <= 0` and `GameController.State != GameState.Playing`. Current checkers: `ArmRoot.TryGrabFruit`, `ScorePickup`, `ScoreManager.CanScore`, `SpiderWebStruggle`.
 
 ## Monkey Movement
 

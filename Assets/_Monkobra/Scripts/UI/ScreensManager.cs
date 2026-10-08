@@ -7,20 +7,18 @@ public class ScreensManager: MonoBehaviour {
     }
 
     // Public Methods  #########################################################
-    /// <summary>Shows the win screen and hides the lose screen.</summary>
-    public void ShowWinScreen() {
-        SetScreens(winActive: true, loseActive: false);
-    }
-
-    /// <summary>Shows the lose screen and hides the win screen.</summary>
-    public void ShowLoseScreen() {
-        SetScreens(winActive: false, loseActive: true);
+    /// <summary>Shows the screen of the given state, hides the others.</summary>
+    public void ShowScreenFor(GameState state) {
+        SetScreens(
+            tutorialActive: state == GameState.Tutorial,
+            loseActive: state == GameState.Lost
+        );
     }
 
     // Inspector Fields  #######################################################
     [SerializeField]
-    [Tooltip("win screen panel")]
-    private GameObject winScreen;
+    [Tooltip("tutorial screen panel")]
+    private GameObject tutorialScreen;
 
     [SerializeField]
     [Tooltip("lose screen panel")]
@@ -29,9 +27,9 @@ public class ScreensManager: MonoBehaviour {
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
         // Inspector Assignment Guard  -----------------------------------------
-        if (winScreen == null) {
+        if (tutorialScreen == null) {
             Debug.LogError(
-                "ScreensManager:\tmust assign Inspector Field: Win Screen",
+                "ScreensManager:\tmust assign Inspector Field: Tutorial Screen",
                 this
             );
         }
@@ -53,21 +51,26 @@ public class ScreensManager: MonoBehaviour {
         I = this;
     }
 
+    // GameController may set its first state before this singleton exists
     private void Start() {
-        SetScreens(winActive: false, loseActive: false);
+        if (GameController.I != null) {
+            ShowScreenFor(GameController.I.State);
+        }
     }
 
     // private methods  ########################################################
-    private void SetScreens(bool winActive, bool loseActive) {
-        if (winScreen != null) {
-            winScreen.SetActive(winActive);
+    private void SetScreens(bool tutorialActive, bool loseActive) {
+        if (tutorialScreen != null) {
+            tutorialScreen.SetActive(tutorialActive);
         }
         if (loseScreen != null) {
             loseScreen.SetActive(loseActive);
         }
 
         if (Debug.isDebugBuild) {
-            Debug.Log($"ScreensManager:\twin={winActive}, lose={loseActive}");
+            Debug.Log(
+                $"ScreensManager:\ttutorial={tutorialActive}, lose={loseActive}"
+            );
         }
     }
 }

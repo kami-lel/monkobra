@@ -459,7 +459,8 @@ public class ArmRoot: MonoBehaviour {
     private void TryGrabFruit() 
     {
         if (Time.timeScale <= 0f
-            || (GameController.I != null && GameController.I.IsGameOver)) {
+            || (GameController.I != null
+                && GameController.I.State != GameState.Playing)) {
             return;
         }//暂停或游戏结束后，不再摘水果
         if (!isReaching || reachFruit == null) {

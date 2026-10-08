@@ -84,7 +84,7 @@ All under `Assets/_Monkobra/Scripts/`. Each row names the owner of the detail.
 
 | Script | Role | Detail |
 | --- | --- | --- |
-| `GameController` | singleton, owns win or lose and `IsGameOver` | [TDD](docs/monkobra-tdd.md#run-lifecycle) |
+| `GameController`, `GameState` | singleton, owns the `GameState` machine: Tutorial, Playing, Lost | [TDD](docs/monkobra-tdd.md#run-lifecycle) |
 | `GameConfig` | ScriptableObject of stamina tuning | [TDD](docs/monkobra-tdd.md#stamina) |
 | `ArmRoot/MonkeyPrefabRoot` | kinematic body: orbit, climb, stun, `IsHeld` | [TDD](docs/monkobra-tdd.md#monkey-movement) |
 | `ArmRoot/MonkeyConfig` | ScriptableObject of monkey tuning and input actions | [TDD](docs/monkobra-tdd.md#monkey-movement) |
@@ -102,7 +102,7 @@ All under `Assets/_Monkobra/Scripts/`. Each row names the owner of the detail.
 | `Environment/SpiderWebTrap` | web prefab root with one deepened trigger box | [Mobs](docs/mob-doc.md#trap-and-escape) |
 | `Environment/SpiderWebStruggle` | on the monkey: trap state, escape bar, immunity | [Mobs](docs/mob-doc.md#trap-and-escape) |
 | `Environment/SpiderWebBuilder` | `Build Web` context menu that builds the web strands out of cubes, a one-off authoring aid | none |
-| `Environment/WinZoneHandler` | on `TreeTop`, calls `WinGame` | [TDD](docs/monkobra-tdd.md#run-lifecycle) |
+| `Environment/WinZoneHandler` | empty leftover on `TreeTop`, win removed, to delete | [TDD](docs/monkobra-tdd.md#run-lifecycle) |
 | `Cobra/CobraClimb` | chasing cobra path, coil, and look | [Mobs](docs/mob-doc.md#cobra) |
 | `Cobra/CobraCollisions` | cobra contact calls `LoseGame` | [Mobs](docs/mob-doc.md#contact) |
 | `Cobra/FallingCobraSpawner` | unlock, rhythm, and branch pick | [Mobs](docs/mob-doc.md#falling-cobra) |

@@ -1,4 +1,8 @@
+using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Utilities;
+using UnityEngine.SceneManagement;
 
 public class GameController: MonoBehaviour {
     // Public Members  #########################################################
@@ -6,60 +10,47 @@ public class GameController: MonoBehaviour {
         get; private set;
     }
 
-    public bool IsGameOver => isGameOver;
-    //公开，让其他脚本查看游戏是否结束
-    // Public Methods  #########################################################
-    public void WinGame() {
-        if (isGameOver) {
-            return;
-        }
-
-        isGameOver = true;
-
-        if (ScoreManager.I != null) {
-            ScoreManager.I.EndRun();
-        }//先结算分数
-
-        if (ScreensManager.I != null) {
-            ScreensManager.I.ShowWinScreen();
-        } else {
-            Debug.LogError(
-                "GameController:\tScreensManager instance not found",
-                this
-            );
-        }
-
-        Time.timeScale = 0f;
-        Debug.Log("GameController:\tgame won", this);
+    public GameState State {
+        get; private set;
     }
 
+    public event Action<GameState> StateChanged;
+
+    // Public Methods  #########################################################
     public void LoseGame() {
-        if (isGameOver) {
+        if (State != GameState.Playing) {
             return;
         }
 
-        isGameOver = true;
-
+        // settle score first
         if (ScoreManager.I != null) {
             ScoreManager.I.EndRun();
-        }//先结算分数
-
-        if (ScreensManager.I != null) {
-            ScreensManager.I.ShowLoseScreen();
-        } else {
-            Debug.LogError(
-                "GameController:\tScreensManager instance not found",
-                this
-            );
         }
 
-        Time.timeScale = 0f;
+        SetState(GameState.Lost);
         Debug.Log("GameController:\tgame lost", this);
     }
+
+    // Inspector Fields  #######################################################
+    [SerializeField]
+    [Tooltip("interact action, restarts the scene on the lose screen")]
+    private InputActionReference interactAction;
+
+    [SerializeField]
+    [Min(0f)]
+    [Tooltip("unscaled seconds the lose screen ignores restart input")]
+    private float restartInputDelay = 0.5f;
 
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
         // Inspector Assignment Guard  -----------------------------------------
+        if (interactAction == null) {
+            Debug.LogError(
+                "GameController:\tmust assign Inspector Field: Interact Action",
+                this
+            );
+        }
+
         if (I != null && I != this) {
             Debug.LogWarning(
                 "GameController:\tduplicate instance destroyed",
@@ -71,16 +62,58 @@ public class GameController: MonoBehaviour {
         }
 
         I = this;
-        Time.timeScale = 1f;
+        SetState(GameState.Tutorial);
+        anyPressSub = InputSystem.onAnyButtonPress.CallOnce(OnAnyPressed);
+    }
+
+    private void Update() {
+        if (State != GameState.Lost || interactAction == null) {
+            return;
+        }
+
+        if (Time.unscaledTime - lostTime < restartInputDelay) {
+            return;
+        }
+
+        if (interactAction.action.WasPressedThisFrame()) {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
     }
 
     private void OnDestroy() {
+        anyPressSub?.Dispose();
+
         if (I == this) {
             I = null;
             Time.timeScale = 1f;
         }
     }
 
+    // Event Handlers  #########################################################
+    private void OnAnyPressed(InputControl _) {
+        anyPressSub = null;
+        if (State == GameState.Tutorial) {
+            SetState(GameState.Playing);
+        }
+    }
+
+    // private methods  ########################################################
+    private void SetState(GameState next) {
+        State = next;
+        Time.timeScale = next == GameState.Playing ? 1f : 0f;
+
+        if (next == GameState.Lost) {
+            lostTime = Time.unscaledTime;
+        }
+
+        if (ScreensManager.I != null) {
+            ScreensManager.I.ShowScreenFor(next);
+        }
+
+        StateChanged?.Invoke(next);
+    }
+
     // private members  ########################################################
-    private bool isGameOver;
+    private IDisposable anyPressSub;
+    private float lostTime;
 }
