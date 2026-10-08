@@ -45,6 +45,7 @@ graph TD
 - Reach Side: `ReachSide` is right only when the right zone has fruit and the left does not, else left, including when neither or both have fruit. Only the arm on that side reaches
 - Newest Fruit: the target is the most recent entry on that side
 - Reach Events: `FruitReachChanged` fires when a fruit enters or leaves both zones combined, so a fruit in the other zone still counts as reachable
+- Reach Target: `ReachTarget` is the single fruit a reach would aim at, the newest on `ReachSide`, and `ReachTargetChanged` fires when it changes. While an arm reaches, `SetLockedTarget` pins it to the aimed fruit, so a newer fruit never steals the outline. Only that fruit is outlined
 - Removal: a grabbed fruit is switched off inside a zone, where its trigger exit may never fire, so `RemoveFruit` clears it from both sides explicitly
 
 ## Reach and Release
@@ -74,7 +75,7 @@ graph TD
 
 | Tier | When | Priority |
 | --- | --- | --- |
-| Reachable | the fruit sits in a detection zone | lower |
+| Reachable | the fruit is `ReachTarget`, the one a reach would aim at | lower |
 | Grabbable | a hand overlaps the fruit, so a release would grab it | higher, wins |
 
 ## Fruit Supply
