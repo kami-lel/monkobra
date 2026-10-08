@@ -171,6 +171,7 @@ One asset, `Settings/_Shared/InputSystem_Actions`, holds all bindings, reference
 | Score | `UI/ScoreDisplay` | total score, on the HUD and the lose panel |
 | Height | `UI/HeightDisplayController` | height climbed since game start, in world units |
 | Screens | `UI/ScreensManager` | tutorial and lose panels |
+| Lose Stats | `UI/LoseScreenController` | final height (highest point climbed) and final score, filled each time the lose panel is enabled |
 | Web Prompt | `UI/SpiderWebPrompt` | first-trap hint and the escape bar ([Mobs](mob-doc.md#trap-and-escape)) |
 
 ## Conventions
