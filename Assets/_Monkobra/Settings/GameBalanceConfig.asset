@@ -28,5 +28,94 @@ MonoBehaviour:
   pointsPerMeter: 1
   unitsPerMeter: 0.1
   scoreRewardPoints: 100
-  minBranchCount: 2
-  maxBranchCount: 9
+  rampedDifficultyCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 10
+      value: 0
+      inSlope: 0.010816078
+      outSlope: 0.010816078
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.0715726
+    - serializedVersion: 3
+      time: 100
+      value: 1
+      inSlope: 0.0125
+      outSlope: 0.0125
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  branchGenerationAttemptCount: 10
+  branchSpawnProbabilityCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  bananaSpawnProbabilityCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0.3539959
+      outSlope: 0.3539959
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 1
+    - serializedVersion: 3
+      time: 0.055922568
+      value: 0.025378792
+      inSlope: 0.5796636
+      outSlope: 0.5796636
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.77327466
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.37432513
+      value: 0.13330945
+      inSlope: 0.2027102
+      outSlope: 0.2027102
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0.2
+      inSlope: 0.10658979
+      outSlope: 0.10658979
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
