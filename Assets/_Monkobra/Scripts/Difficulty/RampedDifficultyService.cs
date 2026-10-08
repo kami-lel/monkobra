@@ -20,6 +20,17 @@ public class RampedDifficultyService: MonoBehaviour {
         return Mathf.Clamp01(rampCurve.Evaluate(climbedY));
     }
 
+    /// <summary>
+    /// Height the player has climbed since game start.
+    /// </summary>
+    /// <returns>current player y minus start y; 0 w/o player</returns>
+    public float CalcPlayerClimbedYDistance() {
+        if (player == null) {
+            return 0f;
+        }
+        return player.position.y - PlayerGameStartYPosition;
+    }
+
     // Inspector Fields
     [SerializeField]
     [Tooltip("x: player y above start y; y: ramped difficulty 0~1")]

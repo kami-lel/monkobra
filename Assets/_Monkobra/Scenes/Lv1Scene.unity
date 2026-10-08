@@ -1987,8 +1987,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 567824735}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.007178432, y: 0.9947869, z: -0.09925197, w: 0.022283465}
-  m_LocalPosition: {x: -0.44799006, y: 2.0649786, z: 10.224244}
+  m_LocalRotation: {x: 0.007924218, y: 0.99088365, z: -0.13267098, w: 0.02202928}
+  m_LocalPosition: {x: -0.35504013, y: 2.2493973, z: 8.234935}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2079,7 +2079,7 @@ Camera:
     height: 1
   near clip plane: 0.1
   far clip plane: 5000
-  field of view: 60
+  field of view: 65
   orthographic: 0
   orthographic size: 10
   m_Depth: 0
@@ -3638,6 +3638,7 @@ GameObject:
   - component: {fileID: 1091358617}
   - component: {fileID: 1091358619}
   - component: {fileID: 2100000001}
+  - component: {fileID: 2100000002}
   m_Layer: 0
   m_Name: GameController
   m_TagString: GameController
@@ -4712,7 +4713,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1641963984929784354, guid: 4f7b2e3d9df44034096d964cb9622089, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1641963984929784354, guid: 4f7b2e3d9df44034096d964cb9622089, type: 3}
       propertyPath: m_AnchorMin.x
@@ -4720,15 +4721,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1641963984929784354, guid: 4f7b2e3d9df44034096d964cb9622089, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1641963984929784354, guid: 4f7b2e3d9df44034096d964cb9622089, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 300
+      value: 800
       objectReference: {fileID: 0}
     - target: {fileID: 1641963984929784354, guid: 4f7b2e3d9df44034096d964cb9622089, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 35
+      value: 150
+      objectReference: {fileID: 0}
+    - target: {fileID: 1641963984929784354, guid: 4f7b2e3d9df44034096d964cb9622089, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1641963984929784354, guid: 4f7b2e3d9df44034096d964cb9622089, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1641963984929784354, guid: 4f7b2e3d9df44034096d964cb9622089, type: 3}
       propertyPath: m_LocalPosition.x
@@ -4760,11 +4769,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1641963984929784354, guid: 4f7b2e3d9df44034096d964cb9622089, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 19
+      value: 34.6
       objectReference: {fileID: 0}
     - target: {fileID: 1641963984929784354, guid: 4f7b2e3d9df44034096d964cb9622089, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: 142.9
       objectReference: {fileID: 0}
     - target: {fileID: 1641963984929784354, guid: 4f7b2e3d9df44034096d964cb9622089, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -5888,8 +5897,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2005575609}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.0000000023283062, y: 0.9894004, z: -0.14521314, w: 0.0000000018626449}
-  m_LocalPosition: {x: -0.000000029802322, y: 3.000001, z: 10}
+  m_LocalRotation: {x: -7.6662765e-10, y: 0.98395354, z: -0.17842485, w: -0.0000000081681595}
+  m_LocalPosition: {x: -0.000000029802322, y: 3, z: 7.9999995}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5944,9 +5953,9 @@ MonoBehaviour:
   TargetOffset: {x: 0, y: 0, z: 0}
   Damping: {x: 0.5, y: 0.5}
   Lookahead:
-    Enabled: 0
+    Enabled: 1
     Time: 0
-    Smoothing: 26.6
+    Smoothing: 10
     IgnoreY: 1
 --- !u!114 &2005575613
 MonoBehaviour:
@@ -5966,7 +5975,7 @@ MonoBehaviour:
     AngularDampingMode: 0
     RotationDamping: {x: 1, y: 1, z: 1}
     QuaternionDamping: 1
-  FollowOffset: {x: 0, y: 3, z: 10}
+  FollowOffset: {x: 0, y: 3, z: 8}
 --- !u!114 &2005575614
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5991,7 +6000,7 @@ MonoBehaviour:
     LookAtTarget: {fileID: 0}
     CustomLookAtTarget: 0
   Lens:
-    FieldOfView: 60
+    FieldOfView: 65
     OrthographicSize: 10
     NearClipPlane: 0.1
     FarClipPlane: 5000
@@ -6024,8 +6033,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CameraLookUp
   config: {fileID: 11400000, guid: 807cabe9104f1f948afe0b58847b456f, type: 2}
   maxLookUpOffsetU: 4
+  maxLookDownOffsetU: -3
   riseSmoothTimeS: 0.2
-  settleSmoothTimeS: 0.5
+  settleSmoothTimeS: 0.4
 --- !u!1 &2056540446
 GameObject:
   m_ObjectHideFlags: 0
@@ -6211,6 +6221,42 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScoreManager
   config: {fileID: 11400000, guid: 7b3ab5c870a242a1b76703c9b159fb46, type: 2}
   player: {fileID: 504779541}
+--- !u!114 &2100000002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1091358616}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f16464034bd75ec4db90c71b53e356e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RampedDifficultyService
+  rampCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 20
+      value: 0
+      inSlope: 0
+      outSlope: 0.0125
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 100
+      value: 1
+      inSlope: 0.0125
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &2100000010
 GameObject:
   m_ObjectHideFlags: 0
@@ -6246,7 +6292,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 24, y: -24}
+  m_AnchoredPosition: {x: 872, y: -24}
   m_SizeDelta: {x: 440, y: 60}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &2100000012

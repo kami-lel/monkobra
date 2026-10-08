@@ -39,13 +39,6 @@ public class ScoreManager: MonoBehaviour {
         SampleHeight();
     }
 
-    public void ApplyWorldOriginShift(float worldDeltaY) {
-        if (hasStarted && !float.IsNaN(worldDeltaY)
-            && !float.IsInfinity(worldDeltaY)) {
-            startY += worldDeltaY;
-        }
-    }
-
     private void Awake() {
         if (I != null && I != this) {
             enabled = false;
@@ -58,13 +51,11 @@ public class ScoreManager: MonoBehaviour {
             return;
         }
         I = this;
-        playerBody = player.GetComponent<Rigidbody>();
     }
 
     private void Start() {
         pointsPerMeter = config.PointsPerMeter;
         unitsPerMeter = config.UnitsPerMeter;
-        startY = ReadPlayerY();
         highestClimbedUnits = 0d;
         DistanceScore = 0;
         RewardScore = 0;
@@ -94,21 +85,16 @@ public class ScoreManager: MonoBehaviour {
 
     private bool hasStarted;
     private bool isRunEnded;
-    private Rigidbody playerBody;
-    private double startY;
     private double highestClimbedUnits;
     private double unitsPerMeter = 1d;
     private int pointsPerMeter;
 
-    private float ReadPlayerY() {
-        return playerBody != null ? playerBody.position.y : player.position.y;
-    }
-
     private void SampleHeight() {
-        if (player == null) {
+        if (RampedDifficultyService.I == null) {
             return;
         }
-        double climbedUnits = (double)ReadPlayerY() - startY;
+        double climbedUnits =
+            RampedDifficultyService.I.CalcPlayerClimbedYDistance();
         //如果数值无效，或者没超过之前的最高高度，就直接退出。不能刷分
         if (double.IsNaN(climbedUnits) || double.IsInfinity(climbedUnits)
             || climbedUnits <= highestClimbedUnits) {

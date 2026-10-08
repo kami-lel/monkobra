@@ -3,10 +3,11 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Tilts the behind camera upward while the player climbs. Raises the
-/// <see cref="CinemachineRotationComposer"/> aim point above the tracked
-/// target, found on the same GameObject, in proportion to upward move input, so the camera changes its angle
-/// and never its position. Rises fast and settles back slowly.
+/// Tilts the behind camera up while the player climbs and down while the
+/// player descends. Moves the <see cref="CinemachineRotationComposer"/> aim
+/// point above or below the tracked target, found on the same GameObject, in
+/// proportion to vertical move input, so the camera changes its angle and
+/// never its position. Leaves center fast and settles back slowly.
 /// <para>
 /// Reads the move action from the shared <see cref="MonkeyConfig"/> asset,
 /// the same one the body and arms read. Set the composer's own Damping Y to 0,
@@ -25,11 +26,15 @@ public class CameraLookUp: MonoBehaviour {
     private float maxLookUpOffsetU = 6f;
 
     [SerializeField]
-    [Tooltip("how fast the aim point rises while moving up; s")]
+    [Tooltip("aim point offset at full down input, negative is below; u")]
+    private float maxLookDownOffsetU = -1f;
+
+    [SerializeField]
+    [Tooltip("how fast the aim point leaves center while moving up/down; s")]
     private float riseSmoothTimeS = 0.12f;
 
     [SerializeField]
-    [Tooltip("how fast the aim point settles back once up input ends; s")]
+    [Tooltip("how fast the aim point settles back once vertical input ends; s")]
     private float settleSmoothTimeS = 0.5f;
 
     // MonoBehaviour Lifecycle  ################################################
@@ -63,13 +68,16 @@ public class CameraLookUp: MonoBehaviour {
             return;
         }
 
-        float upInput = Mathf.Max(
-            0f,
-            config.MoveAction.action.ReadValue<Vector2>().y
-        );
-        float targetOffsetU = upInput * maxLookUpOffsetU;
+        float verticalInput = config.MoveAction.action.ReadValue<Vector2>().y;
+        float targetOffsetU =
+            verticalInput >= 0f
+                ? verticalInput * maxLookUpOffsetU
+                : -verticalInput * maxLookDownOffsetU;
+        // moving away from center rises fast, returning to center settles slow
         float smoothTimeS =
-            targetOffsetU > offsetU ? riseSmoothTimeS : settleSmoothTimeS;
+            Mathf.Abs(targetOffsetU) > Mathf.Abs(offsetU)
+                ? riseSmoothTimeS
+                : settleSmoothTimeS;
         offsetU = Mathf.SmoothDamp(
             offsetU,
             targetOffsetU,
@@ -85,6 +93,7 @@ public class CameraLookUp: MonoBehaviour {
     // Editor Validation  ######################################################
     private void OnValidate() {
         maxLookUpOffsetU = Mathf.Max(0f, maxLookUpOffsetU);
+        maxLookDownOffsetU = Mathf.Min(0f, maxLookDownOffsetU);
         riseSmoothTimeS = Mathf.Max(0f, riseSmoothTimeS);
         settleSmoothTimeS = Mathf.Max(0f, settleSmoothTimeS);
     }
