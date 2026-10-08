@@ -3,20 +3,12 @@ using UnityEngine;
 [DisallowMultipleComponent]
 //同一个对象不能重复挂两个 ScorePickup，避免配置重复
 public class ScorePickup: MonoBehaviour {
-    [SerializeField]
-    private ScoreReward reward;
-
     public bool TryCollect() {
         if (!isActiveAndEnabled || isCollected || Time.timeScale <= 0f
             || (GameController.I != null
                 && GameController.I.State != GameState.Playing)) {
             return false;
         }//组件没启用、已经领过、游戏暂停或结束，都会拒绝领取
-        if (reward == null) {
-            Debug.LogError("ScorePickup: assign reward in Inspector.", this);
-            return false;
-        }
-
         ScoreManager manager = ScoreManager.I;
         if (manager != null && !manager.CanScore) {
             return false;
@@ -24,7 +16,7 @@ public class ScorePickup: MonoBehaviour {
 
         isCollected = true;
         if (manager != null) {
-            manager.TryAddReward(reward);
+            manager.TryAddReward();
         } else {
         
             Debug.LogWarning("ScorePickup: no ScoreManager; collected without points.", this);

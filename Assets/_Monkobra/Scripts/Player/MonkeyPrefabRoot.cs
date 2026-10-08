@@ -47,6 +47,10 @@ public class MonkeyPrefabRoot: MonoBehaviour {
     )]
     private MonkeyConfig config;
 
+    [SerializeField]
+    [Tooltip("game balance tuning; climb speed, exhaustion and branch hit")]
+    private GameBalanceConfig balanceConfig;
+
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
         // Inspector Assignment Guard  -----------------------------------------
@@ -68,6 +72,14 @@ public class MonkeyPrefabRoot: MonoBehaviour {
                 "MonkeyPrefabRoot:\tmust assign MonkeyConfig field: "
                     + "moveAction",
                 config
+            );
+        }
+
+        if (balanceConfig == null) {
+            Debug.LogWarning(
+                "MonkeyPrefabRoot:	must assign Inspector Field: "
+                    + "balanceConfig",
+                this
             );
         }
 
@@ -121,7 +133,7 @@ public class MonkeyPrefabRoot: MonoBehaviour {
     }
 
     private void FixedUpdate() {
-        if (config == null) {
+        if (config == null || balanceConfig == null) {
             return;
         }
 
@@ -145,7 +157,7 @@ public class MonkeyPrefabRoot: MonoBehaviour {
         // an empty stamina bar slows the monkey instead of ending the run
         bool isExhausted = StaminaBar.I != null && !StaminaBar.I.HasStamina;
         float upSpeedScale = isExhausted
-            ? config.ExhaustedSpeedMultiplier
+            ? balanceConfig.ExhaustedSpeedMultiplier
             : 1f;
 
         orbitAngleDeg -= directionalInput.x
@@ -153,8 +165,8 @@ public class MonkeyPrefabRoot: MonoBehaviour {
             * Time.fixedDeltaTime;
 
         float maxClimbSpeed = directionalInput.y >= 0f
-            ? config.UpSpeedU * upSpeedScale
-            : config.DownSpeedU;
+            ? balanceConfig.UpSpeedU * upSpeedScale
+            : balanceConfig.DownSpeedU;
         float rampRate = hasInput
             ? config.AccelerationU
             : config.DecelerationU;
@@ -172,7 +184,7 @@ public class MonkeyPrefabRoot: MonoBehaviour {
             nextY = Mathf.Max(
                 dropTargetY,
                 transform.position.y
-                    - config.HitDropSpeedU * Time.fixedDeltaTime
+                    - balanceConfig.HitDropSpeedU * Time.fixedDeltaTime
             );
         }
 
@@ -190,7 +202,8 @@ public class MonkeyPrefabRoot: MonoBehaviour {
             // standing still, no key pressed, regains stamina slowly
             if (!hasInput) {
                 StaminaBar.I.AddStamina(
-                    config.IdleStaminaRecoveryPerS * Time.fixedDeltaTime
+                    balanceConfig.IdleStaminaRecoveryPerS
+                        * Time.fixedDeltaTime
                 );
             }
         }
@@ -203,10 +216,11 @@ public class MonkeyPrefabRoot: MonoBehaviour {
     }
 
     // Event Handlers  #########################################################
-    // knock monkey off climb: ignore input for the config's stun duration,
-    // fall its drop distance. Ignore hit while previous one in effect
+    // knock monkey off climb: ignore input for the stun duration, fall the
+    // drop distance, both from the balance config. Ignore hit while previous
+    // one in effect
     private void OnBranchHit(Collider branch) {
-        if (config == null) {
+        if (config == null || balanceConfig == null) {
             return;
         }
 
@@ -220,12 +234,13 @@ public class MonkeyPrefabRoot: MonoBehaviour {
             return;
         }
 
-        stunEndTime = Time.time + config.HitStunDurationS;
-        dropTargetY = transform.position.y - config.HitDropDistanceU;
+        stunEndTime = Time.time + balanceConfig.HitStunDurationS;
+        dropTargetY =
+            transform.position.y - balanceConfig.HitDropDistanceU;
         if (Debug.isDebugBuild) {
             Debug.Log(
                 "MonkeyPrefabRoot:\tbranch hit, control lost for "
-                    + $"{config.HitStunDurationS}s"
+                    + $"{balanceConfig.HitStunDurationS}s"
             );
         }
     }

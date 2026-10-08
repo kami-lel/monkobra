@@ -7,7 +7,7 @@ How Monkobra is built: the engine and packages, the run lifecycle, the systems t
 | Document | Owns |
 | --- | --- |
 | [Game Design Document](monkobra-gdd.md) | what the player does and why: pillars, loop, mechanics, difficulty |
-| This document | engine, architecture, run lifecycle, monkey, tree, stamina, score, UI, input, conventions |
+| This document | engine, architecture, run lifecycle, game balance, monkey, tree, stamina, score, UI, input, conventions |
 | [Mobs](mob-doc.md) | cobra, falling cobra, branches, spider webs, and what each does when the monkey touches it |
 | [Grab System](grab-doc.md) | detection zones, arm reach, release check, camera swap, outline feedback |
 | [AGENTS.md](../AGENTS.md) | rules for agents, including the WebGL export steps |
@@ -82,9 +82,28 @@ stateDiagram-v2
 
 Gameplay that must stop outside a run checks both `Time.timeScale <= 0` and `GameController.State != GameState.Playing`. Current checkers: `ArmRoot.TryGrabFruit`, `ScorePickup`, `ScoreManager.CanScore`, `SpiderWebStruggle`.
 
+## Game Balance
+
+Every game balance number lives in one asset, `Settings/GameBalanceConfig.asset`, an instance of the `GameBalanceConfig` ScriptableObject. To tweak the game's feel, edit that single file and nothing else: no balance value is held in a second asset or hard-coded in a script.
+
+| Group | Fields | Read by |
+| --- | --- | --- |
+| Stamina | `maxStamina`, `staminaDecreaseAmount`, `staminaDecreaseIntervalS`, `staminaUpwardDrainPerU`, `staminaSidewayDrainPerU`, `fruitStaminaRestore` | `StaminaBar` |
+| Movement | `upSpeedU`, `downSpeedU`, `exhaustedSpeedMultiplier`, `idleStaminaRecoveryPerS` | `MonkeyPrefabRoot` |
+| Branch Hit | `hitStunDurationS`, `hitDropDistanceU`, `hitDropSpeedU` | `MonkeyPrefabRoot` |
+| Score | `pointsPerMeter`, `unitsPerMeter`, `scoreRewardPoints` | `ScoreManager` |
+| Branch Count | `minBranchCount`, `maxBranchCount` | `DynamicTreeSegmentPrefabRoot` |
+
+- Wiring: each reader holds a `GameBalanceConfig` inspector field (`config` on `StaminaBar` and `ScoreManager`, `balanceConfig` on `MonkeyPrefabRoot` and `DynamicTreeSegmentPrefabRoot`), all pointing at the same asset
+- Not Balance: the arm stroke and reach, orbit speed, acceleration, and input actions stay in `MonkeyConfig`; branch radius, spacing, retries, and the progress at which the branch count peaks stay in `BranchFruitPlacementConfig`
+- Retired: `GameConfig`, `ScoreConfig`, and `ScoreReward` were folded into `GameBalanceConfig` and removed
+- Suffixes: `U` is world units, `S` is seconds, `Deg` is degrees, `PerU` is per world unit travelled
+
+The balance values in each section below are the current ones; change them in the asset, not in the section.
+
 ## Monkey Movement
 
-`MonkeyPrefabRoot` drives the body and `MonkeyConfig` holds every number.
+`MonkeyPrefabRoot` drives the body. Its climb and stun numbers come from [Game Balance](#game-balance) and its orbit, acceleration, and input from `MonkeyConfig`.
 
 - Body: kinematic, with gravity off. The script writes position and rotation outright through the Rigidbody, so no arm joint or collision can push it off its path
 - Orbit: the horizontal input changes one angle, and the body sits exactly on a ring of fixed radius round its parent, the trunk
@@ -101,7 +120,7 @@ Gameplay that must stop outside a run checks both `Time.timeScale <= 0` and `Gam
 | Acceleration | 20 u/s² |
 | Deceleration | 30 u/s² |
 
-All values come from `Settings/MonkeyConfig.asset`. The arm stroke and reach tuning in the same asset is covered by the [Grab System](grab-doc.md#tuning).
+Climb speeds come from `Settings/GameBalanceConfig.asset`. Orbit speed, acceleration, and deceleration come from `Settings/_Shared/MonkeyConfig.asset`, which also holds the arm stroke and reach tuning covered by the [Grab System](grab-doc.md#tuning).
 
 ## Tree
 
@@ -114,23 +133,23 @@ The tree is a stack of static and dynamic trunk segments under a `TreeTop`.
 
 ## Stamina
 
-`StaminaBar` is a singleton `Slider` that reads `GameConfig`.
+`StaminaBar` is a singleton `Slider` that reads `GameBalanceConfig`.
 
 - Timer Drain: a fixed amount every interval, as a coroutine started in `Start`
 - Movement Drain: `DrainByMovement` per physics step, upward distance costs more than sideways
 - Restore: `AddStaminaByFruit` adds the per-banana amount, capped at the maximum ([Grab System](grab-doc.md#on-a-successful-grab))
-- Idle Recovery: `MonkeyPrefabRoot` adds `MonkeyConfig.IdleStaminaRecoveryPerS` per second while no move key is pressed
-- Depletion: reaching 0 does not end the run: `MonkeyPrefabRoot` scales upward climb speed only by `MonkeyConfig.ExhaustedSpeedMultiplier` (0.2) until stamina is above 0 again
+- Idle Recovery: `MonkeyPrefabRoot` adds `GameBalanceConfig.IdleStaminaRecoveryPerS` per second while no move key is pressed
+- Depletion: reaching 0 does not end the run: `MonkeyPrefabRoot` scales upward climb speed only by `GameBalanceConfig.ExhaustedSpeedMultiplier` (0.2) until stamina is above 0 again
 
-| Setting | Value | Note |
-| --- | --- | --- |
-| Max Stamina | 100 | asset |
-| Timer Drain | 10 per 10 s | asset |
-| Restore Per Banana | 30 | script default |
-| Upward Cost | 0.5 per u | script default |
-| Sideways Cost | 0.3 per u | script default |
+| Setting | Value |
+| --- | --- |
+| Max Stamina | 100 |
+| Timer Drain | 10 per 10 s |
+| Restore Per Banana | 30 |
+| Upward Cost | 0.5 per u |
+| Sideways Cost | 0.3 per u |
 
-All values live in `Settings/GameConfig.asset`. The fields the asset does not list take their script defaults.
+All values live in `Settings/GameBalanceConfig.asset`.
 
 ## Score
 
@@ -141,11 +160,13 @@ All values live in `Settings/GameConfig.asset`. The fields the asset does not li
 - Gate: `CanScore` is true only after start, before `EndRun`, while unpaused, and while the game is not over
 - Display: `ScoreDisplay` shows the total on the HUD and on the lose panel
 
-| Setting | Value | Asset |
-| --- | --- | --- |
-| Points Per Meter | 1 | `Settings/Scoring/ScoreConfig.asset` |
-| World Units Per Meter | 0.1 | 〃 |
-| Points Per Banana | 100 | `Settings/Scoring/BananaScore.asset` |
+| Setting | Value |
+| --- | --- |
+| Points Per Meter | 1 |
+| World Units Per Meter | 0.1 |
+| Points Per Banana | 100 |
+
+All values live in `Settings/GameBalanceConfig.asset`; `ScorePickup` carries no reward asset of its own.
 
 `WebDemo` and the other test scenes have no `ScoreManager`.
 
@@ -180,10 +201,10 @@ One asset, `Settings/_Shared/InputSystem_Actions`, holds all bindings, reference
 - Start Over Awake: a consumer that may start before its singleton reads it in `Start`, so Awake order never matters
 - Events Over Calls: detection scripts forward trigger events (`Entered`, `Exited`, `BranchHit`) rather than calling their consumers
 - Tags: `Branch`, `FruitCollider`, and `Player` drive trigger matching. Webs match by a Rigidbody component instead
-- Tuning In Data: values stay in serialized fields, and shared tuning sits in a ScriptableObject (`MonkeyConfig`, `GameConfig`, `ScoreConfig`, `ScoreReward`, `BranchFruitPlacementConfig`). Gameplay values are never hard-coded
+- Tuning In Data: values stay in serialized fields, and shared tuning sits in a ScriptableObject: balance numbers in `GameBalanceConfig` ([Game Balance](#game-balance)), monkey arm and input in `MonkeyConfig`, branch geometry in `BranchFruitPlacementConfig`. Gameplay values are never hard-coded
 - Field Guards: required inspector fields are checked in `Awake` with a logged message naming the field
 - Kinematic Body: nothing about the monkey is mass or gravity driven. Each arm is posed purely by its joint drives
-- Style: `ArmRoot/`, `GameController`, `GameConfig`, `UI/StaminaBar`, `UI/ScreensManager`, `Cobra/CobraClimb`, `Cobra/CobraCollisions`, and most of `Environment/` follow the house Unity style. `Scoring/`, `Cobra/FallingCobra`, `Cobra/FallingCobraSpawner`, and `Environment/SpiderWebBuilder` are still in the template style, some with Chinese comments
+- Style: `ArmRoot/`, `GameController`, `GameBalanceConfig`, `UI/StaminaBar`, `UI/ScreensManager`, `Cobra/CobraClimb`, `Cobra/CobraCollisions`, and most of `Environment/` follow the house Unity style. `Scoring/`, `Cobra/FallingCobra`, `Cobra/FallingCobraSpawner`, and `Environment/SpiderWebBuilder` are still in the template style, some with Chinese comments
 
 ## Build and Deploy
 

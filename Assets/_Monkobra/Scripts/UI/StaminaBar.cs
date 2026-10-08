@@ -14,8 +14,8 @@ public class StaminaBar: MonoBehaviour {
 
     // Public Methods  #########################################################
     /// <summary>
-    /// restores the per-fruit amount from <see cref="GameConfig"/>, called
-    /// when an arm grabs a fruit
+    /// restores the per-fruit amount from <see cref="GameBalanceConfig"/>,
+    /// called when an arm grabs a fruit
     /// </summary>
     public void AddStaminaByFruit() {
         AddStamina(config.FruitStaminaRestore);
@@ -37,7 +37,7 @@ public class StaminaBar: MonoBehaviour {
     /// <summary>
     /// drains stamina for one step of movement: climbing costs the most,
     /// orbiting the trunk costs less, descending is free. Rates come from
-    /// <see cref="GameConfig"/>
+    /// <see cref="GameBalanceConfig"/>
     /// </summary>
     /// <param name="climbedU">upward distance covered this step; u</param>
     /// <param name="orbitedU">sideways arc length covered this step; u</param>
@@ -59,8 +59,8 @@ public class StaminaBar: MonoBehaviour {
 
     // Inspector Fields  #######################################################
     [SerializeField]
-    [Tooltip("game-wide tuning; stamina budget and drain rate")]
-    private GameConfig config;
+    [Tooltip("game balance tuning; stamina budget and drain rate")]
+    private GameBalanceConfig config;
 
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
