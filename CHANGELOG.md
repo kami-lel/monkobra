@@ -1,13 +1,14 @@
 # Monkobra CHANGELOG
 
 <!--
-BUG stigma bar wrong
 TODO add final score & high score
+BUG falling cobra gone
 
 Bug progress bar anchor
 Todo data collection system
 Fixme clear SO organize
 Fixme update per project assets rule
+Fixme rename cobra as great cobra
 -->
 
 ## [Unreleased]

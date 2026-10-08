@@ -120,7 +120,7 @@ The tree is a stack of static and dynamic trunk segments under a `TreeTop`.
 - Movement Drain: `DrainByMovement` per physics step, upward distance costs more than sideways
 - Restore: `AddStaminaByFruit` adds the per-banana amount, capped at the maximum ([Grab System](grab-doc.md#on-a-successful-grab))
 - Idle Recovery: `MonkeyPrefabRoot` adds `MonkeyConfig.IdleStaminaRecoveryPerS` per second while no move key is pressed
-- Depletion: reaching 0 does not end the run: `MonkeyPrefabRoot` scales climb and orbit speed by `MonkeyConfig.ExhaustedSpeedMultiplier` (0.2) until stamina is above 0 again
+- Depletion: reaching 0 does not end the run: `MonkeyPrefabRoot` scales upward climb speed only by `MonkeyConfig.ExhaustedSpeedMultiplier` (0.2) until stamina is above 0 again
 
 | Setting | Value | Note |
 | --- | --- | --- |

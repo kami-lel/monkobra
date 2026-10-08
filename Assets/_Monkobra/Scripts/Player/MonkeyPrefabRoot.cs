@@ -144,16 +144,17 @@ public class MonkeyPrefabRoot: MonoBehaviour {
         // exactly on its ring every step rather than chasing it
         // an empty stamina bar slows the monkey instead of ending the run
         bool isExhausted = StaminaBar.I != null && !StaminaBar.I.HasStamina;
-        float speedScale = isExhausted ? config.ExhaustedSpeedMultiplier : 1f;
-        float rotationSpeedDeg = config.RotationSpeedDeg * speedScale;
+        float upSpeedScale = isExhausted
+            ? config.ExhaustedSpeedMultiplier
+            : 1f;
 
         orbitAngleDeg -= directionalInput.x
-            * rotationSpeedDeg
+            * config.RotationSpeedDeg
             * Time.fixedDeltaTime;
 
-        float maxClimbSpeed = speedScale * (directionalInput.y >= 0f
-            ? config.UpSpeedU
-            : config.DownSpeedU);
+        float maxClimbSpeed = directionalInput.y >= 0f
+            ? config.UpSpeedU * upSpeedScale
+            : config.DownSpeedU;
         float rampRate = hasInput
             ? config.AccelerationU
             : config.DecelerationU;
@@ -180,7 +181,7 @@ public class MonkeyPrefabRoot: MonoBehaviour {
         if (!isStunned && StaminaBar.I != null) {
             float climbedU = nextY - transform.position.y;
             float orbitedU = Mathf.Abs(directionalInput.x)
-                * rotationSpeedDeg
+                * config.RotationSpeedDeg
                 * Time.fixedDeltaTime
                 * Mathf.Deg2Rad
                 * orbitRadius;
