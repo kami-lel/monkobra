@@ -61,7 +61,8 @@ public class AnalyticsManager: MonoBehaviour {
             );
             File.WriteAllText(
                 SessionFilePath,
-                "# MonKobra Analytics: Session: " + title + "\n\n",
+                "# MonKobra Analytics: Session: " + title + "\n\n"
+                    + "MonKobra v" + Application.version + "\n\n",
                 new UTF8Encoding(false)
             );
         } catch (Exception e) {
