@@ -94,7 +94,7 @@ Every game balance number lives in one asset, `Settings/GameBalanceConfig.asset`
 | Score | `pointsPerMeter`, `unitsPerMeter`, `scoreRewardPoints` | `ScoreManager` |
 | Branch Count | `minBranchCount`, `maxBranchCount` | `DynamicTreeSegmentPrefabRoot` |
 
-- Wiring: each reader holds a `GameBalanceConfig` inspector field (`config` on `StaminaBar` and `ScoreManager`, `balanceConfig` on `MonkeyPrefabRoot` and `DynamicTreeSegmentPrefabRoot`), all pointing at the same asset
+- Wiring: each reader holds a `GameBalanceConfig` inspector field (`balanceConfig` on `StaminaBar`, `ScoreManager`, `MonkeyPrefabRoot`, and `DynamicTreeSegmentPrefabRoot`), all pointing at the same asset
 - Not Balance: the arm stroke and reach, orbit speed, acceleration, and input actions stay in `MonkeyConfig`; branch radius, spacing, retries, and the progress at which the branch count peaks stay in `BranchFruitPlacementConfig`
 - Retired: `GameConfig`, `ScoreConfig`, and `ScoreReward` were folded into `GameBalanceConfig` and removed
 - Suffixes: `U` is world units, `S` is seconds, `Deg` is degrees, `PerU` is per world unit travelled

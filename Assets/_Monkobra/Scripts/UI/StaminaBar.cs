@@ -18,7 +18,7 @@ public class StaminaBar: MonoBehaviour {
     /// called when an arm grabs a fruit
     /// </summary>
     public void AddStaminaByFruit() {
-        AddStamina(config.FruitStaminaRestore);
+        AddStamina(balanceConfig.FruitStaminaRestore);
     }
 
     public void AddStamina(float amount) {
@@ -27,7 +27,7 @@ public class StaminaBar: MonoBehaviour {
         }
 
         currentStamina = Mathf.Min(
-            config.MaxStamina,
+            balanceConfig.MaxStamina,
             currentStamina + amount
         );
 
@@ -47,8 +47,8 @@ public class StaminaBar: MonoBehaviour {
         }
 
         float amount =
-            Mathf.Max(0f, climbedU) * config.StaminaUpwardDrainPerU
-            + Mathf.Max(0f, orbitedU) * config.StaminaSidewayDrainPerU;
+            Mathf.Max(0f, climbedU) * balanceConfig.StaminaUpwardDrainPerU
+            + Mathf.Max(0f, orbitedU) * balanceConfig.StaminaSidewayDrainPerU;
         if (amount <= 0f) {
             return;
         }
@@ -60,14 +60,14 @@ public class StaminaBar: MonoBehaviour {
     // Inspector Fields  #######################################################
     [SerializeField]
     [Tooltip("game balance tuning; stamina budget and drain rate")]
-    private GameBalanceConfig config;
+    private GameBalanceConfig balanceConfig;
 
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
         // Inspector Assignment Guard  -----------------------------------------
-        if (config == null) {
+        if (balanceConfig == null) {
             Debug.LogWarning(
-                "StaminaBar:\tmust assign Inspector Field: config",
+                "StaminaBar:\tmust assign Inspector Field: balanceConfig",
                 this
             );
             enabled = false;
@@ -84,9 +84,9 @@ public class StaminaBar: MonoBehaviour {
         I = this;
         staminaSlider = GetComponent<Slider>();
 
-        currentStamina = config.MaxStamina;
+        currentStamina = balanceConfig.MaxStamina;
         staminaSlider.minValue = 0f;
-        staminaSlider.maxValue = config.MaxStamina;
+        staminaSlider.maxValue = balanceConfig.MaxStamina;
         staminaSlider.value = currentStamina;
 
         if (Debug.isDebugBuild) {
@@ -114,11 +114,13 @@ public class StaminaBar: MonoBehaviour {
     private IEnumerator DecreaseStaminaOverTime() {
         // an empty bar only slows the monkey, so the tick keeps running
         while (true) {
-            yield return new WaitForSeconds(config.StaminaDecreaseIntervalS);
+            yield return new WaitForSeconds(
+                balanceConfig.StaminaDecreaseIntervalS
+            );
 
             currentStamina = Mathf.Max(
                 0f,
-                currentStamina - config.StaminaDecreaseAmount
+                currentStamina - balanceConfig.StaminaDecreaseAmount
             );
 
             staminaSlider.value = currentStamina;
