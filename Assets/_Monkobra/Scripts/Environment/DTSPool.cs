@@ -5,9 +5,8 @@ using UnityEngine;
 /// Endless tree from a fixed pool of <see cref="DynamicTreeSegmentPrefabRoot"/>
 /// segments. Put it on an empty parent: it instantiates
 /// <c>segmentCount</c> copies of <c>segmentPrefab</c> as its children,
-/// stacked end to end upward, <c>segmentsBelowPlayer</c> of them under the
-/// player's start height and the rest above. The stack never starts under
-/// the pool's own height, so the ground holds.
+/// stacked end to end upward, the first (lowest) one created at world
+/// height <c>firstSegmentY</c>.
 /// <para>
 /// The pool holds exactly <c>segmentCount</c> segments and never makes more.
 /// Its own web pass covers the first stack, so keep it out from under a
@@ -50,10 +49,10 @@ public class DTSPool: MonoBehaviour {
 
     [SerializeField]
     [Tooltip(
-        "segments of the first stack placed under the player's start "
-            + "height, the rest stand above; at most segmentCount - 1"
+        "world y where the first (lowest) segment is created, its pivot; u. "
+            + "Set it under the player's start so the stack reaches below"
     )]
-    private int segmentsBelowPlayer = 1;
+    private float firstSegmentY = 0f;
 
     [Header("Recycling")]
     [SerializeField]
@@ -136,11 +135,6 @@ public class DTSPool: MonoBehaviour {
     // Editor Validation  ######################################################
     private void OnValidate() {
         segmentCount = Mathf.Max(1, segmentCount);
-        segmentsBelowPlayer = Mathf.Clamp(
-            segmentsBelowPlayer,
-            0,
-            segmentCount - 1
-        );
         lookAheadU = Mathf.Max(0f, lookAheadU);
     }
 
@@ -156,31 +150,28 @@ public class DTSPool: MonoBehaviour {
 
     // private methods  ########################################################
     // segments stand end to end, pivots mid-segment, and join the FIFO lowest
-    // first. The stack base sits segmentsBelowPlayer segments under the
-    // player, never under this object, so the stack cannot sink past the
-    // ground
+    // first, the lowest pivot sitting at firstSegmentY
     private void BuildStack() {
-        float baseY = float.NaN; // set once the first segment gives a height
         for (int i = 0; i < segmentCount; i++) {
             DynamicTreeSegmentPrefabRoot segment = Instantiate(
                 segmentPrefab,
                 transform
             );
-            float height = segment.GetHeight();
-            if (float.IsNaN(baseY)) {
-                baseY = Mathf.Max(
-                    transform.position.y,
-                    target.position.y - segmentsBelowPlayer * height
-                );
-            }
 
             Vector3 position = transform.position;
-            position.y = baseY + height * 0.5f;
+            if (newestSegment == null) {
+                position.y = firstSegmentY;
+            } else {
+                // pivots sit mid-segment, so each rests half of itself and
+                // half of the one under it on their joint
+                position.y =
+                    newestSegment.transform.position.y
+                    + (newestSegment.GetHeight() + segment.GetHeight()) * 0.5f;
+            }
             segment.transform.SetPositionAndRotation(
                 position,
                 transform.rotation
             );
-            baseY += height;
 
             segments.Enqueue(segment);
             newestSegment = segment;
