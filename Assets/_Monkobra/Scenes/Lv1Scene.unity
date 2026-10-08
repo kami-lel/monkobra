@@ -2842,7 +2842,7 @@ MonoBehaviour:
   segmentPrefab: {fileID: 3613063465898347742, guid: d7b7ba174e361a94b843e9a27ce78bba, type: 3}
   mockTree: {fileID: 762143288}
   segmentCount: 10
-  segmentsBelowPlayer: 2
+  firstSegmentY: -10
   lookAheadU: 20
 --- !u!1 &825330269
 GameObject:
