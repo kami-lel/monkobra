@@ -1,8 +1,8 @@
 # Monkobra CHANGELOG
 
 <!--
-TODO full gameplay: restart
 FIXME re-add inf run
+HACK rm winnable
 
 Bug progress bar anchor
 Todo data collection system
