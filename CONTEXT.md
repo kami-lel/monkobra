@@ -92,6 +92,7 @@ All under `Assets/_Monkobra/Scripts/`. Each row names the owner of the detail.
 | `ArmRoot/DetectionZone` | side-tagged trigger forwarding enter and exit | [Grab](docs/grab-doc.md#detection) |
 | `ArmRoot/UpwardFruitDetection` | singleton, reachable and grabbable fruit | [Grab](docs/grab-doc.md#detection) |
 | `ArmRoot/CameraRigManager` | swaps the three Cinemachine cameras | [Grab](docs/grab-doc.md#camera) |
+| `Cameras/CameraLookUp` | on the behind camera: tilts the aim point up while climbing | none |
 | `ArmRoot/HitBranchDetection` | branch sensor: raises `BranchHit`, shakes the camera | [Mobs](docs/mob-doc.md#hit-penalty) |
 | `Environment/TreeManager` | singleton, tree `MinY` and `MaxY` | [TDD](docs/monkobra-tdd.md#tree) |
 | `Environment/DynamicTreeSegmentPrefabRoot` | places branches on a segment | [Mobs](docs/mob-doc.md#placement) |
