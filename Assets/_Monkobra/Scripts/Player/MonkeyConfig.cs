@@ -59,6 +59,14 @@ public class MonkeyConfig: ScriptableObject {
     /// <returns>ramp rate toward target velocity while idle; u/s²</returns>
     public float DecelerationU => decelerationU;
 
+    /// <returns>multiplier on climb and orbit speed while stamina is empty
+    /// </returns>
+    public float ExhaustedSpeedMultiplier => exhaustedSpeedMultiplier;
+
+    /// <returns>stamina regained per s while the monkey gives no movement
+    /// input</returns>
+    public float IdleStaminaRecoveryPerS => idleStaminaRecoveryPerS;
+
     /// <returns>how long control is lost after a branch hit; s</returns>
     public float HitStunDurationS => hitStunDurationS;
 
@@ -135,6 +143,15 @@ public class MonkeyConfig: ScriptableObject {
     [Tooltip("ramp rate toward target velocity while idle; u/s²")]
     private float decelerationU = 30f;
 
+    [Header("Exhaustion")]
+    [SerializeField]
+    [Tooltip("climb and orbit speed multiplier while stamina is empty")]
+    private float exhaustedSpeedMultiplier = 0.2f;
+
+    [SerializeField]
+    [Tooltip("stamina regained per s while no movement key is pressed")]
+    private float idleStaminaRecoveryPerS = 2f;
+
     [Header("Branch Hit")]
     [SerializeField]
     [Tooltip("control lost after a branch hit; s")]
@@ -174,6 +191,8 @@ public class MonkeyConfig: ScriptableObject {
         rotationSpeedDeg = Mathf.Max(0f, rotationSpeedDeg);
         accelerationU = Mathf.Max(0f, accelerationU);
         decelerationU = Mathf.Max(0f, decelerationU);
+        exhaustedSpeedMultiplier = Mathf.Clamp01(exhaustedSpeedMultiplier);
+        idleStaminaRecoveryPerS = Mathf.Max(0f, idleStaminaRecoveryPerS);
         hitStunDurationS = Mathf.Max(0f, hitStunDurationS);
         hitDropDistanceU = Mathf.Max(0f, hitDropDistanceU);
         hitDropSpeedU = Mathf.Max(0f, hitDropSpeedU);

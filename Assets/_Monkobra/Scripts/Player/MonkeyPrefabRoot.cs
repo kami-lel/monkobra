@@ -142,13 +142,18 @@ public class MonkeyPrefabRoot: MonoBehaviour {
 
         // the orbit angle is the only horizontal state, so the body sits
         // exactly on its ring every step rather than chasing it
+        // an empty stamina bar slows the monkey instead of ending the run
+        bool isExhausted = StaminaBar.I != null && !StaminaBar.I.HasStamina;
+        float speedScale = isExhausted ? config.ExhaustedSpeedMultiplier : 1f;
+        float rotationSpeedDeg = config.RotationSpeedDeg * speedScale;
+
         orbitAngleDeg -= directionalInput.x
-            * config.RotationSpeedDeg
+            * rotationSpeedDeg
             * Time.fixedDeltaTime;
 
-        float maxClimbSpeed = directionalInput.y >= 0f
+        float maxClimbSpeed = speedScale * (directionalInput.y >= 0f
             ? config.UpSpeedU
-            : config.DownSpeedU;
+            : config.DownSpeedU);
         float rampRate = hasInput
             ? config.AccelerationU
             : config.DecelerationU;
@@ -175,11 +180,18 @@ public class MonkeyPrefabRoot: MonoBehaviour {
         if (!isStunned && StaminaBar.I != null) {
             float climbedU = nextY - transform.position.y;
             float orbitedU = Mathf.Abs(directionalInput.x)
-                * config.RotationSpeedDeg
+                * rotationSpeedDeg
                 * Time.fixedDeltaTime
                 * Mathf.Deg2Rad
                 * orbitRadius;
             StaminaBar.I.DrainByMovement(climbedU, orbitedU);
+
+            // standing still, no key pressed, regains stamina slowly
+            if (!hasInput) {
+                StaminaBar.I.AddStamina(
+                    config.IdleStaminaRecoveryPerS * Time.fixedDeltaTime
+                );
+            }
         }
 
         Vector3 next =
