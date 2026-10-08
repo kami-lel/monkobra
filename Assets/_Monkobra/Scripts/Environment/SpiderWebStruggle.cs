@@ -217,7 +217,8 @@ public class SpiderWebStruggle: MonoBehaviour {
     // so the struggle stays stopped even if a game over keeps time running
     private static bool IsGameHalted =>
         Time.timeScale <= 0f
-        || (GameController.I != null && GameController.I.IsGameOver);
+        || (GameController.I != null
+            && GameController.I.State != GameState.Playing);
 
     // cached references  ------------------------------------------------------
     private MonkeyPrefabRoot monkeyRoot;

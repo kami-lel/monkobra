@@ -190,21 +190,6 @@ public class MonkeyPrefabRoot: MonoBehaviour {
     }
 
     // Event Handlers  #########################################################
-    private void OnTriggerEnter(Collider other) {
-        if (!other.CompareTag(WIN_ZONE_TAG)) {
-            return;
-        }
-
-        if (GameController.I != null) {
-            GameController.I.WinGame();
-        } else {
-            Debug.LogError(
-                "MonkeyPrefabRoot:\tGameController instance not found",
-                this
-            );
-        }
-    }
-
     // knock monkey off climb: ignore input for the config's stun duration,
     // fall its drop distance. Ignore hit while previous one in effect
     private void OnBranchHit(Collider branch) {
@@ -235,7 +220,6 @@ public class MonkeyPrefabRoot: MonoBehaviour {
     // constants  ##############################################################
     private const float INPUT_DEADZONE = 0.1f;
     private const float INPUT_DEADZONE_SQR = INPUT_DEADZONE * INPUT_DEADZONE;
-    private const string WIN_ZONE_TAG = "WinZone";
 
     // private members  ########################################################
     private float orbitAngleDeg;
