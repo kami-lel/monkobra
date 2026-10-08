@@ -251,6 +251,8 @@ public class AnalyticsManager: MonoBehaviour {
 
         var sb = new StringBuilder();
         sb.Append("## Run ").Append(RunCount).Append("\n\n");
+        sb.Append("- Final Height: ").Append(height).Append("\n\n");
+
         sb.Append("#### Run Duration: ");
         sb.Append(duration.ToString("F1", CultureInfo.InvariantCulture));
         sb.Append(" s\n\n");
@@ -265,8 +267,6 @@ public class AnalyticsManager: MonoBehaviour {
         sb.Append("- Score from Banana: ");
         sb.Append(FormatBananaScore(rewardScore, bananaClocks.Count));
         sb.Append("\n\n");
-
-        sb.Append("#### Final Height: ").Append(height).Append("\n\n");
 
         sb.Append("#### Banana Count: ").Append(bananaClocks.Count);
         sb.Append("\n\n");
