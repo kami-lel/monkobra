@@ -3,11 +3,17 @@ using UnityEngine;
 /// <summary>
 /// Maps player height to a ramped difficulty value, always in 0~1.
 /// </summary>
+// run first so other LateUpdate readers see this frame's height
+[DefaultExecutionOrder(-100)]
 public class RampedDifficultyService: MonoBehaviour {
     // Public Members
     public static RampedDifficultyService I { get; private set; }
     // player y at game start; world u
     public float PlayerGameStartYPosition { get; private set; }
+    // player y above start y, refreshed every frame; world u
+    public float CurrentPlayerClimbedYDistance { get; private set; }
+    // highest CurrentPlayerClimbedYDistance so far, never below 0; world u
+    public float HighestPlayerClimbedYDistance { get; private set; }
 
     // Public Methods
     /// <summary>
@@ -18,17 +24,6 @@ public class RampedDifficultyService: MonoBehaviour {
     public float GetRampedValueFromYPosition(float y) {
         float climbedY = y - PlayerGameStartYPosition;
         return Mathf.Clamp01(rampCurve.Evaluate(climbedY));
-    }
-
-    /// <summary>
-    /// Height the player has climbed since game start.
-    /// </summary>
-    /// <returns>current player y minus start y; 0 w/o player</returns>
-    public float CalcPlayerClimbedYDistance() {
-        if (player == null) {
-            return 0f;
-        }
-        return player.position.y - PlayerGameStartYPosition;
     }
 
     // Inspector Fields
@@ -69,6 +64,18 @@ public class RampedDifficultyService: MonoBehaviour {
             Debug.Log("RampedDifficulty:\tplayer start y: "
                 + PlayerGameStartYPosition);
         }
+    }
+
+    private void LateUpdate() {
+        if (player == null) {
+            return;
+        }
+        CurrentPlayerClimbedYDistance =
+            player.position.y - PlayerGameStartYPosition;
+        HighestPlayerClimbedYDistance = Mathf.Max(
+            HighestPlayerClimbedYDistance,
+            CurrentPlayerClimbedYDistance
+        );
     }
 
     private void OnDestroy() {
