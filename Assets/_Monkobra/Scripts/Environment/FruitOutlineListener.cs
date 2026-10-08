@@ -145,12 +145,5 @@ public class FruitOutlineListener: MonoBehaviour {
             meshes[i].sharedMaterials = tierMats[i];
         }
 
-        if (Debug.isDebugBuild) {
-            Debug.Log(
-                $"FruitOutlineListener:\t{name} reachable: {isReachable}, "
-                    + $"grabbable: {isGrabbable}",
-                this
-            );
-        }
     }
 }

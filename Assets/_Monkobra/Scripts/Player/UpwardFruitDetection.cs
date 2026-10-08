@@ -64,13 +64,6 @@ public class UpwardFruitDetection: MonoBehaviour {
 
         Collider previous = grabbableFruit;
         grabbableFruit = fruit;
-        if (Debug.isDebugBuild) {
-            Debug.Log(
-                "UpwardFruitDetection:\tgrabbable fruit changed: "
-                    + (fruit != null ? fruit.name : "none"),
-                this
-            );
-        }
         GrabbableFruitChanged?.Invoke(previous, fruit);
     }
 
@@ -98,17 +91,11 @@ public class UpwardFruitDetection: MonoBehaviour {
     /// </summary>
     public void RemoveFruit(Collider fruit) {
         bool wasInReach = IsFruitInReach(fruit);
-        bool hadLeft = leftFruits.Remove(fruit);
-        bool hadRight = rightFruits.Remove(fruit);
+        leftFruits.Remove(fruit);
+        rightFruits.Remove(fruit);
         fruitOrder.Remove(fruit);
         if (wasInReach) {
             FruitReachChanged?.Invoke(fruit, false);
-        }
-        if (hadLeft && leftFruits.Count == 0) {
-            LogReachChanged(DetectionSide.Left);
-        }
-        if (hadRight && rightFruits.Count == 0) {
-            LogReachChanged(DetectionSide.Right);
         }
         if (fruit == grabbableFruit) {
             SetGrabbableFruit(null);
@@ -192,9 +179,6 @@ public class UpwardFruitDetection: MonoBehaviour {
         bool wasInReach = IsFruitInReach(other);
         if (fruits.Add(other)) {
             fruitOrder.Add(other);
-            if (fruits.Count == 1) {
-                LogReachChanged(side);
-            }
             if (!wasInReach) {
                 FruitReachChanged?.Invoke(other, true);
             }
@@ -207,9 +191,6 @@ public class UpwardFruitDetection: MonoBehaviour {
             side == DetectionSide.Left ? leftFruits : rightFruits;
         if (fruits.Remove(other)) {
             fruitOrder.Remove(other);
-            if (fruits.Count == 0) {
-                LogReachChanged(side);
-            }
             // the other zone may still hold it
             if (!IsFruitInReach(other)) {
                 FruitReachChanged?.Invoke(other, false);
@@ -244,15 +225,5 @@ public class UpwardFruitDetection: MonoBehaviour {
         Collider previous = reachTarget;
         reachTarget = next;
         ReachTargetChanged?.Invoke(previous, next);
-    }
-
-    private void LogReachChanged(DetectionSide side) {
-        bool reach = side == DetectionSide.Left ? ReachForLeft : ReachForRight;
-        if (Debug.isDebugBuild) {
-            Debug.Log(
-                $"UpwardFruitDetection:\treachFor{side} changed: {reach}",
-                this
-            );
-        }
     }
 }

@@ -318,9 +318,6 @@ public class ArmRoot: MonoBehaviour {
         if (body != null) {
             body.WakeUp();
         }
-        if (Debug.isDebugBuild) {
-            Debug.Log($"ArmRoot:\treaching for {fruit.name}", this);
-        }
     }
 
     // release decides the grab, then the arm pulls back
@@ -519,9 +516,6 @@ public class ArmRoot: MonoBehaviour {
             staminaBar.AddStaminaByFruit();
         } else {
             Debug.LogError("ArmRoot:\tfail to get singleton: StaminaBar", this);
-        }
-        if (Debug.isDebugBuild) {
-            Debug.Log($"ArmRoot:\tgrabbed {fruit.name}", this);
         }
     }
 

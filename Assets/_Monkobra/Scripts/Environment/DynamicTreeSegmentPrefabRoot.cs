@@ -162,15 +162,6 @@ public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
             SpawnBranch(segmentHeight, placedPositions);
         }
 
-        if (Debug.isDebugBuild) {
-            Debug.Log(
-                $"DynamicTreeSegmentPrefabRoot:\tsegment y {segmentY} "
-                    + $"(climb progress {progress:F2}), "
-                    + $"spawned {branchCount} branches "
-                    + $"(range {minBranchCount}~{maxBranchCount})",
-                this
-            );
-        }
     }
 
     private void SpawnBranch(float segmentHeight, List<Vector3> placedPositions) {
