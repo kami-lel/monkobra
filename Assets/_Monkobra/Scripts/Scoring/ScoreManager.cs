@@ -10,6 +10,8 @@ public class ScoreManager: MonoBehaviour {
     public double HighestClimbedMeters => highestClimbedUnits / unitsPerMeter;
     public bool IsRunEnded => isRunEnded;
     public event Action<long> ScoreChanged;
+    // raised once per banana pickup that scored
+    public event Action BananaCollected;
 
     public bool CanScore => isActiveAndEnabled && hasStarted && !isRunEnded && Time.timeScale > 0f && (GameController.I == null || GameController.I.State == GameState.Playing);
     //必须满足：组件启用、已经开局、尚未结束、没有暂停，才允许计分
@@ -30,6 +32,7 @@ public class ScoreManager: MonoBehaviour {
         // every reward is a banana pickup
         BananaCollectedCount++;
         NotifyIfChanged(oldScore);
+        BananaCollected?.Invoke();
         return true;
     }
 
