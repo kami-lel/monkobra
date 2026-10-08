@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -206,6 +207,15 @@ public class AnalyticsManager: MonoBehaviour {
         return clock.ToString(CLOCK_FORMAT, CultureInfo.InvariantCulture);
     }
 
+    // "unit * count = total" when every banana paid the same, else total only
+    private static string FormatBananaScore(long total, int count) {
+        if (count > 0 && total % count == 0) {
+            return (total / count) + " * " + count + " = " + total;
+        }
+
+        return total.ToString(CultureInfo.InvariantCulture);
+    }
+
     private static void AppendClockList(
         StringBuilder sb,
         List<DateTime> clocks
@@ -234,25 +244,37 @@ public class AnalyticsManager: MonoBehaviour {
                 )
             )
             : 0;
-        long score = ScoreManager.I != null ? ScoreManager.I.TotalScore : 0;
-        int bananas = ScoreManager.I != null
-            ? ScoreManager.I.BananaCollectedCount
-            : 0;
+        ScoreManager scoreMgr = ScoreManager.I;
+        long score = scoreMgr != null ? scoreMgr.TotalScore : 0;
+        long heightScore = scoreMgr != null ? scoreMgr.DistanceScore : 0;
+        long rewardScore = scoreMgr != null ? scoreMgr.RewardScore : 0;
 
         var sb = new StringBuilder();
         sb.Append("## Run ").Append(RunCount).Append("\n\n");
-        sb.Append("| Metric | Value |\n| --- | --- |\n");
-        string endedAt = DateTime.Now.ToString(
-            "HH:mm:ss",
-            CultureInfo.InvariantCulture
-        );
-        sb.Append("| Ended At | ").Append(endedAt).Append(" |\n");
-        sb.Append("| Duration (s) | ")
-            .Append(duration.ToString("F1", CultureInfo.InvariantCulture))
-            .Append(" |\n");
-        sb.Append("| Final Height | ").Append(height).Append(" |\n");
-        sb.Append("| Final Score | ").Append(score).Append(" |\n");
-        sb.Append("| Bananas Collected | ").Append(bananas).Append(" |\n\n");
+        sb.Append("#### Run Duration: ");
+        sb.Append(duration.ToString("F1", CultureInfo.InvariantCulture));
+        sb.Append(" s\n\n");
+        sb.Append("- Time Start: ").Append(FormatClock(runStartClock));
+        sb.Append('\n');
+        sb.Append("- Time Stop: ").Append(FormatClock(DateTime.Now));
+        sb.Append("\n\n");
+
+        sb.Append("#### Final Score: ").Append(score).Append("\n\n");
+        sb.Append("- Score from Height: ").Append(heightScore);
+        sb.Append('\n');
+        sb.Append("- Score from Banana: ");
+        sb.Append(FormatBananaScore(rewardScore, bananaClocks.Count));
+        sb.Append("\n\n");
+
+        sb.Append("#### Final Height: ").Append(height).Append("\n\n");
+
+        sb.Append("#### Banana Count: ").Append(bananaClocks.Count);
+        sb.Append("\n\n");
+        AppendClockList(sb, bananaClocks);
+
+        sb.Append("#### Web Encounter: ").Append(webClocks.Count);
+        sb.Append("\n\n");
+        AppendClockList(sb, webClocks);
 
         try {
             File.AppendAllText(

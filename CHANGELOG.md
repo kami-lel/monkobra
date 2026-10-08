@@ -1,8 +1,6 @@
 # Monkobra CHANGELOG
 
 <!--
-TODO data collection system
-
 Fixme clear SO organize
 Fixme update per project assets rule
 Fixme rename cobra as great cobra
