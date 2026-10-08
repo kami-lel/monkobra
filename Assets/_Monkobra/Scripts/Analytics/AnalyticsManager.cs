@@ -233,13 +233,17 @@ public class AnalyticsManager: MonoBehaviour {
         return total.ToString(CultureInfo.InvariantCulture);
     }
 
+    // each stamp as seconds elapsed since the run started
     private static void AppendClockList(
         StringBuilder sb,
-        List<DateTime> clocks
+        List<DateTime> clocks,
+        DateTime start
     ) {
         for (int i = 0; i < clocks.Count; i++) {
-            sb.Append(i + 1).Append(". ").Append(FormatClock(clocks[i]));
-            sb.Append('\n');
+            double elapsed = (clocks[i] - start).TotalSeconds;
+            sb.Append(i + 1).Append(". ");
+            sb.Append(elapsed.ToString("F1", CultureInfo.InvariantCulture));
+            sb.Append(" s\n");
         }
         if (clocks.Count > 0) {
             sb.Append('\n');
@@ -287,15 +291,15 @@ public class AnalyticsManager: MonoBehaviour {
 
         sb.Append("#### Banana Count: ").Append(bananaClocks.Count);
         sb.Append("\n\n");
-        AppendClockList(sb, bananaClocks);
+        AppendClockList(sb, bananaClocks, runStartClock);
 
         sb.Append("#### Web Encounter: ").Append(webClocks.Count);
         sb.Append("\n\n");
-        AppendClockList(sb, webClocks);
+        AppendClockList(sb, webClocks, runStartClock);
 
         sb.Append("#### Branch Hit: ").Append(branchClocks.Count);
         sb.Append("\n\n");
-        AppendClockList(sb, branchClocks);
+        AppendClockList(sb, branchClocks, runStartClock);
 
         try {
             File.AppendAllText(
