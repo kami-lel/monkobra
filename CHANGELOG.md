@@ -2,7 +2,6 @@
 
 <!--
 TODO data collection system
-TODO add final score & high score in UI
 
 Fixme clear SO organize
 Fixme update per project assets rule

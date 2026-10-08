@@ -137,7 +137,7 @@ All values live in `Settings/GameConfig.asset`. The fields the asset does not li
 `ScoreManager` (singleton `I`, on the `GameController` object) keeps two scores and notifies the UI when the total changes.
 
 - Distance Score: whole meters of the highest point climbed, read from `RampedDifficultyService.CurrentPlayerClimbedYDistance`, refreshed every frame (player y minus the y at game start), times points per meter. Only a new high counts, so falling and re-climbing earns nothing
-- Reward Score: points from each banana collected through its `ScorePickup`
+- Reward Score: points from each banana collected through its `ScorePickup`; `ScoreManager.BananaCollectedCount` counts those pickups
 - Gate: `CanScore` is true only after start, before `EndRun`, while unpaused, and while the game is not over
 - Display: `ScoreDisplay` shows the total on the HUD and on the lose panel
 
@@ -171,7 +171,7 @@ One asset, `Settings/_Shared/InputSystem_Actions`, holds all bindings, reference
 | Score | `UI/ScoreDisplay` | total score, on the HUD and the lose panel |
 | Height | `UI/HeightDisplayController` | height climbed since game start, in world units |
 | Screens | `UI/ScreensManager` | tutorial and lose panels |
-| Lose Stats | `UI/LoseScreenController` | final height (highest point climbed) and final score, filled each time the lose panel is enabled |
+| Lose Stats | `UI/LoseScreenController` | final height (highest point climbed), final score, and bananas collected, filled each time the lose panel is enabled |
 | Web Prompt | `UI/SpiderWebPrompt` | first-trap hint and the escape bar ([Mobs](mob-doc.md#trap-and-escape)) |
 
 ## Conventions
