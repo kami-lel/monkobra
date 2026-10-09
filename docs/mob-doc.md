@@ -89,17 +89,17 @@ For scale, the monkey climbs at up to 6 u/s ([Monkey Movement](monkobra-tdd.md#m
 
 ## Falling Cobra
 
-A hazard from above, so far placed only in `FallingCobraDemo`, not in `Lv1Scene`.
+A hazard from above, spawned in `Lv1Scene` as the monkey climbs the endless tree.
 
 ### Spawning
 
-`FallingCobraSpawner` finds the `Player`-tagged monkey and tracks the highest climb since the start.
+`FallingCobraSpawner` is attached to the active `DTSPool` object in `Lv1Scene`. It finds the `Player`-tagged monkey, uses the pool's transform as the tree center, and tracks the highest climb since the start. It does not depend on the mock tree, which the pool deactivates at runtime.
 
 1. Unlock: spawning begins once the monkey has climbed `startClimbHeightU` above its starting height, and stays unlocked even if the monkey later falls
 2. Spot: it looks for a `Branch`-tagged object 4 to 9 u above the monkey whose angle round the trunk puts it within 3 u (sideways) of the monkey, nearest first, and spawns the cobra on the monkey's own orbit ring above that branch. If none qualifies it retries each second
 3. Rhythm: only one falling cobra exists at a time. The wait before the next one shortens from the initial interval to the minimum as the peak climb after unlock grows
 
-| Setting (`FallingCobraDemo`) | Value |
+| Setting (`Lv1Scene` > `DTSPool` > `FallingCobraSpawner`) | Value |
 | --- | --- |
 | Unlock Climb | 60 u |
 | Initial Interval | 8 s |
@@ -110,8 +110,8 @@ A hazard from above, so far placed only in `FallingCobraDemo`, not in `Lv1Scene`
 
 ### Behavior
 
-- Warning: for 1.25 s it pulses red at 4 Hz and has no hit shape
-- Fall: it then drops at 6 u/s with one capsule trigger tagged `Branch` covering the whole snake, while every segment collider is switched off
+- Warning: it starts red immediately, then pulses red against its green base for 1.25 s at 4 Hz and has no hit shape
+- Fall: it clears the warning color, returns to green, then drops at 6 u/s with one capsule trigger tagged `Branch` covering the whole snake, while every segment collider is switched off
 - Hit: because the capsule is tagged `Branch`, the monkey's own branch sensor applies the usual shake, stun, and drop, and the capsule is switched off after the first touch so one snake costs one drop
 - Despawn: 5 u below the monkey it destroys itself, which frees the spawner for the next one
 

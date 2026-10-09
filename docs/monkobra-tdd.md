@@ -32,10 +32,7 @@ A system gets its own document when it spans several scripts and carries rules a
 
 | Scene | Purpose |
 | --- | --- |
-| `Lv1Scene` | the game: the only scene in Build Settings |
-| `CobraDemo` | test scene for the chasing cobra |
-| `FallingCobraDemo` | test scene for the falling cobra, the only scene that has one |
-| `WebDemo` | test scene for spider webs, no score |
+| `Lv1Scene` | the game and the only scene in Build Settings; `DTSPool` also holds the falling-cobra spawner |
 
 The folder layout and a script-by-script index are in [CONTEXT.md](../CONTEXT.md#repository-layout).
 
@@ -127,7 +124,7 @@ Climb speeds come from `Settings/GameBalanceConfig.asset`. Orbit speed, accelera
 
 The tree is a stack of static and dynamic trunk segments under a `TreeTop`.
 
-- Extent: `TreeManager` (singleton `I`) holds the tree's `MinY` and `MaxY`, 0 and 100 by default, and everything that maps a height to progress reads it: branch density, web start, the progress bar. The tree is finite
+- Extent: `TreeManager` (singleton `I`) still holds nominal `MinY` and `MaxY` values for systems that map height to a percentage. The active trunk is endless through `DTSPool`; its mock tree is deactivated at runtime. The falling-cobra spawner uses the active pool's transform as the tree center
 - Segments: each `DynamicTreeSegmentPrefabRoot` places branches on itself in `Start` ([Mobs](mob-doc.md#placement)), and `SpiderWebSpawner` places webs after that ([Mobs](mob-doc.md#placement-1))
 - Pool: `DTSPool` sits on an empty object, finds the `Player`-tagged object once, and instantiates `segmentCount` copies of `segmentPrefab` end to end, the first (lowest) one created at the world height `firstSegmentY`. It keeps them in a FIFO: only when the stack top is less than `lookAheadU` above the player, and the lowest segment lies wholly under the player, that lowest one is moved over the stack top by `DynamicTreeSegmentPrefabRoot.Restart`, which clears its branches and webs and rolls branches again; `SpiderWebSpawner.PopulateSegment` then redoes the webs. Its `mockTree` field names an editor-only stand-in that is deactivated at runtime
 - Top: the `TreeTop` prefab carries the win zone
