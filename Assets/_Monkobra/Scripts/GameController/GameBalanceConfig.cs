@@ -2,7 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// Single home for the game balance knobs: stamina budget, climb speeds,
-/// branch-hit penalty, score rules and branch generation.
+/// branch-hit penalty, score rules, branch generation and falling cobras.
 /// </summary>
 [CreateAssetMenu(
     fileName = "GameBalanceConfig",
@@ -76,6 +76,21 @@ public class GameBalanceConfig: ScriptableObject {
     /// branch bears a banana</returns>
     public AnimationCurve BananaSpawnProbabilityCurve =>
         bananaSpawnProbabilityCurve;
+
+    /// <returns>falling cobra creation attempts rolled per segment</returns>
+    public int FallingCobraAttemptCount => fallingCobraAttemptCount;
+
+    /// <returns>x: ramped difficulty 0~1; y: chance 0~1 that one attempt
+    /// creates a falling cobra</returns>
+    public AnimationCurve FallingCobraSpawnProbabilityCurve =>
+        fallingCobraSpawnProbabilityCurve;
+
+    /// <returns>vertical fall speed of a falling cobra; u/s</returns>
+    public float FallingCobraFallSpeedU => fallingCobraFallSpeedU;
+
+    /// <returns>speed a falling cobra slides round the trunk toward the
+    /// monkey; u/s</returns>
+    public float FallingCobraHorizontalSpeedU => fallingCobraHorizontalSpeedU;
 
     // Inspector Fields  #######################################################
     [Header("Stamina")]
@@ -183,6 +198,30 @@ public class GameBalanceConfig: ScriptableObject {
     private AnimationCurve bananaSpawnProbabilityCurve =
         AnimationCurve.Linear(0f, 0f, 1f, 1f);
 
+    [Header("Falling Cobra")]
+    [SerializeField]
+    [Min(0)]
+    [Tooltip("falling cobra creation attempts rolled per segment")]
+    private int fallingCobraAttemptCount = 2;
+
+    [SerializeField]
+    [Tooltip(
+        "x: ramped difficulty 0~1; y: chance 0~1 that one attempt "
+            + "creates a falling cobra"
+    )]
+    private AnimationCurve fallingCobraSpawnProbabilityCurve =
+        AnimationCurve.Linear(0f, 0f, 1f, 0.5f);
+
+    [SerializeField]
+    [Tooltip("vertical fall speed of a falling cobra; u/s")]
+    private float fallingCobraFallSpeedU = 6f;
+
+    [SerializeField]
+    [Tooltip(
+        "speed a falling cobra slides round the trunk toward the monkey; u/s"
+    )]
+    private float fallingCobraHorizontalSpeedU = 2f;
+
     // Editor Validation  ######################################################
     private void OnValidate() {
         maxStamina = Mathf.Max(1f, maxStamina);
@@ -204,6 +243,12 @@ public class GameBalanceConfig: ScriptableObject {
         branchGenerationAttemptCount = Mathf.Max(
             0,
             branchGenerationAttemptCount
+        );
+        fallingCobraAttemptCount = Mathf.Max(0, fallingCobraAttemptCount);
+        fallingCobraFallSpeedU = Mathf.Max(0f, fallingCobraFallSpeedU);
+        fallingCobraHorizontalSpeedU = Mathf.Max(
+            0f,
+            fallingCobraHorizontalSpeedU
         );
     }
 }
