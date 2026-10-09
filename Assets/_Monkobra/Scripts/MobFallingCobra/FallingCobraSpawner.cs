@@ -3,6 +3,7 @@ using UnityEngine;
 public class FallingCobraSpawner: MonoBehaviour {
     [Header("References")]
     [SerializeField] private FallingCobra fallingCobraPrefab;
+    [SerializeField] private Transform treeCenter;
 
     [Header("When to Spawn")]
     [SerializeField]
@@ -37,6 +38,13 @@ public class FallingCobraSpawner: MonoBehaviour {
                 this
             );
         }
+        if (treeCenter == null) {
+            Debug.LogError(
+                "FallingCobraSpawner:\tmust assign Inspector Field: "
+                    + "treeCenter",
+                this
+            );
+        }
     }
 
     private void Start() {
@@ -56,7 +64,7 @@ public class FallingCobraSpawner: MonoBehaviour {
     private void Update() {
         if (
             player == null
-            || TreeManager.I == null
+            || treeCenter == null
             || fallingCobraPrefab == null
         ) {
             return;
@@ -103,10 +111,10 @@ public class FallingCobraSpawner: MonoBehaviour {
     private bool TryFindBranchSpawn(out Vector3 spawnPosition) {
         spawnPosition = Vector3.zero;
 
-        Vector3 treeCenter = TreeManager.I.transform.position;
+        Vector3 treeCenterPosition = treeCenter.position;
         float playerRadius = new Vector2(
-            player.position.x - treeCenter.x,
-            player.position.z - treeCenter.z
+            player.position.x - treeCenterPosition.x,
+            player.position.z - treeCenterPosition.z
         ).magnitude;
 
         float bestSideDistanceSqr =
@@ -126,7 +134,7 @@ public class FallingCobraSpawner: MonoBehaviour {
             }
 
             Vector3 direction =
-                branch.transform.position - treeCenter;
+                branch.transform.position - treeCenterPosition;
             direction.y = 0f;
             if (direction.sqrMagnitude < 0.001f) {
                 continue;
@@ -135,7 +143,7 @@ public class FallingCobraSpawner: MonoBehaviour {
             // 枝條比猴子的繞樹路徑更靠外；
             // 將落蛇位置移到相同角度的猴子路徑上。
             Vector3 pathPosition =
-                treeCenter + direction.normalized * playerRadius;
+                treeCenterPosition + direction.normalized * playerRadius;
             float sideDistanceSqr =
                 new Vector2(
                     pathPosition.x - player.position.x,
