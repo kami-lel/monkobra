@@ -511,11 +511,12 @@ public class ArmRoot: MonoBehaviour {
             }//一个水果即使有多个碰撞体，摘掉后也会一起从检测列表移除，避免留下已经不存在的目标
         }
 
-        StaminaBar staminaBar = StaminaBar.I;
+        StaminaBarController staminaBar = StaminaBarController.I;
         if (staminaBar != null) {
             staminaBar.AddStaminaByFruit();
         } else {
-            Debug.LogError("ArmRoot:\tfail to get singleton: StaminaBar", this);
+            Debug.LogError(
+                "ArmRoot:\tfail to get singleton: StaminaBarController", this);
         }
     }
 

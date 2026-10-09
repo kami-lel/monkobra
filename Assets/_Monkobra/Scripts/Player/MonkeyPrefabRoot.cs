@@ -155,7 +155,11 @@ public class MonkeyPrefabRoot: MonoBehaviour {
         // the orbit angle is the only horizontal state, so the body sits
         // exactly on its ring every step rather than chasing it
         // an empty stamina bar slows the monkey instead of ending the run
-        bool isExhausted = StaminaBar.I != null && !StaminaBar.I.HasStamina;
+        StaminaBarController staminaBar = StaminaBarController.I;
+        bool isExhausted = staminaBar != null && !staminaBar.HasStamina;
+        if (isExhausted && hasInput) {
+            staminaBar.NotifyMoveAttempt();
+        }
         float upSpeedScale = isExhausted
             ? balanceConfig.ExhaustedSpeedMultiplier
             : 1f;
@@ -190,18 +194,18 @@ public class MonkeyPrefabRoot: MonoBehaviour {
 
         // the stun fall is involuntary and so is descending: only voluntary
         // upward and sideways travel costs stamina
-        if (!isStunned && StaminaBar.I != null) {
+        if (!isStunned && staminaBar != null) {
             float climbedU = nextY - transform.position.y;
             float orbitedU = Mathf.Abs(directionalInput.x)
                 * config.RotationSpeedDeg
                 * Time.fixedDeltaTime
                 * Mathf.Deg2Rad
                 * orbitRadius;
-            StaminaBar.I.DrainByMovement(climbedU, orbitedU);
+            staminaBar.DrainByMovement(climbedU, orbitedU);
 
             // standing still, no key pressed, regains stamina slowly
             if (!hasInput) {
-                StaminaBar.I.AddStamina(
+                staminaBar.AddStamina(
                     balanceConfig.IdleStaminaRecoveryPerS
                         * Time.fixedDeltaTime
                 );
