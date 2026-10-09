@@ -912,7 +912,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 387742569}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.020249778, y: 0.97973335, z: 0.13797057, w: -0.14379433}
+  m_LocalRotation: {x: 0.020249767, y: 0.97973335, z: 0.13797048, w: -0.14379433}
   m_LocalPosition: {x: 0.000000029802322, y: -0.99999994, z: 10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1445,7 +1445,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 567824735}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.007924218, y: 0.99088365, z: -0.13267098, w: 0.02202928}
+  m_LocalRotation: {x: 0.006826927, y: 0.9962255, z: -0.08358717, w: 0.022393677}
   m_LocalPosition: {x: -0.35504013, y: 2.2493973, z: 8.234935}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -2098,7 +2098,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c7cc9663b4ecb664694bb8df0376ab90, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FallingCobraSpawner
   fallingCobraPrefab: {fileID: -3548897315033333001, guid: b60be837c54dfb545b11b9dd5e789cbb, type: 3}
   treeCenter: {fileID: 824126027}
@@ -3694,7 +3694,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2005575609}
   serializedVersion: 2
-  m_LocalRotation: {x: -7.6662765e-10, y: 0.98395354, z: -0.17842485, w: -0.0000000081681595}
+  m_LocalRotation: {x: 0.000000004554392, y: 0.99156284, z: -0.1296274, w: 0.000000022197616}
   m_LocalPosition: {x: -0.000000029802322, y: 3, z: 7.9999995}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -3747,7 +3747,7 @@ MonoBehaviour:
       Size: {x: 0.8, y: 0.8}
       Offset: {x: 0, y: 0}
   CenterOnActivate: 1
-  TargetOffset: {x: 0, y: 0, z: 0}
+  TargetOffset: {x: 0, y: 0.8719441, z: 0}
   Damping: {x: 0.5, y: 0.5}
   Lookahead:
     Enabled: 1
