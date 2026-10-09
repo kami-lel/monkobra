@@ -1,9 +1,11 @@
 # Monkobra CHANGELOG
 
 <!--
+FIXME collect web encounter for analytics
+FIXME improve cobra prob spawn
+
 Bug falling cobra gone
 Fixme ramp difficulty for: falling cobra
-Fixme collect web encounter for analytics
 -->
 
 ## [Unreleased]
