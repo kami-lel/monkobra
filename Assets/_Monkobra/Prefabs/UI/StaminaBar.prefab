@@ -153,7 +153,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b45370942b640434daf1161bc3d83ada, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StaminaBarAnimator
-  punchStrength: 0.3
+  punchStrength: 0.15
   punchDurationS: 0.25
   shakeMagnitudePx: {x: 8, y: 4}
   shakeDurationS: 0.3
