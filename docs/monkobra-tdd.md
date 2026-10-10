@@ -35,7 +35,6 @@ A system gets its own document when it spans several scripts and carries rules a
 | `Lv1Scene` | the game: the only scene in Build Settings |
 | `CobraDemo` | test scene for the chasing cobra |
 | `FallingCobraDemo` | test scene for the falling cobra, the only scene that has one |
-| `WebDemo` | test scene for spider webs, no score |
 
 The folder layout and a script-by-script index are in [CONTEXT.md](../CONTEXT.md#repository-layout).
 
@@ -94,9 +93,10 @@ Every game balance number lives in one asset, `Settings/GameBalanceConfig.asset`
 | Score | `pointsPerMeter`, `unitsPerMeter`, `scoreRewardPoints` | `ScoreManager` |
 | Ramped Difficulty | `rampedDifficultyCurve` | `RampedDifficultyService` |
 | Branch | `branchGenerationAttemptCount`, `branchSpawnProbabilityCurve`, `bananaSpawnProbabilityCurve` | `DynamicTreeSegmentPrefabRoot` |
+| Spider Web | `webSlotsPerSegment`, `webStartClimbU`, `webFullChanceClimbU`, `webMaxSpawnChance`, `webSpawnChanceCurve` | `SpiderWebSpawner` |
 
-- Wiring: each reader holds a `GameBalanceConfig` inspector field (`balanceConfig` on `StaminaBarController`, `ScoreManager`, `MonkeyPrefabRoot`, `DynamicTreeSegmentPrefabRoot`, and `RampedDifficultyService`), all pointing at the same asset
-- Not Balance: the arm stroke and reach, orbit speed, acceleration, and input actions stay in `MonkeyConfig`; branch radius, spacing, and retries stay in `BranchFruitPlacementConfig`
+- Wiring: each reader holds a `GameBalanceConfig` inspector field (`balanceConfig` on `StaminaBarController`, `ScoreManager`, `MonkeyPrefabRoot`, `DynamicTreeSegmentPrefabRoot`, `RampedDifficultyService`, and `SpiderWebSpawner`), all pointing at the same asset
+- Not Balance: the arm stroke and reach, orbit speed, acceleration, and input actions stay in `MonkeyConfig`; branch radius, spacing, and retries stay in `BranchFruitPlacementConfig`; web radius, spacing, clearance, retries, and the test override stay on `SpiderWebSpawner`
 - Retired: `GameConfig`, `ScoreConfig`, and `ScoreReward` were folded into `GameBalanceConfig` and removed
 - Suffixes: `U` is world units, `S` is seconds, `Deg` is degrees, `PerU` is per world unit travelled
 
@@ -127,9 +127,10 @@ Climb speeds come from `Settings/GameBalanceConfig.asset`. Orbit speed, accelera
 
 The tree is a stack of static and dynamic trunk segments under a `TreeTop`.
 
-- Extent: `TreeManager` (singleton `I`) holds the tree's `MinY` and `MaxY`, 0 and 100 by default, and everything that maps a height to progress reads it: branch density, web start, the progress bar. The tree is finite
-- Segments: each `DynamicTreeSegmentPrefabRoot` places branches on itself in `Start` ([Mobs](mob-doc.md#placement)), and `SpiderWebSpawner` places webs after that ([Mobs](mob-doc.md#placement-1))
-- Pool: `DTSPool` sits on an empty object, finds the `Player`-tagged object once, and instantiates `segmentCount` copies of `segmentPrefab` end to end, the first (lowest) one created at the world height `firstSegmentY`. It keeps them in a FIFO: only when the stack top is less than `lookAheadU` above the player, and the lowest segment lies wholly under the player, that lowest one is moved over the stack top by `DynamicTreeSegmentPrefabRoot.Restart`, which clears its branches and webs and rolls branches again; `SpiderWebSpawner.PopulateSegment` then redoes the webs. Its `mockTree` field names an editor-only stand-in that is deactivated at runtime
+- Extent: `TreeManager` (singleton `I`) holds `MinY` and `MaxY`, 0 and 100 by default, from the finite tree; nothing reads them any more, and its transform still marks the trunk axis for `FallingCobraSpawner`. It sits on the mock tree, so it outlives the deactivation only because its `Awake` runs before `DTSPool`'s
+- Climb Height: heights that drive difficulty are measured above the monkey's start y by `RampedDifficultyService.GetClimbedYDistance`: branch density, banana chance, web chance, the score, and the height HUD. Nothing shifts the world origin; if something ever does, it only has to move `PlayerGameStartYPosition` along
+- Segments: each `DynamicTreeSegmentPrefabRoot` places branches on itself in `Start` and in every `Restart` ([Mobs](mob-doc.md#placement)), then raises the static `BranchesGenerated`, which `SpiderWebSpawner` answers with webs ([Mobs](mob-doc.md#placement-1))
+- Pool: `DTSPool` sits on an empty object, finds the `Player`-tagged object once, and instantiates `segmentCount` copies of `segmentPrefab` end to end, the first (lowest) one created at the world height `firstSegmentY`. It keeps them in a FIFO: only when the stack top is less than `lookAheadU` above the player, and the lowest segment lies wholly under the player, that lowest one is moved over the stack top by `DynamicTreeSegmentPrefabRoot.Restart`, which clears its branches and webs and rolls branches again; the webs follow through `BranchesGenerated`, the pool never calls the spawner. Its `mockTree` field names an editor-only stand-in, `Envs/Tree` in `Lv1Scene`, that is deactivated at runtime, so nothing that must run may sit under it
 - Top: the `TreeTop` prefab carries the win zone
 
 ## Stamina
@@ -169,7 +170,7 @@ All values live in `Settings/GameBalanceConfig.asset`.
 
 All values live in `Settings/GameBalanceConfig.asset`; `ScorePickup` carries no reward asset of its own.
 
-`WebDemo` and the other test scenes have no `ScoreManager`.
+The test scenes have no `ScoreManager`.
 
 ## Camera
 
@@ -200,7 +201,7 @@ One asset, `Settings/_Shared/InputSystem_Actions`, holds all bindings, reference
 
 - Singletons: scene-scoped and first-wins. `TreeManager`, `UpwardFruitDetection`, `StaminaBarController`, and `ScoreManager` destroy a duplicate component only. `GameController` and `ScreensManager` destroy the duplicate's whole GameObject
 - Start Over Awake: a consumer that may start before its singleton reads it in `Start`, so Awake order never matters
-- Events Over Calls: detection scripts forward trigger events (`Entered`, `Exited`, `BranchHit`) rather than calling their consumers
+- Events Over Calls: detection scripts forward trigger events (`Entered`, `Exited`, `BranchHit`) rather than calling their consumers, and a segment announces its branches with `BranchesGenerated` rather than calling its decorators
 - Tags: `Branch`, `FruitCollider`, and `Player` drive trigger matching. Webs match by a Rigidbody component instead
 - Tuning In Data: values stay in serialized fields, and shared tuning sits in a ScriptableObject: balance numbers in `GameBalanceConfig` ([Game Balance](#game-balance)), monkey arm and input in `MonkeyConfig`, branch geometry in `BranchFruitPlacementConfig`. Gameplay values are never hard-coded
 - Field Guards: required inspector fields are checked in `Awake` with a logged message naming the field

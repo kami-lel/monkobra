@@ -121,18 +121,24 @@ A static trap on the trunk that holds the monkey in place while the cobra keeps 
 
 ### Placement
 
-`SpiderWebSpawner` sits on the tree root and runs after the default execution order, so every segment already has its branches.
+`SpiderWebSpawner` sits on `Envs/DTSPool` in `Lv1Scene`, and on any object that stays active from scene load, never under the pool's mock tree, which `DTSPool` deactivates at runtime (it logs a warning if one is left there). It listens to `DynamicTreeSegmentPrefabRoot.BranchesGenerated`, raised each time a segment has rolled its branches, on its first `Start` and after every `DTSPool` restart, so each roll of branches gets exactly one roll of webs. Only the first enabled spawner listens.
 
-- Slots: each dynamic segment rolls a fixed number of slots, each with a spawn chance, only above `startProgress` of the climb
-- Spot: a web lies flat on its segment's bark facing outward. A spot is dropped if it is below the start height, too close to another web, or its trigger volume (plus clearance) overlaps a branch or fruit. After the retry cap the web is skipped rather than placed overlapping
-- Runtime Segments: the pass covers segments present at load, so a runtime generator must call `PopulateSegment`; `DTSPool` does so after each segment restart
+- Climb Height: a spot's height above the monkey's start y, from `RampedDifficultyService.GetClimbedYDistance`, the same baseline as the score and the height HUD, so world y never matters
+- Slots: each segment rolls a fixed number of slots, each spawning a web with a chance read at the segment's middle climb height
+- Chance: none below the start climb. From there the chance curve, x the progress 0~1 from the start climb to the full-chance climb and y the share 0~1 of the max chance, scales the max chance, and stays at the curve's end past the full-chance climb
+- Spot: a web lies flat on its segment's bark facing outward. A spot is dropped if it is below the start climb, too close to another live web, or its trigger volume (plus clearance) overlaps a branch or fruit. After the retry cap the web is skipped rather than placed overlapping
+- Cleanup: webs are children of their segment, so `Restart` clears them with the branches. Before rolling a segment again the spawner drops that segment's previous webs too, destroying any still active, so none linger and none double up. A web removed under a held monkey frees it
 
-| Setting (`Lv1Scene`) | Value |
-| --- | --- |
-| Start Progress | 0.5 (upper half) |
-| Slots Per Segment | 2 |
-| Spawn Chance Per Slot | 0.5 |
-| Min Web Separation | 4 u |
+| Setting | Value | Asset |
+| --- | --- | --- |
+| Slots Per Segment | 2 | `Settings/GameBalanceConfig.asset` |
+| Start Climb | 50 u | 〃 |
+| Full-Chance Climb | 300 u | 〃 |
+| Max Chance Per Slot | 0.5 | 〃 |
+| Chance Curve | linear, 0.2 of max at the start climb to 1 at the full-chance climb | 〃 |
+| Min Web Separation | 4 u | `SpiderWebSpawner` on `Envs/DTSPool` |
+
+With these values a slot's chance is 0.1 at 50 u, 0.3 at 175 u, and 0.5 from 300 u up.
 
 ### Trap and Escape
 
@@ -152,10 +158,10 @@ The struggle suspends interact because of a shared Space binding, see [Input](mo
 
 ### Testing
 
-Webs are in `Lv1Scene`, and `WebDemo` is a smaller test scene with the same setup and no score. Webs spawn only from the middle of the tree up, so for a quick test set `SpiderWebSpawner` > Start Progress to `0` and Spawn Chance to `1` on the `Tree` object, and leave the scene unsaved. Gizmos show each web's trigger as a yellow box and the start height as a ring.
+Webs are in `Lv1Scene`. They first appear 50 u above the monkey's start, so for a quick test select `Envs/DTSPool`, tick `SpiderWebSpawner` > Use Test Override before pressing Play, and leave the scene unsaved. Webs then spawn from Test Start Climb U (5 u) up at Test Spawn Chance (1) per slot, ignoring the balance ramp. Ticked during Play, it only reaches segments rolled after that, the ones the pool restarts above the first stack. To tune the real ramp, edit the Spider Web group of `Settings/GameBalanceConfig.asset` instead. Gizmos show each web's trigger as a yellow box and, in Play mode, the start climb as a ring.
 
 ## Known Gaps
 
-- Mob tuning for the cobra and webs lives on scene components, not in a shared ScriptableObject
+- Mob tuning for the cobra, the web escape, and web geometry lives on scene components, not in a shared ScriptableObject; only the web spawn rate is in `GameBalanceConfig`
 - Stamina is not linked to branch hits
 - `Lv1Scene`'s Canvas holds 2 objects named `ProgressBar`, the climb progress and the web escape bar, so look them up by path

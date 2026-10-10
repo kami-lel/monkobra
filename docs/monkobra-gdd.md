@@ -88,6 +88,6 @@ The intended arc is steady tension broken by short bursts of risk. The player cl
 
 ## Difficulty
 
-- Ramp: branches grow denser higher up the tree, and spider webs appear only on the upper half
+- Ramp: branches grow denser higher up the tree, and spider webs appear only after a set climb, rare at first and more common the higher the monkey climbs. Numbers are in [Mobs](mob-doc.md#placement-1)
 - Falling Cobra Ramp: once unlocked after a long climb, it drops more often the higher the monkey has climbed, down to a floor interval, even if the monkey later falls back. Numbers and scene status are in [Mobs](mob-doc.md#falling-cobra)
 - Future Work: broader scaling, such as cobra speed or hazard frequency, is not yet designed

@@ -23,7 +23,9 @@ Gamepad: left stick or D-pad moves, the north button grabs, the south button bre
 
 ## Getting Started
 
-Open the repository folder through Unity Hub with Editor `6000.3.22f1` (Unity 6, URP), then open `Lv1Scene` and press Play. The game also runs in the browser from the committed WebGL export in `Monkobra/`, served by GitHub Pages. To try spider webs quickly, see [Testing](docs/mob-doc.md#testing).
+Open the repository folder through Unity Hub with Editor `6000.3.22f1` (Unity 6, URP), then open `Lv1Scene` and press Play. The game also runs in the browser from the committed WebGL export in `Monkobra/`, served by GitHub Pages.
+
+Spider webs first appear 50 u above the monkey's start. To meet them right away, select `Envs/DTSPool` in `Lv1Scene`, tick Spider Web Spawner > Use Test Override before pressing Play, and leave the scene unsaved: webs then spawn from 5 u up on every slot. How often webs appear at each height is tuned in the Spider Web group of `Settings/GameBalanceConfig.asset`. Details are in [Testing](docs/mob-doc.md#testing).
 
 ## Contributing
 
