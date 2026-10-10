@@ -1,16 +1,25 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(Slider))]
-public class StaminaBar: MonoBehaviour {
+public class StaminaBarController: MonoBehaviour {
     // Public Members  #########################################################
-    public static StaminaBar I {
+    public static StaminaBarController I {
         get; private set;
     }
 
     public float CurrentStamina => currentStamina;
     public bool HasStamina => currentStamina > 0f;
+
+    /// <summary>raised each time a fruit restores stamina</summary>
+    public event Action FruitConsumed;
+
+    /// <summary>
+    /// raised when the player tries to move while the bar is empty
+    /// </summary>
+    public event Action ExhaustedMoveAttempted;
 
     // Public Methods  #########################################################
     /// <summary>
@@ -19,6 +28,19 @@ public class StaminaBar: MonoBehaviour {
     /// </summary>
     public void AddStaminaByFruit() {
         AddStamina(balanceConfig.FruitStaminaRestore);
+        FruitConsumed?.Invoke();
+    }
+
+    /// <summary>
+    /// reports a move input, called every physics step the player holds one;
+    /// raises <see cref="ExhaustedMoveAttempted"/> iff the bar is empty
+    /// </summary>
+    public void NotifyMoveAttempt() {
+        if (HasStamina) {
+            return;
+        }
+
+        ExhaustedMoveAttempted?.Invoke();
     }
 
     public void AddStamina(float amount) {
@@ -67,7 +89,8 @@ public class StaminaBar: MonoBehaviour {
         // Inspector Assignment Guard  -----------------------------------------
         if (balanceConfig == null) {
             Debug.LogWarning(
-                "StaminaBar:\tmust assign Inspector Field: balanceConfig",
+                "StaminaBarController:\tmust assign Inspector Field: "
+                    + "balanceConfig",
                 this
             );
             enabled = false;
@@ -76,7 +99,8 @@ public class StaminaBar: MonoBehaviour {
 
         // drop this duplicate component only, the GameObject may hold more
         if (I != null && I != this) {
-            Debug.LogWarning("StaminaBar:\tduplicate instance, removing", this);
+            Debug.LogWarning(
+                "StaminaBarController:\tduplicate instance, removing", this);
             Destroy(this);
             return;
         }
@@ -90,7 +114,7 @@ public class StaminaBar: MonoBehaviour {
         staminaSlider.value = currentStamina;
 
         if (Debug.isDebugBuild) {
-            Debug.Log("StaminaBar:\tready", this);
+            Debug.Log("StaminaBarController:\tready", this);
         }
     }
 

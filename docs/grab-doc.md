@@ -16,7 +16,7 @@ graph TD
   Release[Interact released] --> Arm
   Arm -->|overlap| Pickup[ScorePickup.TryCollect]
   Pickup --> Score[ScoreManager]
-  Arm -->|overlap| Stamina[StaminaBar.AddStaminaByFruit]
+  Arm -->|overlap| Stamina[StaminaBarController.AddStaminaByFruit]
 ```
 
 1. a banana enters a side's detection zone and becomes reachable
@@ -36,7 +36,7 @@ graph TD
 | `Environment/FruitOutlineListener` | two-tier outline on a banana |
 | `Environment/BranchWithScriptRoot` | decides whether a branch bears a banana |
 | `Scoring/ScorePickup` | on a fruit, hands its points to `ScoreManager` once and switches the fruit off |
-| `UI/StaminaBar` | `AddStaminaByFruit` restores stamina on a grab |
+| `UI/StaminaBarController` | `AddStaminaByFruit` restores stamina on a grab |
 
 ## Detection
 
@@ -63,7 +63,7 @@ graph TD
 
 1. `ScorePickup.TryCollect` refuses if the game is over, paused, or the fruit was already collected. Otherwise it hands its reward to `ScoreManager` once and switches the fruit off. A fruit with no `ScorePickup` is just switched off
 2. every collider of that fruit is removed from the detection sets
-3. `StaminaBar.I.AddStaminaByFruit` restores stamina, capped at the maximum, and works from empty too
+3. `StaminaBarController.I.AddStaminaByFruit` restores stamina, capped at the maximum, and works from empty too
 
 ## Camera
 

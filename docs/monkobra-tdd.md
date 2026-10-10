@@ -44,7 +44,7 @@ The folder layout and a script-by-script index are in [CONTEXT.md](../CONTEXT.md
 graph LR
   Input[Input System] --> Monkey[Monkey: movement, arms]
   Monkey --> Grab[Grab System]
-  Grab --> Stamina[StaminaBar]
+  Grab --> Stamina[StaminaBarController]
   Grab --> Score[ScoreManager]
   Mobs[Mobs] -->|touch| Monkey
   Mobs -->|cobra contact| Game[GameController]
@@ -87,7 +87,7 @@ Every game balance number lives in one asset, `Settings/GameBalanceConfig.asset`
 
 | Group | Fields | Read by |
 | --- | --- | --- |
-| Stamina | `maxStamina`, `staminaDecreaseAmount`, `staminaDecreaseIntervalS`, `staminaUpwardDrainPerU`, `staminaSidewayDrainPerU`, `fruitStaminaRestore` | `StaminaBar` |
+| Stamina | `maxStamina`, `staminaDecreaseAmount`, `staminaDecreaseIntervalS`, `staminaUpwardDrainPerU`, `staminaSidewayDrainPerU`, `fruitStaminaRestore` | `StaminaBarController` |
 | Movement | `upSpeedU`, `downSpeedU`, `exhaustedSpeedMultiplier`, `idleStaminaRecoveryPerS` | `MonkeyPrefabRoot` |
 | Branch Hit | `hitStunDurationS`, `hitDropDistanceU`, `hitDropSpeedU` | `MonkeyPrefabRoot` |
 | Score | `pointsPerMeter`, `unitsPerMeter`, `scoreRewardPoints` | `ScoreManager` |
@@ -95,7 +95,7 @@ Every game balance number lives in one asset, `Settings/GameBalanceConfig.asset`
 | Branch | `branchGenerationAttemptCount`, `branchSpawnProbabilityCurve`, `bananaSpawnProbabilityCurve` | `DynamicTreeSegmentPrefabRoot` |
 | Spider Web | `webSlotsPerSegment`, `webStartClimbU`, `webFullChanceClimbU`, `webMaxSpawnChance`, `webSpawnChanceCurve` | `SpiderWebSpawner` |
 
-- Wiring: each reader holds a `GameBalanceConfig` inspector field (`balanceConfig` on `StaminaBar`, `ScoreManager`, `MonkeyPrefabRoot`, `DynamicTreeSegmentPrefabRoot`, `RampedDifficultyService`, and `SpiderWebSpawner`), all pointing at the same asset
+- Wiring: each reader holds a `GameBalanceConfig` inspector field (`balanceConfig` on `StaminaBarController`, `ScoreManager`, `MonkeyPrefabRoot`, `DynamicTreeSegmentPrefabRoot`, `RampedDifficultyService`, and `SpiderWebSpawner`), all pointing at the same asset
 - Not Balance: the arm stroke and reach, orbit speed, acceleration, and input actions stay in `MonkeyConfig`; branch radius, spacing, and retries stay in `BranchFruitPlacementConfig`; web radius, spacing, clearance, retries, and the test override stay on `SpiderWebSpawner`
 - Retired: `GameConfig`, `ScoreConfig`, and `ScoreReward` were folded into `GameBalanceConfig` and removed
 - Suffixes: `U` is world units, `S` is seconds, `Deg` is degrees, `PerU` is per world unit travelled
@@ -111,7 +111,7 @@ The balance values in each section below are the current ones; change them in th
 - Climb: the vertical input ramps a climb speed along world Y with separate acceleration and deceleration, and different maximums up and down
 - Held: `IsHeld` freezes the body in place, set by the web trap ([Mobs](mob-doc.md#trap-and-escape))
 - Stun: after a branch hit the input is ignored and the body falls a set distance ([Mobs](mob-doc.md#hit-penalty))
-- Stamina Cost: each step reports upward and sideways distance to `StaminaBar.DrainByMovement`. The stun fall and descending cost nothing
+- Stamina Cost: each step reports upward and sideways distance to `StaminaBarController.DrainByMovement`. The stun fall and descending cost nothing
 
 | Setting | Value |
 | --- | --- |
@@ -135,7 +135,7 @@ The tree is a stack of static and dynamic trunk segments under a `TreeTop`.
 
 ## Stamina
 
-`StaminaBar` is a singleton `Slider` that reads `GameBalanceConfig`.
+`StaminaBarController` is a singleton `Slider` that reads `GameBalanceConfig`. `StaminaBarAnimator` on the same GameObject punches the bar on `FruitConsumed` and shakes it on `ExhaustedMoveAttempted`, which `MonkeyPrefabRoot` triggers through `NotifyMoveAttempt` while an input is held on an empty bar.
 
 - Timer Drain: a fixed amount every interval, as a coroutine started in `Start`
 - Movement Drain: `DrainByMovement` per physics step, upward distance costs more than sideways
@@ -189,7 +189,7 @@ One asset, `Settings/_Shared/InputSystem_Actions`, holds all bindings, reference
 
 | Element | Script | Shows |
 | --- | --- | --- |
-| Stamina Bar | `UI/StaminaBar` | current stamina |
+| Stamina Bar | `UI/StaminaBarController` | current stamina |
 | Climb Progress | `UI/ProgressBarRoot` | the monkey's height as a share of the tree, with a cobra marker |
 | Score | `UI/ScoreDisplay` | total score, on the HUD and the lose panel |
 | Height | `UI/HeightDisplayController` | height climbed since game start, in world units |
@@ -199,14 +199,14 @@ One asset, `Settings/_Shared/InputSystem_Actions`, holds all bindings, reference
 
 ## Conventions
 
-- Singletons: scene-scoped and first-wins. `TreeManager`, `UpwardFruitDetection`, `StaminaBar`, and `ScoreManager` destroy a duplicate component only. `GameController` and `ScreensManager` destroy the duplicate's whole GameObject
+- Singletons: scene-scoped and first-wins. `TreeManager`, `UpwardFruitDetection`, `StaminaBarController`, and `ScoreManager` destroy a duplicate component only. `GameController` and `ScreensManager` destroy the duplicate's whole GameObject
 - Start Over Awake: a consumer that may start before its singleton reads it in `Start`, so Awake order never matters
 - Events Over Calls: detection scripts forward trigger events (`Entered`, `Exited`, `BranchHit`) rather than calling their consumers, and a segment announces its branches with `BranchesGenerated` rather than calling its decorators
 - Tags: `Branch`, `FruitCollider`, and `Player` drive trigger matching. Webs match by a Rigidbody component instead
 - Tuning In Data: values stay in serialized fields, and shared tuning sits in a ScriptableObject: balance numbers in `GameBalanceConfig` ([Game Balance](#game-balance)), monkey arm and input in `MonkeyConfig`, branch geometry in `BranchFruitPlacementConfig`. Gameplay values are never hard-coded
 - Field Guards: required inspector fields are checked in `Awake` with a logged message naming the field
 - Kinematic Body: nothing about the monkey is mass or gravity driven. Each arm is posed purely by its joint drives
-- Style: `ArmRoot/`, `GameController`, `GameBalanceConfig`, `UI/StaminaBar`, `UI/ScreensManager`, `Cobra/CobraClimb`, `Cobra/CobraCollisions`, and most of `Environment/` follow the house Unity style. `Scoring/`, `Cobra/FallingCobra`, `Cobra/FallingCobraSpawner`, and `Environment/SpiderWebBuilder` are still in the template style, some with Chinese comments
+- Style: `ArmRoot/`, `GameController`, `GameBalanceConfig`, `UI/StaminaBarController`, `UI/ScreensManager`, `Cobra/CobraClimb`, `Cobra/CobraCollisions`, and most of `Environment/` follow the house Unity style. `Scoring/`, `Cobra/FallingCobra`, `Cobra/FallingCobraSpawner`, and `Environment/SpiderWebBuilder` are still in the template style, some with Chinese comments
 
 ## Build and Deploy
 
