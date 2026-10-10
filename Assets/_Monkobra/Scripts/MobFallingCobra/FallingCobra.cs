@@ -21,6 +21,7 @@ public class FallingCobra: MonoBehaviour {
     private Color[] baseColors;
     private MaterialPropertyBlock warningBlock;
     private Transform player;
+    private float warningStartTime;
     private float fallStartTime;
     private bool isFalling;
     private bool hitMonkey;
@@ -87,7 +88,9 @@ public class FallingCobra: MonoBehaviour {
             player = playerObject.transform;
         }
 
-        fallStartTime = Time.time + warningDurationS;
+        warningStartTime = Time.time;
+        fallStartTime = warningStartTime + warningDurationS;
+        ApplyWarningColor(1f);
     }
 
     private void Update() {
@@ -99,10 +102,15 @@ public class FallingCobra: MonoBehaviour {
             return;
         }
 
-        float pulse = 0.5f + 0.5f * Mathf.Sin(
-            Time.time * warningPulseHz * 2f * Mathf.PI
+        float pulse = 0.5f + 0.5f * Mathf.Cos(
+            (Time.time - warningStartTime)
+                * warningPulseHz * 2f * Mathf.PI
         );
 
+        ApplyWarningColor(pulse);
+    }
+
+    private void ApplyWarningColor(float pulse) {
         for (int i = 0; i < snakeRenderers.Length; i++) {
             Renderer snakeRenderer = snakeRenderers[i];
             snakeRenderer.GetPropertyBlock(warningBlock);
