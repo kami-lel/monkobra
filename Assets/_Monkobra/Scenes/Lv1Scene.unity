@@ -1445,8 +1445,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 567824735}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.014173588, y: 0.9752757, z: 0.18412715, w: -0.121382415}
-  m_LocalPosition: {x: -0.47033605, y: -1.9177848, z: 9.853978}
+  m_LocalRotation: {x: 0.005147263, y: 0.99968106, z: -0.009470453, w: 0.022838317}
+  m_LocalPosition: {x: -0.35504013, y: 2.2493973, z: 8.234935}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1537,7 +1537,7 @@ Camera:
     height: 1
   near clip plane: 0.1
   far clip plane: 5000
-  field of view: 50
+  field of view: 65
   orthographic: 0
   orthographic size: 10
   m_Depth: 0
@@ -3671,7 +3671,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2005575609}
   serializedVersion: 2
-  m_LocalRotation: {x: 3.3461542e-10, y: 0.98395354, z: -0.17842482, w: 0.0000000029205307}
+  m_LocalRotation: {x: 0.0000000018497841, y: 0.9984459, z: -0.055729683, w: 0.000000010107185}
   m_LocalPosition: {x: -0.000000029802322, y: 3, z: 7.9999995}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -3724,7 +3724,7 @@ MonoBehaviour:
       Size: {x: 0.8, y: 0.8}
       Offset: {x: 0, y: 0}
   CenterOnActivate: 1
-  TargetOffset: {x: 0, y: 0, z: 0}
+  TargetOffset: {x: 0, y: 2.104146, z: 0}
   Damping: {x: 0.5, y: 0.5}
   Lookahead:
     Enabled: 1

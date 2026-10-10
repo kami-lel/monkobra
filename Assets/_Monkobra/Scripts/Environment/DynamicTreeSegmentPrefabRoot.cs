@@ -174,21 +174,10 @@ public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
         );
 
         int attemptCount = balanceConfig.BranchGenerationAttemptCount;
-        int branchCount = 0;
         for (int i = 0; i < attemptCount; i++) {
             if (Random.value < spawnProbability) {
                 SpawnBranch(segmentHeight, placedPositions);
-                branchCount++;
             }
-        }
-
-        if (Debug.isDebugBuild) {
-            Debug.Log(
-                "DynamicTreeSegmentPrefabRoot:\t"
-                    + $"branches {branchCount}/{attemptCount} "
-                    + $"(difficulty {difficulty:F2}, p {spawnProbability:F2})",
-                this
-            );
         }
 
         // branches are in and posed, decorators may now keep clear of them

@@ -249,19 +249,10 @@ public class SpiderWebSpawner: MonoBehaviour {
         Physics.SyncTransforms();
 
         int slotCount = balanceConfig.WebSlotsPerSegment;
-        int spawnedCount = 0;
         for (int slot = 0; slot < slotCount; slot++) {
-            if (Random.value < chance && TrySpawnWeb(segment, difficulty)) {
-                spawnedCount++;
+            if (Random.value < chance) {
+                TrySpawnWeb(segment, difficulty);
             }
-        }
-
-        if (Debug.isDebugBuild) {
-            Debug.Log(
-                $"SpiderWebSpawner:\twebs {spawnedCount}/{slotCount} on "
-                    + $"{segment.name} (climb {climbedU:F0}u, p {chance:F2})",
-                segment
-            );
         }
     }
 
