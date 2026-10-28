@@ -10,11 +10,23 @@ Bug tree branch created at player location & thus resulting failure
 
 ### Added
 
+##### Erik
+
+- `Lv1Scene` split into nested prefabs: `World`, `Envs`, `Entities`, `Systems`, `UI` and a leaf prefab per unit, so teammates edit different files
+
 ### Changed
+
+##### Erik
+
+- `AnalyticsManager` is now a component of the `GameController` prefab and no longer survives a scene reload, so each load starts a new session file
 
 ### Deprecated
 
 ### Removed
+
+##### Erik
+
+- orphan `GoalText` object in `Lv1Scene` (never drawn, no parent Canvas) and its mention in the TDD
 
 ### Fixed
 
