@@ -40,10 +40,10 @@ monkobra/
 ├── docs/              design, technical, mob, grab, balance, gameplay loop, build, and git documents
 ├── Assets/
 │   ├── _Monkobra/     all authored assets, <Type>/<Module>/<asset>
-│   │   ├── Scenes/    Lv1Scene, a shell of 6 prefab instances, see [Scene Hierarchy](#scene-hierarchy)
+│   │   ├── Scenes/    Lv1Scene, a shell of 8 prefab instances, see [Scene Hierarchy](#scene-hierarchy)
 │   │   ├── Scripts/   Analytics/, Cameras/, Environment/, GameController/, HackShortcuts/, MobFallingCobra/, MobGreatCobra/, MobSpiderWeb/, Player/, Scoring/, UI/
 │   │   ├── Plugins/   WebGL/Download.jslib (browser download of a text file)
-│   │   ├── Prefabs/   Environment/, Mob/, Player/, Systems/, UI/, World/
+│   │   ├── Prefabs/   Environment/, Mob/, Player/, Systems/ (GameController), UI/, World/ (light, volume, event system)
 │   │   ├── Materials/ Environment/, Mob/, Player/
 │   │   ├── Input/     InputSystem_Actions
 │   │   ├── Shaders/   Environment/FruitOutline (inverted-hull Shader Graph)
@@ -57,15 +57,15 @@ monkobra/
 
 ## Scene Hierarchy
 
-`Lv1Scene` holds no inline object: its root is 6 prefab instances, each nesting one prefab per unit, so teammates edit different files.
+`Lv1Scene` holds no inline object: its root is 8 prefab instances, so teammates edit different files; `Envs`, `Entities` and `UI` nest one prefab per unit.
 
 | Root Prefab | Nests |
 | --- | --- |
 | `Cameras` | the three Cinemachine cameras |
-| `World/World` | `DirectionalLight`, `GlobalVolume`, `EventSystem` |
+| `World/DirectionalLight`, `World/GlobalVolume`, `World/EventSystem` | three separate root prefabs, no wrapper |
 | `Environment/Envs` | `DTSPool` (with both spawners), `StarterZoneExitTrigger`, `Tree` (mock tree) |
 | `Player/Entities` | `Monkey`, `GreatCobra` |
-| `Systems/Systems` | `GameController` (also carries `AnalyticsManager`), `ScreensManager`, `ScoreManager`, `RampedDifficultyManager` |
+| `Systems/GameController` | one GameObject carrying `GameController`, `AnalyticsManager`, `ScreensManager`, `ScoreManager`, `RampedDifficultyManager` as components |
 | `UI/UI` | the `Canvas`, `ScoreHeight` (`HeightDisplay`, `ScoreHUD`), `LowStaminaPrompt`, `HackShortcutHelp`, `StaminaBar`, `ProgressBar`, `SpiderWebPrompt`, `Screens` (`LoseScreen`, `TutorialScreen`) |
 
 Unity drops a reference between two prefab assets, so every link that crosses a root (e.g. `LoseScreen.scoreManager`, `Cameras` tracking target) is a property override on the scene instance. Each object rests in its original active state: owners such as `ScreensManager` switch screens on, managers stay active.

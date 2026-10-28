@@ -26,7 +26,7 @@ Read these `docs/` files when their topic arises:
 - The repository root is the Unity project root: `Assets/`, `Packages/`, and `ProjectSettings/` sit at the top level
 - Authored assets live under `Assets/_Monkobra/`, laid out `<Type>/<Module>/<asset>` per the `coder-unity-engine` skill (e.g. `Scripts/`, `Prefabs/`, `Scenes/`, `Settings/_Shared/`)
 - Unity template leftovers and imports (`Assets/Readme.asset`, `Assets/TextMesh Pro/`) stay outside the game root
-- `Lv1Scene.unity` is a shell of 6 root prefab instances (`Cameras`, `World`, `Envs`, `Entities`, `Systems`, `UI`), see the Scene Hierarchy in [CONTEXT.md](CONTEXT.md#scene-hierarchy); open the owning prefab and edit it there, never an inline copy in the scene, so parallel work lands in different files
+- `Lv1Scene.unity` is a shell of 8 root prefab instances (`Cameras`, `DirectionalLight`, `GlobalVolume`, `EventSystem`, `Envs`, `Entities`, `GameController`, `UI`), see the Scene Hierarchy in [CONTEXT.md](CONTEXT.md#scene-hierarchy); open the owning prefab and edit it there, never an inline copy in the scene, so parallel work lands in different files
 - A new scene object becomes its own prefab under `Assets/_Monkobra/Prefabs/<Module>/`, nested in the matching root prefab; add a root only when no existing one fits
 - A reference between two prefabs is a property override on the scene instance (Unity drops it inside a prefab asset); keep such links few
 - Every asset under `Assets/` is committed with its `.meta` file, and a moved or renamed asset moves its `.meta` with it
