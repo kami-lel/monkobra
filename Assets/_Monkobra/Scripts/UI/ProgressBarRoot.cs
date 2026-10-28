@@ -4,8 +4,7 @@ using UnityEngine.UI;
 
 
 [RequireComponent(typeof(Scrollbar))]
-public class ProgressBarRoot : MonoBehaviour
-{
+public class ProgressBarRoot: MonoBehaviour {
     [Header("Cobra Marker")]
     [SerializeField] private Transform cobraHead;
     [SerializeField] private RectTransform cobraMarker;
@@ -44,12 +43,10 @@ public class ProgressBarRoot : MonoBehaviour
     private TextMeshProUGUI catchUpLabel;
     private float catchUpHideTime; // Time.time the warning is gone
 
-    private void Awake()
-    {
+    private void Awake() {
         progressBar = GetComponent<Scrollbar>();
 
-        if (progressBar == null)
-        {
+        if (progressBar == null) {
             Debug.LogError(
                 "ProgressBarRoot: failed to get Scrollbar.",
                 this
@@ -59,8 +56,7 @@ public class ProgressBarRoot : MonoBehaviour
             return;
         }
 
-        if (windowSizeY <= 0f)
-        {
+        if (windowSizeY <= 0f) {
             Debug.LogWarning(
                 "ProgressBarRoot: windowSizeY must be positive.",
                 this
@@ -69,40 +65,32 @@ public class ProgressBarRoot : MonoBehaviour
             windowSizeY = 1f;
         }
 
-        if (cobraHead != null)
-        {
+        if (cobraHead != null) {
             cobra = cobraHead.GetComponentInParent<CobraClimb>();
         }
 
-        if (cobraMarker != null)
-        {
+        if (cobraMarker != null) {
             markerGraphic = cobraMarker.GetComponent<Graphic>();
-            if (markerGraphic != null)
-            {
+            if (markerGraphic != null) {
                 markerBaseColor = markerGraphic.color;
             }
             catchUpLabel = CreateCatchUpLabel();
         }
 
-        if (cobra != null)
-        {
+        if (cobra != null) {
             cobra.CatchUpStarted += OnCatchUpStarted;
         }
     }
 
-    private void OnDestroy()
-    {
-        if (cobra != null)
-        {
+    private void OnDestroy() {
+        if (cobra != null) {
             cobra.CatchUpStarted -= OnCatchUpStarted;
         }
     }
 
-    private void OnCatchUpStarted(int stacks)
-    {
+    private void OnCatchUpStarted(int stacks) {
         catchUpHideTime = Time.time + catchUpShowS;
-        if (catchUpLabel == null)
-        {
+        if (catchUpLabel == null) {
             return;
         }
 
@@ -120,10 +108,8 @@ public class ProgressBarRoot : MonoBehaviour
         catchUpLabel.rectTransform.sizeDelta = new Vector2(0f, fontSize * 1.6f);
     }
 
-    private void Update()
-    {
-        if (!TryFindPlayer())
-        {
+    private void Update() {
+        if (!TryFindPlayer()) {
             return;
         }
 
@@ -134,20 +120,16 @@ public class ProgressBarRoot : MonoBehaviour
         UpdateCatchUpCue();
     }
 
-    private bool TryFindPlayer()
-    {
-        if (player != null)
-        {
+    private bool TryFindPlayer() {
+        if (player != null) {
             return true;
         }
 
         GameObject playerObject =
             GameObject.FindGameObjectWithTag(PLAYER_TAG);
 
-        if (playerObject == null)
-        {
-            if (!hasWarnedNoPlayer)
-            {
+        if (playerObject == null) {
+            if (!hasWarnedNoPlayer) {
                 Debug.LogWarning(
                     "ProgressBarRoot: no Player found.",
                     this
@@ -163,10 +145,8 @@ public class ProgressBarRoot : MonoBehaviour
         return true;
     }
 
-    private void UpdateCobraProgress()
-    {
-        if (cobraHead == null || cobraMarker == null)
-        {
+    private void UpdateCobraProgress() {
+        if (cobraHead == null || cobraMarker == null) {
             return;
         }
 
@@ -176,8 +156,7 @@ public class ProgressBarRoot : MonoBehaviour
 
         Vector2 anchor = new Vector2(0.5f, 0.5f);
 
-        switch (progressBar.direction)
-        {
+        switch (progressBar.direction) {
             case Scrollbar.Direction.LeftToRight:
                 anchor.x = cobraProgress;
                 break;
@@ -202,8 +181,7 @@ public class ProgressBarRoot : MonoBehaviour
 
     // the marker flashes while the cobra catches up; the center warning
     // shows once per catch-up, then fades out, only during a run
-    private void UpdateCatchUpCue()
-    {
+    private void UpdateCatchUpCue() {
         bool isPlaying =
             GameController.I == null
             || GameController.I.State == GameState.Playing;
@@ -213,23 +191,20 @@ public class ProgressBarRoot : MonoBehaviour
         float pulse =
             0.5f + 0.5f * Mathf.Sin(Time.time * catchUpPulseHz * 2f * Mathf.PI);
 
-        if (markerGraphic != null)
-        {
+        if (markerGraphic != null) {
             markerGraphic.color = isCatchingUp
                 ? Color.Lerp(markerBaseColor, catchUpColor, pulse)
                 : markerBaseColor;
         }
 
-        if (catchUpLabel == null)
-        {
+        if (catchUpLabel == null) {
             return;
         }
 
         float remainingS = catchUpHideTime - Time.time;
         bool show = isPlaying && remainingS > 0f;
         catchUpLabel.gameObject.SetActive(show);
-        if (show)
-        {
+        if (show) {
             Color labelColor = catchUpColor;
             labelColor.a = catchUpFadeS > 0f
                 ? Mathf.Clamp01(remainingS / catchUpFadeS)
@@ -240,11 +215,9 @@ public class ProgressBarRoot : MonoBehaviour
 
     // a full-width label built at runtime on the root canvas, at the screen
     // center
-    private TextMeshProUGUI CreateCatchUpLabel()
-    {
+    private TextMeshProUGUI CreateCatchUpLabel() {
         Canvas canvas = cobraMarker.GetComponentInParent<Canvas>();
-        if (canvas == null)
-        {
+        if (canvas == null) {
             return null;
         }
 

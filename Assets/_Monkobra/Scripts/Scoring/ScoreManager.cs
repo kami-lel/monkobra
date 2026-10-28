@@ -22,8 +22,7 @@ public class ScoreManager: MonoBehaviour {
     private Transform player;
     //添加水果等奖励分
     public bool TryAddReward() {
-        if (!CanScore) 
-        {
+        if (!CanScore) {
             return false;
         }
 
@@ -37,8 +36,7 @@ public class ScoreManager: MonoBehaviour {
     }
 
     public void EndRun() {
-        if (!hasStarted || isRunEnded) 
-        {
+        if (!hasStarted || isRunEnded) {
             return;
         }
         isRunEnded = true;

@@ -460,8 +460,7 @@ public class ArmRoot: MonoBehaviour {
 
     // grab the aimed fruit iff the hand overlaps it now: switch it off and
     // drop it from detection. Too short or past it, no overlap, no grab
-    private void TryGrabFruit() 
-    {
+    private void TryGrabFruit() {
         if (Time.timeScale <= 0f
             || (GameController.I != null
                 && !GameController.I.IsRunLive)) {
