@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Sits on the monkey root beside <see cref="MonkeyPrefabRoot"/> and owns the
+/// Sits on the monkey root beside <see cref="MonkeyController"/> and owns the
 /// spider web trap. A <see cref="SpiderWebTrap"/> hands itself over on
 /// contact, the body is held in place, and each escape press adds progress
 /// that drains back while idle. A full bar frees the monkey, removes the web
@@ -20,7 +20,7 @@ using UnityEngine.InputSystem;
 /// hint returns on every scene load.
 /// </para>
 /// </summary>
-[RequireComponent(typeof(MonkeyPrefabRoot))]
+[RequireComponent(typeof(MonkeyController))]
 public class SpiderWebStruggle: MonoBehaviour {
     // Public Members  #########################################################
     /// <summary>
@@ -136,10 +136,10 @@ public class SpiderWebStruggle: MonoBehaviour {
             );
         }
 
-        monkeyRoot = GetComponent<MonkeyPrefabRoot>();
+        monkeyRoot = GetComponent<MonkeyController>();
         if (monkeyRoot == null) {
             Debug.LogError(
-                "SpiderWebStruggle:\tfail to get Component: MonkeyPrefabRoot",
+                "SpiderWebStruggle:\tfail to get Component: MonkeyController",
                 this
             );
         }
@@ -223,7 +223,7 @@ public class SpiderWebStruggle: MonoBehaviour {
             && GameController.I.State != GameState.Playing);
 
     // cached references  ------------------------------------------------------
-    private MonkeyPrefabRoot monkeyRoot;
+    private MonkeyController monkeyRoot;
     private SpiderWebTrap trapWeb; // web holding the monkey, null when free
 
     // private methods  ########################################################
@@ -264,7 +264,7 @@ public class SpiderWebStruggle: MonoBehaviour {
         Escaped?.Invoke();
     }
 
-    // disabling a held action cancels it: ArmRoot ends its reach, grabbing
+    // disabling a held action cancels it: ArmController ends its reach, grabbing
     // only if the hand already overlaps the fruit as on any release, and
     // CameraRigManager swings back to the behind view
     private void SuspendInteract() {

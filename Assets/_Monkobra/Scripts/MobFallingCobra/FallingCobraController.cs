@@ -25,7 +25,7 @@ using UnityEngine;
 /// </para>
 /// </summary>
 [RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider))]
-public class FallingCobra: MonoBehaviour {
+public class FallingCobraController: MonoBehaviour {
     // Public Members  #########################################################
     /// <returns>pivot to the far end of the snake, hit radius included; u
     /// </returns>
@@ -49,7 +49,7 @@ public class FallingCobra: MonoBehaviour {
     ) {
         if (config == null) {
             Debug.LogWarning(
-                "FallingCobra:\tInitialize needs a GameBalanceConfig, stay "
+                "FallingCobraController:\tInitialize needs a GameBalanceConfig, stay "
                     + "dormant",
                 this
             );
@@ -108,7 +108,7 @@ public class FallingCobra: MonoBehaviour {
         hitCollider = GetComponent<CapsuleCollider>();
         if (body == null || hitCollider == null) {
             Debug.LogError(
-                "FallingCobra:\trequires Rigidbody and CapsuleCollider",
+                "FallingCobraController:\trequires Rigidbody and CapsuleCollider",
                 this
             );
             enabled = false;
@@ -163,9 +163,9 @@ public class FallingCobra: MonoBehaviour {
         GameObject playerObject = GameObject.FindGameObjectWithTag(PLAYER_TAG);
         if (playerObject != null) {
             player = playerObject.transform;
-            playerArms = playerObject.GetComponentsInChildren<ArmRoot>(true);
+            playerArms = playerObject.GetComponentsInChildren<ArmController>(true);
             playerSensor =
-                playerObject.GetComponentInChildren<HitBranchDetection>(true);
+                playerObject.GetComponentInChildren<HitBranchSensor>(true);
         }
     }
 
@@ -191,7 +191,7 @@ public class FallingCobra: MonoBehaviour {
     }
 
     private void OnTriggerEnter(Collider other) {
-        if (other.GetComponent<HitBranchDetection>() != null) {
+        if (other.GetComponent<HitBranchSensor>() != null) {
             // the sensor raises the drop itself, as for a branch
             RegisterHit();
             return;
@@ -250,8 +250,8 @@ public class FallingCobra: MonoBehaviour {
     private Color[] baseColors;
     private MaterialPropertyBlock warningBlock;
     private Transform player;
-    private ArmRoot[] playerArms; // the monkey's arms, read for a reach
-    private HitBranchDetection playerSensor; // applies the drop
+    private ArmController[] playerArms; // the monkey's arms, read for a reach
+    private HitBranchSensor playerSensor; // applies the drop
 
     // private methods  ########################################################
     // wakes when the monkey is close and the cobra is not below it, a fall
@@ -282,7 +282,7 @@ public class FallingCobra: MonoBehaviour {
         if (state != State.Falling || !hitCollider.enabled) {
             return;
         }
-        bool isSensor = other.GetComponent<HitBranchDetection>() != null;
+        bool isSensor = other.GetComponent<HitBranchSensor>() != null;
         if (!isSensor && !IsMonkeyPart(other)) {
             return;
         }
@@ -290,7 +290,7 @@ public class FallingCobra: MonoBehaviour {
         if (playerSensor != null) {
             playerSensor.ReportHit(
                 hitCollider,
-                HitBranchDetection.HitKind.FallingCobra
+                HitBranchSensor.HitKind.FallingCobraController
             );
         }
     }
@@ -319,7 +319,7 @@ public class FallingCobra: MonoBehaviour {
     /// false for its other trigger volumes, which reach far past the body
     /// </returns>
     private static bool IsMonkeyPart(Collider other) {
-        if (other.GetComponentInParent<ArmRoot>() != null) {
+        if (other.GetComponentInParent<ArmController>() != null) {
             return true;
         }
         if (other.isTrigger) {
@@ -337,7 +337,7 @@ public class FallingCobra: MonoBehaviour {
         if (playerArms == null) {
             return false;
         }
-        foreach (ArmRoot arm in playerArms) {
+        foreach (ArmController arm in playerArms) {
             if (arm != null && arm.IsReaching) {
                 return true;
             }

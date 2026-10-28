@@ -4,14 +4,14 @@ using UnityEngine;
 
 /// <summary>
 /// Tracks which side of the character has fruit within reach, fed by 2
-/// <see cref="DetectionZone"/> children that forward their trigger events.
+/// <see cref="DetectionZoneRelay"/> children that forward their trigger events.
 /// Keeps every "FruitCollider" overlap per side, so ReachForLeft and
 /// ReachForRight hold with several fruits at once. Also relays which fruit a
 /// hand currently overlaps, so a release would grab it.
 /// </summary>
-public class UpwardFruitDetection: MonoBehaviour {
+public class UpwardFruitSensor: MonoBehaviour {
     // Public Members  #########################################################
-    public static UpwardFruitDetection I {
+    public static UpwardFruitSensor I {
         get; private set;
     }
 
@@ -109,18 +109,18 @@ public class UpwardFruitDetection: MonoBehaviour {
     // Inspector Fields  #######################################################
     [Tooltip("left-side detection zone, must report Side == Left")]
     [SerializeField]
-    private DetectionZone leftZone;
+    private DetectionZoneRelay leftZone;
 
     [Tooltip("right-side detection zone, must report Side == Right")]
     [SerializeField]
-    private DetectionZone rightZone;
+    private DetectionZoneRelay rightZone;
 
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
         // Inspector Assignment Guard  -----------------------------------------
         if (leftZone == null || rightZone == null) {
             Debug.LogWarning(
-                "UpwardFruitDetection:\tmust assign Inspector Fields: "
+                "UpwardFruitSensor:\tmust assign Inspector Fields: "
                     + "leftZone, rightZone",
                 this
             );
@@ -129,7 +129,7 @@ public class UpwardFruitDetection: MonoBehaviour {
         // drop only this duplicate component, the GameObject may hold more
         if (I != null && I != this) {
             Debug.LogWarning(
-                "UpwardFruitDetection:\tduplicate instance, removing",
+                "UpwardFruitSensor:\tduplicate instance, removing",
                 this
             );
             Destroy(this);
@@ -214,7 +214,7 @@ public class UpwardFruitDetection: MonoBehaviour {
     private Collider lockedTarget; // fruit an arm is reaching for, else null
 
     // Private Methods  ########################################################
-    // pinned fruit wins, else the one ArmRoot would pick on the reach side
+    // pinned fruit wins, else the one ArmController would pick on the reach side
     private void RefreshReachTarget() {
         Collider next =
             lockedTarget != null ? lockedTarget : GetNewestFruit(ReachSide);

@@ -7,9 +7,9 @@ using UnityEngine;
 /// <see cref="ReportHit(Collider, HitKind)"/>. Only detects: the camera
 /// shake is <see cref="CameraHitShakeEfx"/>'s job.
 /// </summary>
-public class HitBranchDetection: MonoBehaviour {
+public class HitBranchSensor: MonoBehaviour {
     // Public Members  #########################################################
-    public static HitBranchDetection I {
+    public static HitBranchSensor I {
         get; private set;
     }
 
@@ -29,7 +29,7 @@ public class HitBranchDetection: MonoBehaviour {
     /// </summary>
     public enum HitKind {
         Branch,
-        FallingCobra,
+        FallingCobraController,
     }
 
     // Public Methods  #########################################################
@@ -77,7 +77,7 @@ public class HitBranchDetection: MonoBehaviour {
     // private methods  ########################################################
     private void ApplyHit(Collider source, HitKind kind) {
         if (Debug.isDebugBuild) {
-            Debug.Log($"HitBranchDetection:\thit {kind} {source.name}");
+            Debug.Log($"HitBranchSensor:\thit {kind} {source.name}");
         }
         Hit?.Invoke(source, kind);
         BranchHit?.Invoke(source);

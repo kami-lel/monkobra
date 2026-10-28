@@ -16,7 +16,7 @@ public enum DetectionSide {
 /// child GameObject with a trigger Collider, set its Side in the
 /// Inspector, and subscribe to Entered/Exited to know which zone fired.
 /// </summary>
-public class DetectionZone: MonoBehaviour {
+public class DetectionZoneRelay: MonoBehaviour {
     // Public Members  #########################################################
     public DetectionSide Side => side;
     public event Action<DetectionSide, Collider> Entered;

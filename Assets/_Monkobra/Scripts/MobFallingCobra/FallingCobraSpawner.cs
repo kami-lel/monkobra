@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 
 /// <summary>
-/// Hangs dormant <see cref="FallingCobra"/>s on the trunk of each
+/// Hangs dormant <see cref="FallingCobraController"/>s on the trunk of each
 /// <see cref="DynamicTreeSegmentPrefabRoot"/> as soon as it has rolled its
 /// branches, on its first Start and after every restart by
 /// <see cref="DTSPool"/>, by listening to
@@ -37,7 +37,7 @@ public class FallingCobraSpawner: MonoBehaviour {
     [SerializeField]
     [FormerlySerializedAs("fallingCobraPrefab")]
     [Tooltip("falling cobra prefab, spawned dormant on a segment")]
-    private FallingCobra cobraPrefab;
+    private FallingCobraController cobraPrefab;
 
     [SerializeField]
     [Tooltip("game balance tuning; cobra attempts, chance & speeds")]
@@ -137,7 +137,7 @@ public class FallingCobraSpawner: MonoBehaviour {
     private static FallingCobraSpawner listener; // the one spawner subscribed
 
     private bool hasWarnedNoDifficulty; // missing service logged once
-    private readonly List<FallingCobra> spawnedCobras = new();
+    private readonly List<FallingCobraController> spawnedCobras = new();
 
     // private methods  ########################################################
     // rolls this spawner's cobra attempts for segment, which already holds its
@@ -183,7 +183,7 @@ public class FallingCobraSpawner: MonoBehaviour {
     // segment never carries 2 rolls
     private void ClearCobras(DynamicTreeSegmentPrefabRoot segment) {
         for (int i = spawnedCobras.Count - 1; i >= 0; i--) {
-            FallingCobra cobra = spawnedCobras[i];
+            FallingCobraController cobra = spawnedCobras[i];
             if (cobra != null && cobra.transform.parent != segment.transform) {
                 continue;
             }
@@ -201,7 +201,7 @@ public class FallingCobraSpawner: MonoBehaviour {
 
         // the prefab builds its hit capsule in Awake, so its length is only
         // known on an instance
-        FallingCobra cobra = Instantiate(cobraPrefab, segmentXfm);
+        FallingCobraController cobra = Instantiate(cobraPrefab, segmentXfm);
 
         // the trunk cylinder is centered on the segment pivot; keep the whole
         // snake, tail to head, inside the segment's own height
@@ -315,7 +315,7 @@ public class FallingCobraSpawner: MonoBehaviour {
     }
 
     private bool IsSpotFree(Vector3 position) {
-        foreach (FallingCobra other in spawnedCobras) {
+        foreach (FallingCobraController other in spawnedCobras) {
             if (
                 other != null
                 && other.gameObject.activeInHierarchy

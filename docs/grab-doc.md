@@ -6,10 +6,10 @@ How the monkey reaches for and picks bananas: the detection zones, the arm reach
 
 ```mermaid
 graph TD
-  Zones[DetectionZone x2] --> Fruit[UpwardFruitDetection]
+  Zones[DetectionZoneRelay x2] --> Fruit[UpwardFruitSensor]
   Fruit -->|reachable| Outline[FruitOutlineListener]
   Fruit -->|ReachSide| Cam[CameraRigManager]
-  Press[Interact pressed] --> Arm[ArmRoot]
+  Press[Interact pressed] --> Arm[ArmController]
   Fruit -->|newest fruit on side| Arm
   Arm -->|hand overlaps fruit| Grabbable[SetGrabbableFruit]
   Grabbable --> Outline
@@ -28,9 +28,9 @@ graph TD
 
 | Script | Role |
 | --- | --- |
-| `Player/DetectionZone` | side-tagged trigger volume on the monkey that forwards enter and exit events |
-| `Player/UpwardFruitDetection` | singleton (`I`) that keeps the reachable fruit per side, picks the reach side, and relays the grabbable fruit |
-| `Player/ArmRoot` | one arm: hand-over-hand climb stroke, or the reach and the release check |
+| `Player/DetectionZoneRelay` | side-tagged trigger volume on the monkey that forwards enter and exit events |
+| `Player/UpwardFruitSensor` | singleton (`I`) that keeps the reachable fruit per side, picks the reach side, and relays the grabbable fruit |
+| `Player/ArmController` | one arm: hand-over-hand climb stroke, or the reach and the release check |
 | `Player/MonkeyConfig` | reach speed, stroke tuning, and the interact action both arms and the camera read |
 | `Cameras/CameraRigManager` | swaps the behind, look-left, and look-right Cinemachine cameras |
 | `Environment/FruitOutlineListener` | two-tier outline on a banana |
@@ -40,8 +40,8 @@ graph TD
 
 ## Detection
 
-- Zones: two `DetectionZone` triggers (`LeftDetection`, `RightDetection`, under `Detections` on the monkey prefab) flank the monkey. Each forwards `Entered` and `Exited` with its side
-- Filter: `UpwardFruitDetection` keeps only colliders tagged `FruitCollider`, in a set per side plus one entry-order list across both
+- Zones: two `DetectionZoneRelay` triggers (`LeftDetection`, `RightDetection`, under `Detections` on the monkey prefab) flank the monkey. Each forwards `Entered` and `Exited` with its side
+- Filter: `UpwardFruitSensor` keeps only colliders tagged `FruitCollider`, in a set per side plus one entry-order list across both
 - Reach Side: `ReachSide` is right only when the right zone has fruit and the left does not, else left, including when neither or both have fruit. Only the arm on that side reaches
 - Newest Fruit: the target is the most recent entry on that side
 - Reach Events: `FruitReachChanged` fires when a fruit enters or leaves both zones combined, so a fruit in the other zone still counts as reachable
@@ -50,7 +50,7 @@ graph TD
 
 ## Reach and Release
 
-`ArmRoot` has two modes on one `ConfigurableJoint`, and writes only the joint's drive targets, never its configuration.
+`ArmController` has two modes on one `ConfigurableJoint`, and writes only the joint's drive targets, never its configuration.
 
 - Climb Mode: while move input is held the arm sweeps a stroke, the two arms half a cycle apart, and the linear axis is locked
 - Reach Mode: pressing interact on the matching side starts the reach. The locked fruit is chosen once, but the aim is re-pointed at it every physics step, so the arm follows the climb, turning at `ReachAimSpeedDeg` (0 snaps), while it stretches at the configured speed up to the joint's linear limit
@@ -89,6 +89,6 @@ The reach extend speed and the aim turn speed (`reachAimSpeedDeg`, deg/s, 0 snap
 
 ## Known Gaps
 
-- `ArmRoot` carries a fixme to split it into several systems
+- `ArmController` carries a fixme to split it into several systems
 - A miss costs no stamina, only exposure
 - Scenes without a `ScoreManager` restore stamina on a grab but score nothing, see [Score](monkobra-tdd.md#score)

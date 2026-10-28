@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 /// Owns the 3 camera views under the monkey's <c>CameraRig</c> and swaps
 /// which one is live. Defaults to behind. While the interact action is
 /// held, switches to look-left/look-right based on
-/// <see cref="UpwardFruitDetection.I"/> (right only if fruit is reachable
+/// <see cref="UpwardFruitSensor.I"/> (right only if fruit is reachable
 /// there and not on the left; left otherwise, including when neither side
 /// has reachable fruit). Releasing the action returns to behind. Swap is
 /// done by raising the live camera's
@@ -116,11 +116,11 @@ public class CameraRigManager: MonoBehaviour {
 
     // private methods  ########################################################
     private void UpdateActiveView() {
-        UpwardFruitDetection fruitDetection = UpwardFruitDetection.I;
+        UpwardFruitSensor fruitDetection = UpwardFruitSensor.I;
         if (isInteractHeld && fruitDetection == null) {
             Debug.LogError(
                 "CameraRigManager:\tfail to get singleton: "
-                    + "UpwardFruitDetection",
+                    + "UpwardFruitSensor",
                 this
             );
             return;

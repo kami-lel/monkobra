@@ -308,21 +308,21 @@ public class AnalyticsManager: MonoBehaviour {
     // cached references  ------------------------------------------------------
     private GameController observedGame;
     private ScoreManager observedScore;
-    private HitBranchDetection observedBranch;
+    private HitBranchSensor observedBranch;
 
     // private methods  ########################################################
     private void ObserveScene() {
         Observe(
             GameController.I,
             ScoreManager.I,
-            FindFirstObjectByType<HitBranchDetection>()
+            FindFirstObjectByType<HitBranchSensor>()
         );
     }
 
     private void Observe(
         GameController game,
         ScoreManager score,
-        HitBranchDetection branch
+        HitBranchSensor branch
     ) {
         if (observedGame != null) {
             observedGame.StateChanged -= OnGameStateChanged;

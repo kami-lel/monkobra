@@ -20,7 +20,7 @@ using UnityEngine.InputSystem;
 /// </summary>
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(ConfigurableJoint))]
-public class ArmRoot: MonoBehaviour {
+public class ArmController: MonoBehaviour {
     // Public Members  #########################################################
     /// <returns>if the arm is reaching for fruit, else climbing</returns>
     public bool IsReaching => isReaching;
@@ -78,31 +78,31 @@ public class ArmRoot: MonoBehaviour {
         // Inspector Assignment Guard  -----------------------------------------
         if (armVisual == null) {
             Debug.LogWarning(
-                "ArmRoot:\tmust assign Inspector Field: armVisual",
+                "ArmController:\tmust assign Inspector Field: armVisual",
                 this
             );
         }
         if (handCollider == null) {
             Debug.LogWarning(
-                "ArmRoot:\tmust assign Inspector Field: handCollider",
+                "ArmController:\tmust assign Inspector Field: handCollider",
                 this
             );
         }
         if (config == null) {
             Debug.LogWarning(
-                "ArmRoot:\tmust assign Inspector Field: config",
+                "ArmController:\tmust assign Inspector Field: config",
                 this
             );
         } else {
             if (config.MoveAction == null) {
                 Debug.LogWarning(
-                    "ArmRoot:\tmust assign MonkeyConfig field: moveAction",
+                    "ArmController:\tmust assign MonkeyConfig field: moveAction",
                     config
                 );
             }
             if (config.InteractAction == null) {
                 Debug.LogWarning(
-                    "ArmRoot:\tmust assign MonkeyConfig field: "
+                    "ArmController:\tmust assign MonkeyConfig field: "
                         + "interactAction",
                     config
                 );
@@ -111,18 +111,18 @@ public class ArmRoot: MonoBehaviour {
 
         body = GetComponent<Rigidbody>();
         if (body == null) {
-            Debug.LogError("ArmRoot:\tfail to get Component: Rigidbody", this);
+            Debug.LogError("ArmController:\tfail to get Component: Rigidbody", this);
         }
 
         joint = GetComponent<ConfigurableJoint>();
         if (joint == null) {
             Debug.LogError(
-                "ArmRoot:\tfail to get Component: ConfigurableJoint",
+                "ArmController:\tfail to get Component: ConfigurableJoint",
                 this
             );
         } else if (joint.connectedBody == null) {
             Debug.LogWarning(
-                "ArmRoot:\tmust assign ConfigurableJoint field: Connected "
+                "ArmController:\tmust assign ConfigurableJoint field: Connected "
                     + "Body, the arm has nothing to hang off",
                 this
             );
@@ -177,21 +177,21 @@ public class ArmRoot: MonoBehaviour {
         // a target against a zero spring does nothing, arm floats free
         if (AimSpring <= 0f) {
             Debug.LogWarning(
-                "ArmRoot:\tConfigurableJoint has no angular drive spring, "
+                "ArmController:\tConfigurableJoint has no angular drive spring, "
                     + "the arm will not follow its aim target",
                 this
             );
         }
         if (joint.zDrive.positionSpring <= 0f) {
             Debug.LogWarning(
-                "ArmRoot:\tConfigurableJoint Z Drive has no spring, the arm "
+                "ArmController:\tConfigurableJoint Z Drive has no spring, the arm "
                     + "will not telescope on reach",
                 this
             );
         }
         if (joint.linearLimit.limit <= 0f) {
             Debug.LogWarning(
-                "ArmRoot:\tConfigurableJoint Linear Limit is 0, the arm has "
+                "ArmController:\tConfigurableJoint Linear Limit is 0, the arm has "
                     + "no room to reach",
                 this
             );
@@ -206,7 +206,7 @@ public class ArmRoot: MonoBehaviour {
             );
             if (handRadiusU >= restLengthU) {
                 Debug.LogWarning(
-                    $"ArmRoot:\thand is {handRadiusU}u across but the joint "
+                    $"ArmController:\thand is {handRadiusU}u across but the joint "
                         + $"anchor puts the shoulder only {restLengthU}u away, "
                         + "so the arm draws entirely inside its own hand, move "
                         + "the anchor to the shoulder or shrink the hand",
@@ -217,7 +217,7 @@ public class ArmRoot: MonoBehaviour {
 
         if (Debug.isDebugBuild) {
             Debug.Log(
-                $"ArmRoot:\tready, {(isRightArm ? "right" : "left")} arm, "
+                $"ArmController:\tready, {(isRightArm ? "right" : "left")} arm, "
                     + $"rest length {restLengthU}u, max reach "
                     + $"{joint.linearLimit.limit}u",
                 this
@@ -287,10 +287,10 @@ public class ArmRoot: MonoBehaviour {
     // Event Handlers  #########################################################
     // detection singleton picks the side, only the matching arm reaches
     private void OnInteractPerformed(InputAction.CallbackContext context) {
-        UpwardFruitDetection fruitDetection = UpwardFruitDetection.I;
+        UpwardFruitSensor fruitDetection = UpwardFruitSensor.I;
         if (fruitDetection == null) {
             Debug.LogError(
-                "ArmRoot:\tfail to get singleton: UpwardFruitDetection",
+                "ArmController:\tfail to get singleton: UpwardFruitSensor",
                 this
             );
             return;
@@ -427,8 +427,8 @@ public class ArmRoot: MonoBehaviour {
 
     private void EndReach() {
         // only the reaching arm holds the pin, an idle arm must not clear it
-        if (isReaching && UpwardFruitDetection.I != null) {
-            UpwardFruitDetection.I.SetLockedTarget(null);
+        if (isReaching && UpwardFruitSensor.I != null) {
+            UpwardFruitSensor.I.SetLockedTarget(null);
         }
         isReaching = false;
         reachFruit = null;
@@ -452,7 +452,7 @@ public class ArmRoot: MonoBehaviour {
         }
         reportedFruit = fruit;
 
-        UpwardFruitDetection fruitDetection = UpwardFruitDetection.I;
+        UpwardFruitSensor fruitDetection = UpwardFruitSensor.I;
         if (fruitDetection != null) {
             fruitDetection.SetGrabbableFruit(fruit);
         }
@@ -481,7 +481,7 @@ public class ArmRoot: MonoBehaviour {
                     CurrentLengthU
                     < Vector3.Distance(ShoulderWorld, fruit.bounds.center);
                 Debug.Log(
-                    "ArmRoot:\tmiss "
+                    "ArmController:\tmiss "
                         + fruit.name
                         + ", arm too "
                         + (isTooShort ? "short" : "long"),
@@ -501,7 +501,7 @@ public class ArmRoot: MonoBehaviour {
             fruit.gameObject.SetActive(false);
         }
         // a disabled collider may never raise its trigger exit
-        UpwardFruitDetection fruitDetection = UpwardFruitDetection.I;
+        UpwardFruitSensor fruitDetection = UpwardFruitSensor.I;
         if (fruitDetection != null) {
             if (pickup != null) {
                 foreach (Collider part in pickup.GetComponentsInChildren<Collider>(true)) {
@@ -517,7 +517,7 @@ public class ArmRoot: MonoBehaviour {
             staminaBar.AddStaminaByFruit();
         } else {
             Debug.LogError(
-                "ArmRoot:\tfail to get singleton: StaminaBarController", this);
+                "ArmController:\tfail to get singleton: StaminaBarController", this);
         }
     }
 
@@ -574,8 +574,8 @@ public class ArmRoot: MonoBehaviour {
             return;
         }
         reachFruit = null;
-        if (UpwardFruitDetection.I != null) {
-            UpwardFruitDetection.I.SetLockedTarget(null);
+        if (UpwardFruitSensor.I != null) {
+            UpwardFruitSensor.I.SetLockedTarget(null);
         }
         ReportGrabbableFruit(null);
     }

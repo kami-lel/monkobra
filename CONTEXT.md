@@ -61,27 +61,27 @@ The repository root is the Unity project root. `Library/`, `Temp/`, `Logs/`, `Us
 
 ```mermaid
 graph LR
-  Input[Move input] --> Root[MonkeyPrefabRoot]
-  Input --> Arm[ArmRoot x2]
+  Input[Move input] --> Root[MonkeyController]
+  Input --> Arm[ArmController x2]
   Cfg[MonkeyConfig] --> Root
   Cfg --> Arm
-  Root --> Hit[HitBranchDetection]
+  Root --> Hit[HitBranchSensor]
   Hit -->|BranchHit| Root
   Hit -->|Hit w/ kind| Shake[CameraHitShakeEfx]
-  Zones[DetectionZone x2] --> Fruit[UpwardFruitDetection]
+  Zones[DetectionZoneRelay x2] --> Fruit[UpwardFruitSensor]
   Fruit --> Cam[CameraRigManager]
   Fruit --> Outline[FruitOutlineListener]
   Arm -->|TryCollect| Pickup[ScorePickup]
   Pickup --> Score[ScoreManager]
   Score --> ScoreUI[ScoreDisplay]
-  Cobra[CobraCollisions] --> Game[GameController]
+  Cobra[CobraSensor] --> Game[GameController]
   Stamina[StaminaBarController] --> Game
   Game --> Screens[ScreensManager]
   Game -->|EndRun| Score
   Pool[DTSPool] -->|Restart| Segment[DynamicTreeSegmentPrefabRoot]
   Segment -->|BranchesGenerated| Spawner[SpiderWebSpawner]
   Segment -->|BranchesGenerated| CobraSpawner[FallingCobraSpawner]
-  CobraSpawner --> FallCobra[FallingCobra]
+  CobraSpawner --> FallCobra[FallingCobraController]
   Spawner --> Web[SpiderWebTrap]
   Web -->|TryTrap| Struggle[SpiderWebStruggle]
   Struggle -->|IsHeld| Root
@@ -103,17 +103,17 @@ All under `Assets/_Monkobra/Scripts/`. Each row names the owner of the detail.
 | `GameController/GameController`, `GameState` | singleton, owns the `GameState` machine: Tutorial, StarterZone, Playing, Lost; `LoseGame()` takes no cause, analytics infers it | [TDD](docs/monkobra-tdd.md#run-lifecycle) |
 | `GameController/StarterZoneExitRelay` | on a trigger collider GO: the monkey entering calls `EndStarterZone()` | [TDD](docs/monkobra-tdd.md#run-lifecycle) |
 | `GameController/GameBalanceConfig` | ScriptableObject holding every balance number | [Balance Design](docs/balance-doc.md) |
-| `Player/MonkeyPrefabRoot` | kinematic body: orbit, climb, stun, `IsHeld` | [TDD](docs/monkobra-tdd.md#monkey-movement) |
+| `Player/MonkeyController` | kinematic body: orbit, climb, stun, `IsHeld` | [TDD](docs/monkobra-tdd.md#monkey-movement) |
 | `Player/MonkeyConfig` | ScriptableObject of monkey tuning and input actions | [TDD](docs/monkobra-tdd.md#monkey-movement) |
-| `Player/ArmRoot` | one arm: climb stroke, reach, release check | [Grab](docs/grab-doc.md#reach-and-release) |
-| `Player/DetectionZone` | side-tagged trigger forwarding enter and exit | [Grab](docs/grab-doc.md#detection) |
-| `Player/UpwardFruitDetection` | singleton, reachable and grabbable fruit | [Grab](docs/grab-doc.md#detection) |
+| `Player/ArmController` | one arm: climb stroke, reach, release check | [Grab](docs/grab-doc.md#reach-and-release) |
+| `Player/DetectionZoneRelay` | side-tagged trigger forwarding enter and exit | [Grab](docs/grab-doc.md#detection) |
+| `Player/UpwardFruitSensor` | singleton, reachable and grabbable fruit | [Grab](docs/grab-doc.md#detection) |
 | `Cameras/CameraRigManager` | swaps the three Cinemachine cameras | [Grab](docs/grab-doc.md#camera) |
 | `Cameras/CameraLookUp` | on the behind camera: tilts the aim point up while climbing | none |
 | `Cameras/CameraHitShakeEfx` | on the main camera: fires a light impulse for a branch hit, a heavier one for a falling cobra hit | [Mobs](docs/mob-doc.md#hit-penalty) |
 | `Cameras/CameraCoolDownEfx` | on the main camera: vignette blackdown and zoom-out pulse on each low-stamina move attempt, a lighter step while low and a stronger one when empty | [TDD](docs/monkobra-tdd.md#camera) |
 | `Cameras/CameraEfxConfig` | ScriptableObject of the camera efx tuning: both cool-down steps (vignette, zoom-out) and their timing | [TDD](docs/monkobra-tdd.md#camera) |
-| `Player/HitBranchDetection` | singleton branch sensor: raises `BranchHit` and `Hit` (with a `HitKind`); `ReportHit` applies the same drop for a hazard touching the monkey outside the sensor | [Mobs](docs/mob-doc.md#hit-penalty) |
+| `Player/HitBranchSensor` | singleton branch sensor: raises `BranchHit` and `Hit` (with a `HitKind`); `ReportHit` applies the same drop for a hazard touching the monkey outside the sensor | [Mobs](docs/mob-doc.md#hit-penalty) |
 | `Environment/TreeManager` | singleton on the mock tree, marks the trunk axis | [TDD](docs/monkobra-tdd.md#tree) |
 | `Environment/DynamicTreeSegmentPrefabRoot` | places branches on a segment, then raises the static `BranchesGenerated` | [Mobs](docs/mob-doc.md#placement) |
 | `Environment/DTSPool` | on an empty base marker: instantiates the segments, then recycles the lowest segment over the top, restarting it, for an endless tree | [TDD](docs/monkobra-tdd.md#tree) |
@@ -124,10 +124,10 @@ All under `Assets/_Monkobra/Scripts/`. Each row names the owner of the detail.
 | `MobSpiderWeb/SpiderWebTrap` | web prefab root with one deepened trigger box | [Mobs](docs/mob-doc.md#trap-and-escape) |
 | `MobSpiderWeb/SpiderWebStruggle` | on the monkey: trap state, escape bar, immunity | [Mobs](docs/mob-doc.md#trap-and-escape) |
 | `MobSpiderWeb/SpiderWebBuilder` | `Build Web` context menu that builds the web strands out of cubes, a one-off authoring aid | none |
-| `MobGreatCobra/CobraClimb` | chasing cobra path, coil, look, and balance-driven base speed with a stacking mistake surge (raises `CatchUpStarted`) | [Mobs](docs/mob-doc.md#cobra) |
-| `MobGreatCobra/CobraCollisions` | cobra contact calls `LoseGame` | [Mobs](docs/mob-doc.md#contact) |
+| `MobGreatCobra/CobraMotor` | chasing cobra path, coil, look, and balance-driven base speed with a stacking mistake surge (raises `CatchUpStarted`) | [Mobs](docs/mob-doc.md#cobra) |
+| `MobGreatCobra/CobraSensor` | cobra contact calls `LoseGame` | [Mobs](docs/mob-doc.md#contact) |
 | `MobFallingCobra/FallingCobraSpawner` | on `Envs/DTSPool`: on each `BranchesGenerated`, hangs dormant falling cobras on that segment against a probability curve at its ramped difficulty, some ambushing just above a banana | [Mobs](docs/mob-doc.md#falling-cobra) |
-| `MobFallingCobra/FallingCobra` | dormant until the monkey is near (farther while it reaches for a banana), then warning, a constant fall that slides toward the monkey's angle, and a hit capsule that drops the monkey on any-part contact, at most twice per snake | [Mobs](docs/mob-doc.md#falling-cobra) |
+| `MobFallingCobra/FallingCobraController` | dormant until the monkey is near (farther while it reaches for a banana), then warning, a constant fall that slides toward the monkey's angle, and a hit capsule that drops the monkey on any-part contact, at most twice per snake | [Mobs](docs/mob-doc.md#falling-cobra) |
 | `GameController/RampedDifficultyService` | singleton, measures any y above the player's start y (`GetClimbedYDistance`), the climb baseline, and maps any y above the `rampBase` trigger's y (`RampBaseYPosition`) to a 0~1 ramped difficulty via the `rampedDifficultyCurve` in `GameBalanceConfig` | [Balance Design](docs/balance-doc.md#difficulty-follows-height) |
 | `Analytics/AnalyticsManager` | scene-placed singleton kept across reloads: observes the game, fills `SessionData` & the open `RunData`, saves one markdown session file per launch to `persistentDataPath/Analytics/` on run events, a timer, and quit or pause; samples height & stamina; dev keys from `HackShortcutConfig`: restart session, mock save, download report (`DownloadReport`) | [TDD](docs/monkobra-tdd.md#analytics) |
 | `Analytics/RunData` | plain data of one run: stamps, timed samples of height & stamina, status (`InProgress`, `Lost`, `Interrupted`), end, death cause, scores; also `EventStamp`, `RunSample`, `RunStatus` | none |

@@ -4,7 +4,7 @@ using UnityEngine;
 /// <summary>
 /// Camera shake for monkey hits, kept apart from hit detection. Sits on the
 /// main camera, next to the <c>CinemachineImpulseListener</c>. Listens to
-/// <see cref="HitBranchDetection.Hit"/> and fires a light impulse for a
+/// <see cref="HitBranchSensor.Hit"/> and fires a light impulse for a
 /// branch, a heavier one for a falling cobra. Each kind has its own
 /// <see cref="CinemachineImpulseSource"/> on the same camera, so amplitude
 /// and duration are tuned per kind in the Inspector.
@@ -40,11 +40,11 @@ public class CameraHitShakeEfx: MonoBehaviour {
 
     // the sensor lives in the monkey, so it is read after every Awake ran
     private void Start() {
-        sensor = HitBranchDetection.I;
+        sensor = HitBranchSensor.I;
         if (sensor == null) {
             Debug.LogError(
                 "CameraHitShakeEfx:\tfail to get singleton: "
-                    + "HitBranchDetection",
+                    + "HitBranchSensor",
                 this
             );
             enabled = false;
@@ -65,9 +65,9 @@ public class CameraHitShakeEfx: MonoBehaviour {
     // Event Handlers  #########################################################
     // a missing heavy source falls back to the light one, so a hit never
     // goes without a shake
-    private void OnHit(Collider _, HitBranchDetection.HitKind kind) {
+    private void OnHit(Collider _, HitBranchSensor.HitKind kind) {
         CinemachineImpulseSource source =
-            kind == HitBranchDetection.HitKind.FallingCobra
+            kind == HitBranchSensor.HitKind.FallingCobraController
                 ? (heavySource != null ? heavySource : lightSource)
                 : lightSource;
         if (source == null) {
@@ -82,7 +82,7 @@ public class CameraHitShakeEfx: MonoBehaviour {
     }
 
     // private members  ########################################################
-    private HitBranchDetection sensor;
+    private HitBranchSensor sensor;
 
     // private methods  ########################################################
     private void Unsubscribe() {

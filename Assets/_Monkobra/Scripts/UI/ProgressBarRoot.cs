@@ -89,7 +89,7 @@ public class ProgressBarRoot: MonoBehaviour {
         }
 
         if (cobraHead != null) {
-            cobra = cobraHead.GetComponentInParent<CobraClimb>();
+            cobra = cobraHead.GetComponentInParent<CobraMotor>();
         }
 
         if (cobraMarker != null) {
@@ -153,7 +153,7 @@ public class ProgressBarRoot: MonoBehaviour {
 
     private bool hasWarnedNoPlayer;
 
-    private CobraClimb cobra;
+    private CobraMotor cobra;
     private Graphic markerGraphic;
     private Color markerBaseColor;
     private TextMeshProUGUI catchUpLabel;

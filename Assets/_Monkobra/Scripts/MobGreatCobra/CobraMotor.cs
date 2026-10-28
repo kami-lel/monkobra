@@ -16,9 +16,9 @@ using UnityEngine.Serialization;
 /// gaps, slightly tapered, with the neck raised,
 /// a slow travelling slither wave and eyes on the head. The body keeps its
 /// material's own color.
-/// Contact itself is handled by <see cref="CobraCollisions"/>.
+/// Contact itself is handled by <see cref="CobraSensor"/>.
 /// </summary>
-public class CobraClimb: MonoBehaviour {
+public class CobraMotor: MonoBehaviour {
     // Public Members  #########################################################
     /// <returns>if the cobra is surging after a mistake of the monkey
     /// </returns>
@@ -172,14 +172,14 @@ public class CobraClimb: MonoBehaviour {
         // Inspector Assignment Guard  -----------------------------------------
         if (pathCenter == null) {
             Debug.LogError(
-                "CobraClimb:\tmust assign Inspector Field: pathCenter",
+                "CobraMotor:\tmust assign Inspector Field: pathCenter",
                 this
             );
         }
 
         if (bodySegments == null || bodySegments.Length == 0) {
             Debug.LogError(
-                "CobraClimb:\tmust assign Inspector Field: bodySegments",
+                "CobraMotor:\tmust assign Inspector Field: bodySegments",
                 this
             );
         }
@@ -192,7 +192,7 @@ public class CobraClimb: MonoBehaviour {
 
         if (balanceConfig == null) {
             Debug.LogWarning(
-                "CobraClimb:\tno Inspector Field: balanceConfig, "
+                "CobraMotor:\tno Inspector Field: balanceConfig, "
                     + "the cobra will not catch up",
                 this
             );
@@ -331,7 +331,7 @@ public class CobraClimb: MonoBehaviour {
     private int surgeStacks; // mistakes stacked in the running surge
     private float surgeEndTime; // Time.time the running surge ends
     private float nextCountedHitTime; // Time.time b4 which hits add nothing
-    private HitBranchDetection playerSensor;
+    private HitBranchSensor playerSensor;
     private SpiderWebStruggle playerStruggle;
     private Transform player;
     private Vector3[] segmentPositions;
@@ -382,7 +382,7 @@ public class CobraClimb: MonoBehaviour {
     // cobra surges to make the mistake felt
     private void ListenForMistakes(GameObject playerObject) {
         playerSensor =
-            playerObject.GetComponentInChildren<HitBranchDetection>(true);
+            playerObject.GetComponentInChildren<HitBranchSensor>(true);
         if (playerSensor != null) {
             playerSensor.BranchHit += OnMonkeyHit;
         }
@@ -448,7 +448,7 @@ public class CobraClimb: MonoBehaviour {
 
         if (template == null) {
             Debug.LogError(
-                "CobraClimb:\tlast body segment is empty, cannot fill coil",
+                "CobraMotor:\tlast body segment is empty, cannot fill coil",
                 this
             );
             return;
@@ -468,7 +468,7 @@ public class CobraClimb: MonoBehaviour {
 
         if (Debug.isDebugBuild) {
             Debug.Log(
-                $"CobraClimb:\tcloned {neededCount - authoredCount} segments, "
+                $"CobraMotor:\tcloned {neededCount - authoredCount} segments, "
                     + $"{neededCount} in total for {coilTurns:F2} loops",
                 this
             );

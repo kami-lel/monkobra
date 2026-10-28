@@ -19,7 +19,7 @@ using UnityEngine.InputSystem;
 /// one the arms read, so the body and its arms cannot drift out of tune.
 /// </para>
 /// </summary>
-public class MonkeyPrefabRoot: MonoBehaviour {
+public class MonkeyController: MonoBehaviour {
     // Public Members  #########################################################
     /// <summary>
     /// While true the body stays exactly where it is, ignoring input and any
@@ -58,7 +58,7 @@ public class MonkeyPrefabRoot: MonoBehaviour {
 
     [SerializeField]
     [Tooltip("raises branch hit event, knocks monkey off climb")]
-    private HitBranchDetection hitBranchDetection;
+    private HitBranchSensor hitBranchDetection;
 
     [SerializeField]
     [Tooltip(
@@ -76,20 +76,20 @@ public class MonkeyPrefabRoot: MonoBehaviour {
         // Inspector Assignment Guard  -----------------------------------------
         if (hitBranchDetection == null) {
             Debug.LogWarning(
-                "MonkeyPrefabRoot:\tmust assign Inspector Field: "
+                "MonkeyController:\tmust assign Inspector Field: "
                     + "hitBranchDetection",
                 this
             );
         }
         if (config == null) {
             Debug.LogWarning(
-                "MonkeyPrefabRoot:\tmust assign Inspector Field: config",
+                "MonkeyController:\tmust assign Inspector Field: config",
                 this
             );
         }
         else if (config.MoveAction == null) {
             Debug.LogWarning(
-                "MonkeyPrefabRoot:\tmust assign MonkeyConfig field: "
+                "MonkeyController:\tmust assign MonkeyConfig field: "
                     + "moveAction",
                 config
             );
@@ -97,7 +97,7 @@ public class MonkeyPrefabRoot: MonoBehaviour {
 
         if (balanceConfig == null) {
             Debug.LogWarning(
-                "MonkeyPrefabRoot:	must assign Inspector Field: "
+                "MonkeyController:	must assign Inspector Field: "
                     + "balanceConfig",
                 this
             );
@@ -105,7 +105,7 @@ public class MonkeyPrefabRoot: MonoBehaviour {
 
         if (transform.parent == null) {
             Debug.LogError(
-                "MonkeyPrefabRoot:\tfail to get Transform: parent",
+                "MonkeyController:\tfail to get Transform: parent",
                 this
             );
         }
@@ -113,7 +113,7 @@ public class MonkeyPrefabRoot: MonoBehaviour {
         body = GetComponent<Rigidbody>();
         if (body == null) {
             Debug.LogError(
-                "MonkeyPrefabRoot:\tfail to get Component: Rigidbody",
+                "MonkeyController:\tfail to get Component: Rigidbody",
                 this
             );
         }
@@ -129,7 +129,7 @@ public class MonkeyPrefabRoot: MonoBehaviour {
         orbitRadius = CalcCurrentOrbitRadius();
         if (Debug.isDebugBuild) {
             Debug.Log(
-                "MonkeyPrefabRoot:\tready, orbit radius " + $"{orbitRadius}"
+                "MonkeyController:\tready, orbit radius " + $"{orbitRadius}"
             );
         }
     }
@@ -270,7 +270,7 @@ public class MonkeyPrefabRoot: MonoBehaviour {
         if (IsStunned) {
             if (Debug.isDebugBuild) {
                 Debug.Log(
-                    "MonkeyPrefabRoot:\tbranch hit ignored, "
+                    "MonkeyController:\tbranch hit ignored, "
                         + "already stunned"
                 );
             }
@@ -282,7 +282,7 @@ public class MonkeyPrefabRoot: MonoBehaviour {
             transform.position.y - balanceConfig.HitDropDistanceU;
         if (Debug.isDebugBuild) {
             Debug.Log(
-                "MonkeyPrefabRoot:\tbranch hit, control lost for "
+                "MonkeyController:\tbranch hit, control lost for "
                     + $"{balanceConfig.HitStunDurationS}s"
             );
         }

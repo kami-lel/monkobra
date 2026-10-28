@@ -6,7 +6,7 @@ using UnityEngine;
 /// monkey touching any part of the cobra, side-on or by falling onto the coil,
 /// loses the game.
 /// </summary>
-public class CobraCollisions: MonoBehaviour {
+public class CobraSensor: MonoBehaviour {
     // MonoBehaviour Lifecycle  ################################################
     private void OnTriggerEnter(Collider other) {
         CatchIfMonkey(other);
@@ -26,7 +26,7 @@ public class CobraCollisions: MonoBehaviour {
 
         if (GameController.I == null) {
             Debug.LogWarning(
-                "CobraCollisions:\tGameController instance not found"
+                "CobraSensor:\tGameController instance not found"
             );
             return;
         }
@@ -38,7 +38,7 @@ public class CobraCollisions: MonoBehaviour {
 
         if (Debug.isDebugBuild) {
             Debug.Log(
-                $"CobraCollisions:\tplayer caught via {other.name}, "
+                $"CobraSensor:\tplayer caught via {other.name}, "
                     + "losing game"
             );
         }
@@ -51,7 +51,7 @@ public class CobraCollisions: MonoBehaviour {
     /// triggers reaching far past the body</returns>
     private static bool IsMonkeyPart(Collider other) {
         // a hand is a trigger, but still a real part of the monkey
-        if (other.GetComponentInParent<ArmRoot>() != null) {
+        if (other.GetComponentInParent<ArmController>() != null) {
             return true;
         }
 
