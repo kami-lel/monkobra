@@ -1,0 +1,93 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1816035391291253484
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 378394971166795918}
+  - component: {fileID: 3913711001880931279}
+  - component: {fileID: 2576282149422506649}
+  - component: {fileID: 2395132498185291626}
+  m_Layer: 0
+  m_Name: DTSPool
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &378394971166795918
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1816035391291253484}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3913711001880931279
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1816035391291253484}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90eed21d9ac576e428182fdafb6553aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DTSPool
+  segmentPrefab: {fileID: 3613063465898347742, guid: d7b7ba174e361a94b843e9a27ce78bba, type: 3}
+  mockTree: {fileID: 0}
+  segmentCount: 10
+  firstSegmentY: -10
+  lookAheadU: 20
+--- !u!114 &2576282149422506649
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1816035391291253484}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3826980c87e542e68dfcb95a302dc45, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpiderWebSpawner
+  webPrefab: {fileID: -7967758877750076835, guid: 4cd205f4962424e6aa5c63515c047fde, type: 3}
+  balanceConfig: {fileID: 11400000, guid: 6ce5d249000443e49bba5365e143c660, type: 2}
+  trunkRadiusU: 5
+  surfaceOffsetU: 0.02
+  minWebSeparationU: 4
+  clearanceU: 0.3
+  maxPlacementAttempts: 30
+  useTestOverride: 0
+  testSpawnChance: 1
+--- !u!114 &2395132498185291626
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1816035391291253484}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7cc9663b4ecb664694bb8df0376ab90, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FallingCobraSpawner
+  cobraPrefab: {fileID: -3548897315033333001, guid: b60be837c54dfb545b11b9dd5e789cbb, type: 3}
+  balanceConfig: {fileID: 11400000, guid: 6ce5d249000443e49bba5365e143c660, type: 2}
+  spawnRadiusU: 5.88
+  minCobraSeparationU: 4
+  maxPlacementAttempts: 20
+  ambushMinAboveBananaU: 3
+  ambushMaxAboveBananaU: 6

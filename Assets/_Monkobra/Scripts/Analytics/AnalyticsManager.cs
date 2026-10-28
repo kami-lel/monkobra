@@ -97,7 +97,7 @@ public class AnalyticsManager: MonoBehaviour {
         );
         if (string.IsNullOrEmpty(path)) {
             Debug.LogWarning("Analytics:\tfail to save mock session", this);
-        } else {
+        } else if (Debug.isDebugBuild) {
             Debug.Log("Analytics:\tmock session saved " + path, this);
         }
     }
@@ -118,7 +118,9 @@ public class AnalyticsManager: MonoBehaviour {
         }
 
         if (SaveSession()) {
-            Debug.Log("Analytics:\treport saved " + SessionFilePath, this);
+            if (Debug.isDebugBuild) {
+                Debug.Log("Analytics:\treport saved " + SessionFilePath, this);
+            }
         } else {
             Debug.LogWarning("Analytics:\tfail to save report", this);
         }
@@ -135,6 +137,18 @@ public class AnalyticsManager: MonoBehaviour {
 
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
+        // Inspector Assignment Guard  -----------------------------------------
+        if (config == null) {
+            Debug.LogWarning(
+                "Analytics:\tmust assign Inspector Field: config, "
+                + "using defaults", this);
+        }
+        if (hackShortcuts == null) {
+            Debug.LogWarning(
+                "Analytics:\tmust assign Inspector Field: hackShortcuts",
+                this);
+        }
+
         if (I != null && I != this) {
             Debug.LogWarning("Analytics:\tduplicate instance destroyed", this);
             Destroy(gameObject);
@@ -143,13 +157,8 @@ public class AnalyticsManager: MonoBehaviour {
 
         I = this;
         if (config == null) {
-            Debug.LogWarning(
-                "Analytics:\tno config assigned, using defaults",
-                this
-            );
             config = ScriptableObject.CreateInstance<AnalyticsConfig>();
         }
-        DontDestroyOnLoad(gameObject);
         SceneManager.sceneLoaded += OnSceneLoaded;
         // static event, webs spawn at runtime so none can be looked up here
         SpiderWebTrap.Encountered += OnWebEncountered;
@@ -298,21 +307,21 @@ public class AnalyticsManager: MonoBehaviour {
     // cached references  ------------------------------------------------------
     private GameController observedGame;
     private ScoreManager observedScore;
-    private HitBranchDetection observedBranch;
+    private HitBranchSensor observedBranch;
 
     // private methods  ########################################################
     private void ObserveScene() {
         Observe(
             GameController.I,
             ScoreManager.I,
-            FindFirstObjectByType<HitBranchDetection>()
+            FindFirstObjectByType<HitBranchSensor>()
         );
     }
 
     private void Observe(
         GameController game,
         ScoreManager score,
-        HitBranchDetection branch
+        HitBranchSensor branch
     ) {
         if (observedGame != null) {
             observedGame.StateChanged -= OnGameStateChanged;
@@ -341,7 +350,7 @@ public class AnalyticsManager: MonoBehaviour {
 
     // snapshot of the moment and the height climbed above the run start
     private static EventStamp CreateStamp() {
-        RampedDifficultyService ramp = RampedDifficultyService.I;
+        RampedDifficultyManager ramp = RampedDifficultyManager.I;
         return new EventStamp(
             DateTime.Now,
             ramp != null ? ramp.CurrentPlayerClimbedYDistance : 0f
@@ -398,10 +407,10 @@ public class AnalyticsManager: MonoBehaviour {
         }
         run.Status = status;
         run.DurationS = Time.time - run.StartTime;
-        run.HighestHeight = RampedDifficultyService.I != null
+        run.HighestHeight = RampedDifficultyManager.I != null
             ? Mathf.Max(
                 0f,
-                RampedDifficultyService.I.HighestPlayerClimbedYDistance
+                RampedDifficultyManager.I.HighestPlayerClimbedYDistance
             )
             : 0f;
         ScoreManager scoreMgr = ScoreManager.I;

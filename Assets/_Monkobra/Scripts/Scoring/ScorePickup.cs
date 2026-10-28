@@ -18,8 +18,9 @@ public class ScorePickup: MonoBehaviour {
         if (manager != null) {
             manager.TryAddReward();
         } else {
-        
-            Debug.LogWarning("ScorePickup: no ScoreManager; collected without points.", this);
+            Debug.LogWarning(
+                "ScorePickup:\tno ScoreManager; collected without points",
+                this);
         }
         gameObject.SetActive(false);
         return true;

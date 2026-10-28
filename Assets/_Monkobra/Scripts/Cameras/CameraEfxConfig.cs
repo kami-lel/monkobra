@@ -3,11 +3,11 @@ using UnityEngine;
 
 /// <summary>
 /// Shared tuning for the camera efx on the main camera. Today that is the
-/// stamina cool-down of <see cref="CameraCoolDownEfx"/>: a vignette blackdown
+/// stamina cool-down of <see cref="CameraCoolDownFeedback"/>: a vignette blackdown
 /// plus a zoom-out, in two steps, one for low stamina and a stronger one for
 /// an empty bar. The hit shake is tuned on the two
 /// <c>CinemachineImpulseSource</c> components that
-/// <see cref="CameraHitShakeEfx"/> fires instead, since Cinemachine owns
+/// <see cref="CameraHitShakeFeedback"/> fires instead, since Cinemachine owns
 /// those values.
 /// </summary>
 [CreateAssetMenu(

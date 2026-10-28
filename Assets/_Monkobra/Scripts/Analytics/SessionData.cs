@@ -19,7 +19,7 @@ public class SessionData {
     /// death causes of the <see cref="RunStatus.Lost"/> runs, in run order
     /// </summary>
     public List<DeathCause> GetLostDeathCauses() {
-        var causes = new List<DeathCause>();
+        List<DeathCause> causes = new List<DeathCause>();
         for (int i = 0; i < Runs.Count; i++) {
             if (Runs[i].Status == RunStatus.Lost) {
                 causes.Add(Runs[i].Cause);

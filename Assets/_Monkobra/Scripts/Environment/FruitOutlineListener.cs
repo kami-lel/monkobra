@@ -3,7 +3,7 @@ using UnityEngine.Serialization;
 
 /// <summary>
 /// Sits on the "FruitCollider" object of a banana. Listens to
-/// <see cref="UpwardFruitDetection"/> and outlines every child mesh renderer
+/// <see cref="UpwardFruitSensor"/> and outlines every child mesh renderer
 /// in 1 of 2 tiers, grabbable winning over reachable. Only the single
 /// targeted fruit is ever outlined:
 /// <list type="bullet">
@@ -66,11 +66,11 @@ public class FruitOutlineListener: MonoBehaviour {
 
     // read in Start, so Awake order never matters
     private void Start() {
-        UpwardFruitDetection detection = UpwardFruitDetection.I;
+        UpwardFruitSensor detection = UpwardFruitSensor.I;
         if (detection == null) {
             Debug.LogError(
                 "FruitOutlineListener:\t"
-                    + "fail to get singleton: UpwardFruitDetection",
+                    + "fail to get singleton: UpwardFruitSensor",
                 this
             );
             return;
@@ -84,7 +84,7 @@ public class FruitOutlineListener: MonoBehaviour {
     }
 
     private void OnDestroy() {
-        UpwardFruitDetection detection = UpwardFruitDetection.I;
+        UpwardFruitSensor detection = UpwardFruitSensor.I;
         if (detection != null) {
             detection.ReachTargetChanged -= OnReachTargetChanged;
             detection.GrabbableFruitChanged -= OnGrabbableFruitChanged;

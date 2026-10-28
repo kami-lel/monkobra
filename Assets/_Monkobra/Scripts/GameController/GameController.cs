@@ -53,7 +53,9 @@ public class GameController: MonoBehaviour {
         }
 
         SetState(GameState.Lost);
-        Debug.Log("GameController:\tgame lost", this);
+        if (Debug.isDebugBuild) {
+            Debug.Log("GameController:\tgame lost", this);
+        }
     }
 
     // Inspector Fields  #######################################################

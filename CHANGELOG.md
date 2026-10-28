@@ -1,6 +1,19 @@
 # Monkobra CHANGELOG
 
 <!--
+Bug Erik tree branch created at player location & thus resulting failure
+Fixme Pan: UI mpv
+Fixme Erik Keeps improving tutorial zone: larger range, smaller debuff, half the energy
+Todo Dont Pause screen
+Todo belle: 打滑事件
+Todo Erik Movement speed build up
+Todo Dont boss fight
+Todo Pan: 数字显示和蛇的距离
+Todo Yuqing: 抓取椰子，往下扔，蛇往下掉
+Todo Erik Raycasting/2d anime for gaining
+Todo Erik 橡胶果实（手臂伸长，跳过一节）
+Todo Pan 排行榜（假的）
+
 bug spider web fail to load & log warning
 -->
 
@@ -9,11 +22,25 @@ bug spider web fail to load & log warning
 
 ### Added
 
+##### Erik
+
+- `Lv1Scene` split into nested prefabs: `World`, `Envs`, `Entities`, `Systems`, `UI` and a leaf prefab per unit, so teammates edit different files
+
 ### Changed
+
+##### Erik
+
+- scripts renamed to house role suffixes (`Controller`, `Sensor`, `Motor`, `Widget`, `Relay`, `Feedback`, ~), e.g. `ArmRoot` to `ArmController`, `HitBranchDetection` to `HitBranchSensor`, `RampedDifficultyService` to `RampedDifficultyManager`; no behavior change
+- code style pass over all scripts: same-line braces, MonoBehaviour section order with banners, Inspector guards, explicit types instead of `var`, plain logs gated by `isDebugBuild`
+- `AnalyticsManager` is now a component of the `GameController` prefab and no longer survives a scene reload, so each load starts a new session file
 
 ### Deprecated
 
 ### Removed
+
+##### Erik
+
+- orphan `GoalText` object in `Lv1Scene` (never drawn, no parent Canvas) and its mention in the TDD
 
 ### Fixed
 

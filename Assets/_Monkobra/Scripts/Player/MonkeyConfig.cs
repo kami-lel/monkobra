@@ -5,9 +5,9 @@ using UnityEngine.InputSystem;
 /// Shared tuning for the monkey: arm stroke and reach, orbit speed, and the
 /// input actions every consumer reads. Climb speed, exhaustion and branch-hit
 /// numbers live in <see cref="GameBalanceConfig"/>. Consumed by
-/// <see cref="ArmRoot"/> and <see cref="MonkeyPrefabRoot"/>.
+/// <see cref="ArmController"/> and <see cref="MonkeyController"/>.
 /// <para>
-/// <see cref="ArmRoot"/> takes nothing physical from here, springs, limits,
+/// <see cref="ArmController"/> takes nothing physical from here, springs, limits,
 /// anchors and axes are authored on its <see cref="ConfigurableJoint"/>.
 /// </para>
 /// </summary>
