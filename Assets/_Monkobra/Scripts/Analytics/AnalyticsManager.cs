@@ -159,7 +159,6 @@ public class AnalyticsManager: MonoBehaviour {
         if (config == null) {
             config = ScriptableObject.CreateInstance<AnalyticsConfig>();
         }
-        DontDestroyOnLoad(gameObject);
         SceneManager.sceneLoaded += OnSceneLoaded;
         // static event, webs spawn at runtime so none can be looked up here
         SpiderWebTrap.Encountered += OnWebEncountered;
