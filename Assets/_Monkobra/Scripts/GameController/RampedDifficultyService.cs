@@ -6,7 +6,7 @@ using UnityEngine;
 // run first so other LateUpdate readers see this frame's height
 [DefaultExecutionOrder(-100)]
 public class RampedDifficultyService: MonoBehaviour {
-    // Public Members
+    // Public Members  #########################################################
     public static RampedDifficultyService I { get; private set; }
     // player y at game start; world u
     public float PlayerGameStartYPosition { get; private set; }
@@ -23,7 +23,7 @@ public class RampedDifficultyService: MonoBehaviour {
     public float RampBaseYPosition =>
         rampBase != null ? rampBase.position.y : PlayerGameStartYPosition;
 
-    // Public Methods
+    // Public Methods  #########################################################
     /// <summary>
     /// Height of <paramref name="y"/> above the player's game start y, the
     /// one baseline every climb height is measured from. A future world
@@ -52,7 +52,7 @@ public class RampedDifficultyService: MonoBehaviour {
         );
     }
 
-    // Inspector Fields
+    // Inspector Fields  #######################################################
     [SerializeField]
     [Tooltip("game balance tuning; ramp curve")]
     private GameBalanceConfig balanceConfig;
@@ -61,7 +61,7 @@ public class RampedDifficultyService: MonoBehaviour {
     [Tooltip("starter zone exit trigger; its y is where the ramp starts at 0")]
     private Transform rampBase;
 
-    // MonoBehaviour Lifecycle
+    // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
         // Inspector Assignment Guard  -----------------------------------------
         if (balanceConfig == null) {
@@ -125,9 +125,9 @@ public class RampedDifficultyService: MonoBehaviour {
         }
     }
 
-    // constants
+    // constants  ##############################################################
     private const string PLAYER_TAG = "Player";
 
-    // cached references
+    // cached references  ######################################################
     private Transform player;
 }

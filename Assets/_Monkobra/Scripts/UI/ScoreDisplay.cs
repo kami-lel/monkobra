@@ -3,6 +3,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(TMP_Text))]
 public class ScoreDisplay: MonoBehaviour {
+    // Inspector Fields  #######################################################
     [SerializeField]
     [Tooltip("score source")]
     private ScoreManager scoreManager;
@@ -11,8 +12,7 @@ public class ScoreDisplay: MonoBehaviour {
     [Tooltip("Text before the number, e.g. Score: or Final score:")]
     private string prefix = "Score: ";
 
-    private TMP_Text label;
-
+    // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
         // Inspector Assignment Guard  -----------------------------------------
         if (scoreManager == null) {
@@ -37,6 +37,10 @@ public class ScoreDisplay: MonoBehaviour {
         }
     }
 
+    // private members  ########################################################
+    private TMP_Text label;
+
+    // private methods  ########################################################
     private void Refresh(long score) {
         label.text = prefix + score.ToString("N0");
     }

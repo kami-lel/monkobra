@@ -1,6 +1,7 @@
 using UnityEngine;
 
 public class SpiderWebBuilder: MonoBehaviour {
+    // Public Members  #########################################################
     public int spokeCount = 12;        
     public int ringCount = 6;          
     public float radius = 1f;          
@@ -10,6 +11,7 @@ public class SpiderWebBuilder: MonoBehaviour {
     public Material webMaterial;
     public int seed = 1;
 
+    // Public Methods  #########################################################
     [ContextMenu("Build Web")]
     public void Build() {
         for (int i = transform.childCount - 1; i >= 0; i--)
@@ -55,6 +57,7 @@ public class SpiderWebBuilder: MonoBehaviour {
     }
 
 
+    // private methods  ########################################################
     Vector3 Dir(float deg) {
         float rad = deg * Mathf.Deg2Rad;
         return new Vector3(0f, Mathf.Sin(rad), Mathf.Cos(rad));

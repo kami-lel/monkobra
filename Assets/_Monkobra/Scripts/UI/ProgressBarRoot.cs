@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 [RequireComponent(typeof(Scrollbar))]
 public class ProgressBarRoot: MonoBehaviour {
+    // Inspector Fields  #######################################################
     [Header("Cobra Marker")]
     [SerializeField]
     [Tooltip("cobra head; its height sets the marker")]
@@ -52,19 +53,7 @@ public class ProgressBarRoot: MonoBehaviour {
     [Tooltip("warning height on screen, 0 bottom ~ 1 top")]
     private float catchUpScreenY = 0.65f;
 
-    private const string PLAYER_TAG = "Player";
-
-    private Scrollbar progressBar;
-    private Transform player;
-
-    private bool hasWarnedNoPlayer;
-
-    private CobraClimb cobra;
-    private Graphic markerGraphic;
-    private Color markerBaseColor;
-    private TextMeshProUGUI catchUpLabel;
-    private float catchUpHideTime; // Time.time the warning is gone
-
+    // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
         // Inspector Assignment Guard  -----------------------------------------
         if (cobraHead == null) {
@@ -122,6 +111,19 @@ public class ProgressBarRoot: MonoBehaviour {
         }
     }
 
+    private void Update() {
+        if (!TryFindPlayer()) {
+            return;
+        }
+
+        // player stays at the far end of the bar
+        progressBar.SetValueWithoutNotify(1f);
+
+        UpdateCobraProgress();
+        UpdateCatchUpCue();
+    }
+
+    // Event Handlers  #########################################################
     private void OnCatchUpStarted(int stacks) {
         catchUpHideTime = Time.time + catchUpShowS;
         if (catchUpLabel == null) {
@@ -142,18 +144,22 @@ public class ProgressBarRoot: MonoBehaviour {
         catchUpLabel.rectTransform.sizeDelta = new Vector2(0f, fontSize * 1.6f);
     }
 
-    private void Update() {
-        if (!TryFindPlayer()) {
-            return;
-        }
+    // constants  ##############################################################
+    private const string PLAYER_TAG = "Player";
 
-        // player stays at the far end of the bar
-        progressBar.SetValueWithoutNotify(1f);
+    // private members  ########################################################
+    private Scrollbar progressBar;
+    private Transform player;
 
-        UpdateCobraProgress();
-        UpdateCatchUpCue();
-    }
+    private bool hasWarnedNoPlayer;
 
+    private CobraClimb cobra;
+    private Graphic markerGraphic;
+    private Color markerBaseColor;
+    private TextMeshProUGUI catchUpLabel;
+    private float catchUpHideTime; // Time.time the warning is gone
+
+    // private methods  ########################################################
     private bool TryFindPlayer() {
         if (player != null) {
             return true;

@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 //记录高度分和奖励分，在分数变化时通知 UI，并在游戏结束后停止计分
 public class ScoreManager: MonoBehaviour {
+    // Public Members  #########################################################
     public static ScoreManager I { get; private set; }
     public long TotalScore => DistanceScore + RewardScore;
     public long DistanceScore { get; private set; }
@@ -13,15 +14,10 @@ public class ScoreManager: MonoBehaviour {
     // raised once per banana pickup that scored
     public event Action BananaCollected;
 
-    public bool CanScore => isActiveAndEnabled && hasStarted && !isRunEnded && Time.timeScale > 0f && (GameController.I == null || GameController.I.IsRunLive);
     //必须满足：组件启用、已经开局、尚未结束、没有暂停，才允许计分
-    [SerializeField]
-    [Tooltip("scoring rates & reward points")]
-    private GameBalanceConfig balanceConfig;
+    public bool CanScore => isActiveAndEnabled && hasStarted && !isRunEnded && Time.timeScale > 0f && (GameController.I == null || GameController.I.IsRunLive);
 
-    [SerializeField]
-    [Tooltip("monkey; height source")]
-    private Transform player;
+    // Public Methods  #########################################################
     //添加水果等奖励分
     public bool TryAddReward() {
         if (!CanScore) {
@@ -45,6 +41,16 @@ public class ScoreManager: MonoBehaviour {
         SampleHeight();
     }
 
+    // Inspector Fields  #######################################################
+    [SerializeField]
+    [Tooltip("scoring rates & reward points")]
+    private GameBalanceConfig balanceConfig;
+
+    [SerializeField]
+    [Tooltip("monkey; height source")]
+    private Transform player;
+
+    // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
         // Inspector Assignment Guard  -----------------------------------------
         if (balanceConfig == null) {
@@ -68,6 +74,7 @@ public class ScoreManager: MonoBehaviour {
         I = this;
     }
 
+    //读取计分设置，记录出生高度，把分数和最高爬升距离清零
     private void Start() {
         pointsPerMeter = balanceConfig.PointsPerMeter;
         unitsPerMeter = balanceConfig.UnitsPerMeter;
@@ -80,7 +87,7 @@ public class ScoreManager: MonoBehaviour {
         hasStarted = true;
         ScoreChanged?.Invoke(TotalScore);
     }
-    //读取计分设置，记录出生高度，把分数和最高爬升距离清零
+
     private void FixedUpdate() {
         if (CanScore) {
             SampleHeight();
@@ -99,12 +106,14 @@ public class ScoreManager: MonoBehaviour {
         }
     }
 
+    // private members  ########################################################
     private bool hasStarted;
     private bool isRunEnded;
     private double highestClimbedUnits;
     private double unitsPerMeter = 1d;
     private int pointsPerMeter;
 
+    // private methods  ########################################################
     private void SampleHeight() {
         if (RampedDifficultyService.I == null) {
             return;
