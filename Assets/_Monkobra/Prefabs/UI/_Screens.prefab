@@ -45,7 +45,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2623313811405320539}
   m_Layer: 5
-  m_Name: Screens
+  m_Name: _Screens
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

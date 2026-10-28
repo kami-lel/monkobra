@@ -129,7 +129,7 @@ GameObject:
   - component: {fileID: 9198043481806832196}
   - component: {fileID: -8657935869639358425}
   m_Layer: 0
-  m_Name: Monkey
+  m_Name: _Monkey
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
