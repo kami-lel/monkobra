@@ -11,6 +11,9 @@ GameObject:
   - component: {fileID: 5870345463608411116}
   - component: {fileID: 7257939589210771204}
   - component: {fileID: 107438663905873474}
+  - component: {fileID: 8303485971119836938}
+  - component: {fileID: 7414378922096876825}
+  - component: {fileID: 1544209386470739513}
   m_Layer: 0
   m_Name: GameController
   m_TagString: GameController
@@ -63,3 +66,45 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AnalyticsManager
   config: {fileID: 11400000, guid: 7d9a3e5c1b4f4a2e8c6d0f1b3a5e7c35, type: 2}
   hackShortcuts: {fileID: 11400000, guid: 6f67fb399ca4433b8cfe8ef24d234f71, type: 2}
+--- !u!114 &8303485971119836938
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4732386835657357497}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 23c0b83ff6ae0154cadcff97499ca481, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  tutorialScreen: {fileID: 0}
+  loseScreen: {fileID: 0}
+--- !u!114 &7414378922096876825
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4732386835657357497}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01ef831c91714f599e4f2fe3aa180801, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScoreManager
+  balanceConfig: {fileID: 11400000, guid: 6ce5d249000443e49bba5365e143c660, type: 2}
+  player: {fileID: 0}
+--- !u!114 &1544209386470739513
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4732386835657357497}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f16464034bd75ec4db90c71b53e356e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RampedDifficultyService
+  balanceConfig: {fileID: 11400000, guid: 6ce5d249000443e49bba5365e143c660, type: 2}
+  rampBase: {fileID: 0}
