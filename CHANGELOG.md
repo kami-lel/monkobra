@@ -32,6 +32,7 @@ bug spider web fail to load & log warning
 
 - scripts renamed to house role suffixes (`Controller`, `Sensor`, `Motor`, `Widget`, `Relay`, `Feedback`, ~), e.g. `ArmRoot` to `ArmController`, `HitBranchDetection` to `HitBranchSensor`, `RampedDifficultyService` to `RampedDifficultyManager`; no behavior change
 - code style pass over all scripts: same-line braces, MonoBehaviour section order with banners, Inspector guards, explicit types instead of `var`, plain logs gated by `isDebugBuild`
+- `World` and `Systems` wrapper prefabs dropped: the light, volume and event system are root prefabs, and `ScreensManager`, `ScoreManager`, `RampedDifficultyManager` are components of the `GameController` prefab
 - `AnalyticsManager` is now a component of the `GameController` prefab and no longer survives a scene reload, so each load starts a new session file
 
 ### Deprecated
