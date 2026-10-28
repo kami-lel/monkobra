@@ -21,6 +21,7 @@ Read these `docs/` files when their topic arises:
 - [Gameplay Loop](docs/gameplay-loop-doc.md): the complete run loop, from climbing and hazards to the grab and the win or lose end
 - [Analytics](docs/analytics-doc.md): session reports, every recorded metric, and the tuning asset
 - [Build](docs/build-doc.md): the WebGL export, the three builds (WebGL for GitHub Pages, WebGL for itch.io, Windows) and their settings
+- [Work with Git](docs/work-with-git.md): the teammate git flow via GitHub Desktop (Chinese), the human twin of the Git Workflow below
 
 ## Layout & Naming
 

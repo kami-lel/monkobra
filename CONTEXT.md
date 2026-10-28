@@ -37,7 +37,10 @@ monkobra/
 ├── AGENTS.md          agent rules
 ├── CONTEXT.md         this file
 ├── CHANGELOG.md       version history, plus open triage tags in a comment
-├── docs/              design, technical, mob, grab, balance, gameplay loop, build, and git documents
+├── DEVLOG.md          weekly development journal, screenshots in devlog-assets/
+├── docs/              design, technical, mob, grab, balance, gameplay loop, analytics, build, and git documents
+├── devlog-assets/     images embedded by DEVLOG.md
+├── builds/            local build output of all three builds, ignored by git
 ├── Assets/
 │   ├── _Monkobra/     all authored assets, <Type>/<Module>/<asset>
 │   │   ├── Scenes/    Lv1Scene, a shell of 6 prefab instances, see [Scene Hierarchy](#scene-hierarchy)
@@ -48,6 +51,8 @@ monkobra/
 │   │   ├── Input/     InputSystem_Actions
 │   │   ├── Shaders/   Environment/FruitOutline (inverted-hull Shader Graph)
 │   │   └── Settings/  GameBalanceConfig, Analytics/, HackShortcuts/, Mob/ placement, _Shared/ URP assets and MonkeyConfig
+│   ├── WebGLTemplates/ FitWindow/index.html, the 16:9 fit-to-window WebGL page
+│   ├── Settings/      Build Profiles/ (GithubPages, ItchIO), Unity-managed
 │   ├── TextMesh Pro/  imported TMP essentials, not authored
 │   └── Readme.asset   Unity template leftover
 ├── Monkobra/          committed WebGL export served by GitHub Pages
