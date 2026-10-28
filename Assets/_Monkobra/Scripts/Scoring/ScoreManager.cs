@@ -16,9 +16,11 @@ public class ScoreManager: MonoBehaviour {
     public bool CanScore => isActiveAndEnabled && hasStarted && !isRunEnded && Time.timeScale > 0f && (GameController.I == null || GameController.I.IsRunLive);
     //必须满足：组件启用、已经开局、尚未结束、没有暂停，才允许计分
     [SerializeField]
+    [Tooltip("scoring rates & reward points")]
     private GameBalanceConfig balanceConfig;
 
     [SerializeField]
+    [Tooltip("monkey; height source")]
     private Transform player;
     //添加水果等奖励分
     public bool TryAddReward() {
@@ -44,13 +46,22 @@ public class ScoreManager: MonoBehaviour {
     }
 
     private void Awake() {
+        // Inspector Assignment Guard  -----------------------------------------
+        if (balanceConfig == null) {
+            Debug.LogError(
+                "ScoreManager:\tmust assign Inspector Field: balanceConfig",
+                this);
+        }
+        if (player == null) {
+            Debug.LogError(
+                "ScoreManager:\tmust assign Inspector Field: player", this);
+        }
         if (I != null && I != this) {
             enabled = false;
             Destroy(this);
             return;
         }
         if (balanceConfig == null || player == null) {
-            Debug.LogError("ScoreManager: assign balanceConfig and player in Inspector.", this);
             enabled = false;
             return;
         }

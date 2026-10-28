@@ -6,29 +6,51 @@ using UnityEngine.UI;
 [RequireComponent(typeof(Scrollbar))]
 public class ProgressBarRoot: MonoBehaviour {
     [Header("Cobra Marker")]
-    [SerializeField] private Transform cobraHead;
-    [SerializeField] private RectTransform cobraMarker;
+    [SerializeField]
+    [Tooltip("cobra head; its height sets the marker")]
+    private Transform cobraHead;
+
+    [SerializeField]
+    [Tooltip("marker moved along the bar")]
+    private RectTransform cobraMarker;
 
     [Header("Window")]
-    // world-y span shown by the full bar, player pinned at top
-    [SerializeField] private float windowSizeY = 20f;
+    [SerializeField]
+    [Tooltip("world-y span of the full bar, player pinned at top; u")]
+    private float windowSizeY = 20f;
 
     [Header("Catch-Up Cue")]
-    // on each mistake that makes the cobra surge, a warning shows at the
-    // screen center and fades out; the marker flashes while the surge lasts
-    [SerializeField] private string catchUpText = "The cobra is speeding up!";
-    // appended with the stack count from the 2nd stacked mistake on
-    [SerializeField] private string catchUpStackFormat = " x{0}";
-    [SerializeField] private Color catchUpColor = new Color(1f, 0.2f, 0.15f, 1f);
-    [SerializeField] private float catchUpPulseHz = 3f;
-    // text height as a share of the screen height, so it reads the same on
-    // a 1080p and a 4K screen
-    [SerializeField] private float catchUpFontScreenShare = 0.07f;
-    // how long the warning stays, its last part fading out; s
-    [SerializeField] private float catchUpShowS = 1.5f;
-    [SerializeField] private float catchUpFadeS = 0.5f;
-    // warning height on screen, 0 bottom ~ 1 top
-    [SerializeField] private float catchUpScreenY = 0.65f;
+    [SerializeField]
+    [Tooltip("warning at screen center on each cobra surge")]
+    private string catchUpText = "The cobra is speeding up!";
+
+    [SerializeField]
+    [Tooltip("appended w/ stack count from 2nd stacked mistake on")]
+    private string catchUpStackFormat = " x{0}";
+
+    [SerializeField]
+    [Tooltip("warning & marker flash color")]
+    private Color catchUpColor = new Color(1f, 0.2f, 0.15f, 1f);
+
+    [SerializeField]
+    [Tooltip("marker flashes per s while surging")]
+    private float catchUpPulseHz = 3f;
+
+    [SerializeField]
+    [Tooltip("text height as share of screen height")]
+    private float catchUpFontScreenShare = 0.07f;
+
+    [SerializeField]
+    [Tooltip("warning stays this long, last part fading; s")]
+    private float catchUpShowS = 1.5f;
+
+    [SerializeField]
+    [Tooltip("fade-out part of the show time; s")]
+    private float catchUpFadeS = 0.5f;
+
+    [SerializeField]
+    [Tooltip("warning height on screen, 0 bottom ~ 1 top")]
+    private float catchUpScreenY = 0.65f;
 
     private const string PLAYER_TAG = "Player";
 
@@ -44,6 +66,18 @@ public class ProgressBarRoot: MonoBehaviour {
     private float catchUpHideTime; // Time.time the warning is gone
 
     private void Awake() {
+        // Inspector Assignment Guard  -----------------------------------------
+        if (cobraHead == null) {
+            Debug.LogWarning(
+                "ProgressBarRoot:\tmust assign Inspector Field: cobraHead",
+                this);
+        }
+        if (cobraMarker == null) {
+            Debug.LogWarning(
+                "ProgressBarRoot:\tmust assign Inspector Field: cobraMarker",
+                this);
+        }
+
         progressBar = GetComponent<Scrollbar>();
 
         if (progressBar == null) {

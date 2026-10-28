@@ -82,6 +82,7 @@ public class FallingCobra: MonoBehaviour {
     private float warningDurationS = 1.25f;
 
     [SerializeField]
+    [Tooltip("color of the warning pulse")]
     private Color warningColor = new Color(1f, 0.15f, 0.1f, 1f);
 
     [SerializeField]
@@ -94,9 +95,11 @@ public class FallingCobra: MonoBehaviour {
 
     [Header("Body")]
     [SerializeField]
+    [Tooltip("gap b/t body segments; u")]
     private float segmentSpacingU = 0.35f;
 
     [SerializeField]
+    [Tooltip("hit radius of each segment; u")]
     private float hitRadiusU = 0.5f;
 
     // MonoBehaviour Lifecycle  ################################################

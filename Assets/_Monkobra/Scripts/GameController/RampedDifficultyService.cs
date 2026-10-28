@@ -63,6 +63,7 @@ public class RampedDifficultyService: MonoBehaviour {
 
     // MonoBehaviour Lifecycle
     private void Awake() {
+        // Inspector Assignment Guard  -----------------------------------------
         if (balanceConfig == null) {
             Debug.LogError(
                 "RampedDifficulty:\tmust assign Inspector Field: "

@@ -60,11 +60,21 @@ public class CameraCoolDownEfx: MonoBehaviour {
 
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
+        // Inspector Assignment Guard  -----------------------------------------
         if (config == null) {
             Debug.LogWarning(
                 "CameraCoolDownEfx:\tmust assign Inspector Field: config",
                 this
             );
+        }
+        if (volume == null) {
+            Debug.LogWarning(
+                "CameraCoolDownEfx:\tmust assign Inspector Field: volume",
+                this
+            );
+        }
+
+        if (config == null) {
             enabled = false;
             return;
         }
@@ -78,10 +88,6 @@ public class CameraCoolDownEfx: MonoBehaviour {
         }
 
         if (volume == null) {
-            Debug.LogWarning(
-                "CameraCoolDownEfx:\tmust assign Inspector Field: volume",
-                this
-            );
             return;
         }
 

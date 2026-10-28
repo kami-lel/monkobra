@@ -4,6 +4,7 @@ using UnityEngine;
 [RequireComponent(typeof(TMP_Text))]
 public class ScoreDisplay: MonoBehaviour {
     [SerializeField]
+    [Tooltip("score source")]
     private ScoreManager scoreManager;
 
     [SerializeField]
@@ -13,12 +14,17 @@ public class ScoreDisplay: MonoBehaviour {
     private TMP_Text label;
 
     private void Awake() {
+        // Inspector Assignment Guard  -----------------------------------------
+        if (scoreManager == null) {
+            Debug.LogError(
+                "ScoreDisplay:\tmust assign Inspector Field: scoreManager",
+                this);
+        }
         label = GetComponent<TMP_Text>();
     }
 
     private void OnEnable() {
         if (scoreManager == null) {
-            Debug.LogError("ScoreDisplay: assign scoreManager in Inspector.", this);
             return;
         }
         scoreManager.ScoreChanged += Refresh;

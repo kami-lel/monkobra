@@ -24,6 +24,7 @@ public class DetectionZone: MonoBehaviour {
 
     // Inspector Fields  #######################################################
     [SerializeField]
+    [Tooltip("side this zone reports")]
     private DetectionSide side;
 
     // Event Handlers  #########################################################

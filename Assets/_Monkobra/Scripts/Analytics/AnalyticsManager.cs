@@ -135,6 +135,18 @@ public class AnalyticsManager: MonoBehaviour {
 
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
+        // Inspector Assignment Guard  -----------------------------------------
+        if (config == null) {
+            Debug.LogWarning(
+                "Analytics:\tmust assign Inspector Field: config, "
+                + "using defaults", this);
+        }
+        if (hackShortcuts == null) {
+            Debug.LogWarning(
+                "Analytics:\tmust assign Inspector Field: hackShortcuts",
+                this);
+        }
+
         if (I != null && I != this) {
             Debug.LogWarning("Analytics:\tduplicate instance destroyed", this);
             Destroy(gameObject);
@@ -143,10 +155,6 @@ public class AnalyticsManager: MonoBehaviour {
 
         I = this;
         if (config == null) {
-            Debug.LogWarning(
-                "Analytics:\tno config assigned, using defaults",
-                this
-            );
             config = ScriptableObject.CreateInstance<AnalyticsConfig>();
         }
         DontDestroyOnLoad(gameObject);
