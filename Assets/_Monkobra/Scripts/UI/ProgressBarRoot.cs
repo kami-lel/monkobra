@@ -71,7 +71,7 @@ public class ProgressBarRoot: MonoBehaviour {
 
         if (progressBar == null) {
             Debug.LogError(
-                "ProgressBarRoot: failed to get Scrollbar.",
+                "ProgressBarRoot:\tfail to get Component: Scrollbar",
                 this
             );
 
@@ -81,7 +81,7 @@ public class ProgressBarRoot: MonoBehaviour {
 
         if (windowSizeY <= 0f) {
             Debug.LogWarning(
-                "ProgressBarRoot: windowSizeY must be positive.",
+                "ProgressBarRoot:\twindowSizeY must be positive",
                 this
             );
 
@@ -171,7 +171,7 @@ public class ProgressBarRoot: MonoBehaviour {
         if (playerObject == null) {
             if (!hasWarnedNoPlayer) {
                 Debug.LogWarning(
-                    "ProgressBarRoot: no Player found.",
+                    "ProgressBarRoot:\tfail to find GameObject tagged: Player",
                     this
                 );
 

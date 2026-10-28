@@ -97,7 +97,7 @@ public class AnalyticsManager: MonoBehaviour {
         );
         if (string.IsNullOrEmpty(path)) {
             Debug.LogWarning("Analytics:\tfail to save mock session", this);
-        } else {
+        } else if (Debug.isDebugBuild) {
             Debug.Log("Analytics:\tmock session saved " + path, this);
         }
     }
@@ -118,7 +118,9 @@ public class AnalyticsManager: MonoBehaviour {
         }
 
         if (SaveSession()) {
-            Debug.Log("Analytics:\treport saved " + SessionFilePath, this);
+            if (Debug.isDebugBuild) {
+                Debug.Log("Analytics:\treport saved " + SessionFilePath, this);
+            }
         } else {
             Debug.LogWarning("Analytics:\tfail to save report", this);
         }
