@@ -44,7 +44,7 @@ public class SpiderWebBuilder: MonoBehaviour {
         }
 
         
-        var hub = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        GameObject hub = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         DestroyImmediate(hub.GetComponent<Collider>());
         hub.name = "Hub";
         hub.transform.SetParent(transform, false);
@@ -64,7 +64,7 @@ public class SpiderWebBuilder: MonoBehaviour {
     }
 
     void MakeStrand(Vector3 a, Vector3 b, string name) {
-        var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
         DestroyImmediate(go.GetComponent<Collider>()); 
         go.name = name;
         go.transform.SetParent(transform, false);
@@ -72,7 +72,7 @@ public class SpiderWebBuilder: MonoBehaviour {
         go.transform.localPosition = (a + b) * 0.5f;
         go.transform.localRotation = Quaternion.FromToRotation(Vector3.up, d);
         go.transform.localScale = new Vector3(thickness, d.magnitude, thickness);
-        var rend = go.GetComponent<Renderer>();
+        Renderer rend = go.GetComponent<Renderer>();
         rend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         if (webMaterial) rend.sharedMaterial = webMaterial;
     }

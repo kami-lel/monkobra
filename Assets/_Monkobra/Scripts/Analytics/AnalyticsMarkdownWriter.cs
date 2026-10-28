@@ -23,7 +23,7 @@ public static class AnalyticsMarkdownWriter {
             ? (float)(end.Clock - run.StartClock).TotalSeconds
             : run.DurationS;
 
-        var sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.Append("## Run ").Append(number).Append("\n\n");
         if (run.Status != RunStatus.Lost) {
             sb.Append("- Status: ").Append(run.Status).Append('\n');
@@ -77,7 +77,7 @@ public static class AnalyticsMarkdownWriter {
     /// <see cref="RunStatus.Lost"/> runs, then every run
     /// </summary>
     public static string BuildSession(SessionData session) {
-        var sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.Append("# MonKobra Analytics: Session: ").Append(session.Title);
         sb.Append("\n\n");
         sb.Append("MonKobra v").Append(session.AppVersion).Append("\n\n");
@@ -138,11 +138,11 @@ public static class AnalyticsMarkdownWriter {
         StringBuilder sb,
         SessionData session
     ) {
-        var labels = new List<string>();
-        var scores = new List<string>();
-        var highests = new List<string>();
-        var heights = new List<string>();
-        var durations = new List<string>();
+        List<string> labels = new List<string>();
+        List<string> scores = new List<string>();
+        List<string> highests = new List<string>();
+        List<string> heights = new List<string>();
+        List<string> durations = new List<string>();
         for (int i = 0; i < session.Runs.Count; i++) {
             RunData run = session.Runs[i];
             if (run.Status != RunStatus.Lost) {
@@ -256,8 +256,8 @@ public static class AnalyticsMarkdownWriter {
             1,
             Mathf.CeilToInt(bar != null ? bar.MaxStamina : 0f)
         );
-        var times = new List<string>();
-        var values = new List<string>();
+        List<string> times = new List<string>();
+        List<string> values = new List<string>();
         for (int i = 0; i < samples.Count; i++) {
             times.Add(FormatSeconds(samples[i].Elapsed));
             values.Add(samples[i].Stamina.ToString(
@@ -307,8 +307,8 @@ public static class AnalyticsMarkdownWriter {
             return;
         }
 
-        var times = new List<string>();
-        var heights = new List<string>();
+        List<string> times = new List<string>();
+        List<string> heights = new List<string>();
         float minHeight = 0f;
         float maxHeight = 1f;
         for (int i = 0; i < samples.Count; i++) {

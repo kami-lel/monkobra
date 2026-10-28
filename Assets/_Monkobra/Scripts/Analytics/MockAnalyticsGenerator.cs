@@ -60,7 +60,7 @@ public static class MockAnalyticsGenerator {
         float windowS
     ) {
         int runCount = rng.Next(MIN_RUNS, MAX_RUNS + 1);
-        var plans = new List<RunPlan>();
+        List<RunPlan> plans = new List<RunPlan>();
         float total = 0f;
         for (int i = 0; i < runCount; i++) {
             // the monkey learns: skill climbs w/ the run number, w/ noise
@@ -76,7 +76,7 @@ public static class MockAnalyticsGenerator {
         }
 
         DateTime sessionStart = now.AddSeconds(-total);
-        var session = new SessionData {
+        SessionData session = new SessionData {
             StartClock = sessionStart,
             Title = sessionStart.ToString(
                 "yyyy-MM-dd HH:mm:ss",
@@ -147,7 +147,7 @@ public static class MockAnalyticsGenerator {
     // climbs until the monkey is caught: exhaustion, or a stumble on a web or
     // branch that lets the cobra close in
     private static RunPlan SimulateRun(float skill, System.Random rng) {
-        var plan = new RunPlan();
+        RunPlan plan = new RunPlan();
         float t = 0f;
         float height = 0f;
         float stamina = MAX_STAMINA;
@@ -235,7 +235,7 @@ public static class MockAnalyticsGenerator {
         DateTime start,
         float windowS
     ) {
-        var run = new RunData {
+        RunData run = new RunData {
             Status = plan.IsLost ? RunStatus.Lost : RunStatus.Interrupted,
             StartClock = start,
             DurationS = plan.DurationS,
