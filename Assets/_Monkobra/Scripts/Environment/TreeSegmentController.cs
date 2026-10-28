@@ -7,7 +7,7 @@ using UnityEngine;
 /// <see cref="Restart"/> moves it to a new place, raising
 /// <see cref="BranchesGenerated"/> after each roll.
 /// </summary>
-public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
+public class TreeSegmentController: MonoBehaviour {
     // Public Members  #########################################################
     /// <summary>
     /// Raised with the segment each time it has rolled its branches, on its
@@ -16,7 +16,7 @@ public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
     /// theirs then, whoever created or moved the segment.
     /// </summary>
     // System qualified: a using System would make Random ambiguous here
-    public static event System.Action<DynamicTreeSegmentPrefabRoot>
+    public static event System.Action<TreeSegmentController>
         BranchesGenerated;
 
     // Public Methods  #########################################################
@@ -45,7 +45,7 @@ public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
 
         if (TreeManager.I == null) {
             Debug.LogWarning(
-                "DynamicTreeSegmentPrefabRoot:\tno TreeManager in scene, "
+                "TreeSegmentController:\tno TreeManager in scene, "
                     + "skip branch generation",
                 this
             );
@@ -77,14 +77,14 @@ public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
         // Inspector Assignment Guard  -----------------------------------------
         if (segmentCollider == null) {
             Debug.LogWarning(
-                "DynamicTreeSegmentPrefabRoot:\t"
+                "TreeSegmentController:\t"
                     + "must assign Inspector Field: segmentCollider",
                 this
             );
         }
         if (branchWithFruitPrefab == null) {
             Debug.LogWarning(
-                "DynamicTreeSegmentPrefabRoot:\t"
+                "TreeSegmentController:\t"
                     + "must assign Inspector Field: branchWithFruitPrefab",
                 this
             );
@@ -92,7 +92,7 @@ public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
 
         if (placementConfig == null) {
             Debug.LogWarning(
-                "DynamicTreeSegmentPrefabRoot:\t"
+                "TreeSegmentController:\t"
                     + "must assign Inspector Field: placementConfig",
                 this
             );
@@ -100,7 +100,7 @@ public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
 
         if (balanceConfig == null) {
             Debug.LogWarning(
-                "DynamicTreeSegmentPrefabRoot:	"
+                "TreeSegmentController:	"
                     + "must assign Inspector Field: balanceConfig",
                 this
             );
@@ -132,7 +132,7 @@ public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
         hasGenerated = true;
         if (TreeManager.I == null) {
             Debug.LogWarning(
-                "DynamicTreeSegmentPrefabRoot:\tno TreeManager in scene, "
+                "TreeSegmentController:\tno TreeManager in scene, "
                     + "skip branch generation",
                 this
             );
@@ -215,12 +215,12 @@ public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
                 GetRampedDifficulty(branch.transform.position.y)
             )
         );
-        BranchWithScriptRoot branchRoot =
-            branch.GetComponent<BranchWithScriptRoot>();
+        BranchController branchRoot =
+            branch.GetComponent<BranchController>();
         if (branchRoot == null) {
             Debug.LogWarning(
-                "DynamicTreeSegmentPrefabRoot:\t"
-                    + "branchWithFruitPrefab lacks BranchWithScriptRoot",
+                "TreeSegmentController:\t"
+                    + "branchWithFruitPrefab lacks BranchController",
                 this
             );
         } else {

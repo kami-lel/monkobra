@@ -5,7 +5,7 @@ using UnityEngine;
 /// this branch bears a banana, disabling the Banana + Banana Stem children when
 /// it does not, or scaling/repositioning them into place when it does.
 /// </summary>
-public class BranchWithScriptRoot: MonoBehaviour {
+public class BranchController: MonoBehaviour {
     // Public Methods  #########################################################
     /// <summary>
     /// Rolls whether this branch bears a banana, then shows or hides the
@@ -39,13 +39,13 @@ public class BranchWithScriptRoot: MonoBehaviour {
         // Inspector Assignment Guard  -----------------------------------------
         if (banana == null) {
             Debug.LogWarning(
-                "BranchWithScriptRoot:\tmust assign Inspector Field: banana",
+                "BranchController:\tmust assign Inspector Field: banana",
                 this
             );
         }
         if (bananaStem == null) {
             Debug.LogWarning(
-                "BranchWithScriptRoot:\t"
+                "BranchController:\t"
                     + "must assign Inspector Field: bananaStem",
                 this
             );

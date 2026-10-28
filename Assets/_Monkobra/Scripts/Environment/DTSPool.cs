@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Endless tree from a fixed pool of <see cref="DynamicTreeSegmentPrefabRoot"/>
+/// Endless tree from a fixed pool of <see cref="TreeSegmentController"/>
 /// segments. Put it on an empty parent: it instantiates
 /// <c>segmentCount</c> copies of <c>segmentPrefab</c> as its children,
 /// stacked end to end upward, the first (lowest) one created at world
@@ -18,7 +18,7 @@ using UnityEngine;
 /// <para>
 /// The pool knows nothing of webs or falling cobras: a
 /// <see cref="SpiderWebSpawner"/> and a <see cref="FallingCobraSpawner"/> hear
-/// each segment's <see cref="DynamicTreeSegmentPrefabRoot.BranchesGenerated"/>
+/// each segment's <see cref="TreeSegmentController.BranchesGenerated"/>
 /// and redo theirs then, so they must stay off the deactivated mock tree.
 /// </para>
 /// </summary>
@@ -29,7 +29,7 @@ public class DTSPool: MonoBehaviour {
     [Header("Wiring")]
     [SerializeField]
     [Tooltip("segment prefab instantiated segmentCount times")]
-    private DynamicTreeSegmentPrefabRoot segmentPrefab;
+    private TreeSegmentController segmentPrefab;
 
     [SerializeField]
     [Tooltip(
@@ -155,15 +155,15 @@ public class DTSPool: MonoBehaviour {
     private Transform target; // cached player, set in Start
 
     // FIFO of pooled segments: lowest at the front, highest at the back
-    private readonly Queue<DynamicTreeSegmentPrefabRoot> segments = new();
-    private DynamicTreeSegmentPrefabRoot newestSegment; // back of the queue
+    private readonly Queue<TreeSegmentController> segments = new();
+    private TreeSegmentController newestSegment; // back of the queue
 
     // private methods  ########################################################
     // segments stand end to end, pivots mid-segment, and join the FIFO lowest
     // first, the lowest pivot sitting at firstSegmentY
     private void BuildStack() {
         for (int i = 0; i < segmentCount; i++) {
-            DynamicTreeSegmentPrefabRoot segment = Instantiate(
+            TreeSegmentController segment = Instantiate(
                 segmentPrefab,
                 transform
             );
@@ -196,8 +196,8 @@ public class DTSPool: MonoBehaviour {
     /// </returns>
     private bool TryRecycleLowest() {
         // FIFO: the oldest entry is the lowest, the newest the highest
-        DynamicTreeSegmentPrefabRoot lowest = segments.Peek();
-        DynamicTreeSegmentPrefabRoot highest = newestSegment;
+        TreeSegmentController lowest = segments.Peek();
+        TreeSegmentController highest = newestSegment;
 
         // enough stack ahead of the player already, add nothing
         float highestTopY =

@@ -4,10 +4,10 @@ using UnityEngine.Serialization;
 
 /// <summary>
 /// Hangs dormant <see cref="FallingCobraController"/>s on the trunk of each
-/// <see cref="DynamicTreeSegmentPrefabRoot"/> as soon as it has rolled its
+/// <see cref="TreeSegmentController"/> as soon as it has rolled its
 /// branches, on its first Start and after every restart by
 /// <see cref="DTSPool"/>, by listening to
-/// <see cref="DynamicTreeSegmentPrefabRoot.BranchesGenerated"/>. Put one on
+/// <see cref="TreeSegmentController.BranchesGenerated"/>. Put one on
 /// any object active from scene load, never under the pool's mock tree,
 /// which is deactivated at runtime.
 /// <para>
@@ -102,14 +102,14 @@ public class FallingCobraSpawner: MonoBehaviour {
             return;
         }
         listener = this;
-        DynamicTreeSegmentPrefabRoot.BranchesGenerated += OnBranchesGenerated;
+        TreeSegmentController.BranchesGenerated += OnBranchesGenerated;
     }
 
     private void OnDisable() {
         if (listener != this) {
             return;
         }
-        DynamicTreeSegmentPrefabRoot.BranchesGenerated -= OnBranchesGenerated;
+        TreeSegmentController.BranchesGenerated -= OnBranchesGenerated;
         listener = null;
     }
 
@@ -126,7 +126,7 @@ public class FallingCobraSpawner: MonoBehaviour {
     }
 
     // Event Handlers  #########################################################
-    private void OnBranchesGenerated(DynamicTreeSegmentPrefabRoot segment) {
+    private void OnBranchesGenerated(TreeSegmentController segment) {
         PopulateSegment(segment);
     }
 
@@ -142,7 +142,7 @@ public class FallingCobraSpawner: MonoBehaviour {
     // private methods  ########################################################
     // rolls this spawner's cobra attempts for segment, which already holds its
     // branches
-    private void PopulateSegment(DynamicTreeSegmentPrefabRoot segment) {
+    private void PopulateSegment(TreeSegmentController segment) {
         if (segment == null) {
             return;
         }
@@ -181,7 +181,7 @@ public class FallingCobraSpawner: MonoBehaviour {
     // a segment's previous cobras go b4 it rolls again: its restart has
     // already cleared them, any still active are destroyed here, so a
     // segment never carries 2 rolls
-    private void ClearCobras(DynamicTreeSegmentPrefabRoot segment) {
+    private void ClearCobras(TreeSegmentController segment) {
         for (int i = spawnedCobras.Count - 1; i >= 0; i--) {
             FallingCobraController cobra = spawnedCobras[i];
             if (cobra != null && cobra.transform.parent != segment.transform) {
@@ -196,7 +196,7 @@ public class FallingCobraSpawner: MonoBehaviour {
         }
     }
 
-    private bool TrySpawnCobra(DynamicTreeSegmentPrefabRoot segment) {
+    private bool TrySpawnCobra(TreeSegmentController segment) {
         Transform segmentXfm = segment.transform;
 
         // the prefab builds its hit capsule in Awake, so its length is only

@@ -3,10 +3,10 @@ using UnityEngine;
 
 /// <summary>
 /// Sticks <see cref="SpiderWebTrap"/> webs flat on the trunk of each
-/// <see cref="DynamicTreeSegmentPrefabRoot"/> as soon as it has rolled its
+/// <see cref="TreeSegmentController"/> as soon as it has rolled its
 /// branches, on its first Start and after every restart by
 /// <see cref="DTSPool"/>, by listening to
-/// <see cref="DynamicTreeSegmentPrefabRoot.BranchesGenerated"/>. Put one on
+/// <see cref="TreeSegmentController.BranchesGenerated"/>. Put one on
 /// any object active from scene load, never under the pool's mock tree,
 /// which is deactivated at runtime.
 /// <para>
@@ -126,14 +126,14 @@ public class SpiderWebSpawner: MonoBehaviour {
             return;
         }
         listener = this;
-        DynamicTreeSegmentPrefabRoot.BranchesGenerated += OnBranchesGenerated;
+        TreeSegmentController.BranchesGenerated += OnBranchesGenerated;
     }
 
     private void OnDisable() {
         if (listener != this) {
             return;
         }
-        DynamicTreeSegmentPrefabRoot.BranchesGenerated -= OnBranchesGenerated;
+        TreeSegmentController.BranchesGenerated -= OnBranchesGenerated;
         listener = null;
     }
 
@@ -165,7 +165,7 @@ public class SpiderWebSpawner: MonoBehaviour {
     }
 
     // Event Handlers  #########################################################
-    private void OnBranchesGenerated(DynamicTreeSegmentPrefabRoot segment) {
+    private void OnBranchesGenerated(TreeSegmentController segment) {
         PopulateSegment(segment);
     }
 
@@ -188,7 +188,7 @@ public class SpiderWebSpawner: MonoBehaviour {
     // private methods  ########################################################
     // rolls this spawner's web attempts for segment, which already holds its
     // branches
-    private void PopulateSegment(DynamicTreeSegmentPrefabRoot segment) {
+    private void PopulateSegment(TreeSegmentController segment) {
         if (segment == null || prefabTrigger == null) {
             return;
         }
@@ -231,7 +231,7 @@ public class SpiderWebSpawner: MonoBehaviour {
     // already cleared them, any still active are destroyed here, so a
     // segment never carries 2 rolls. Destroyed webs, e.g. broken free, are
     // forgotten on the way
-    private void ClearWebs(DynamicTreeSegmentPrefabRoot segment) {
+    private void ClearWebs(TreeSegmentController segment) {
         for (int i = spawnedWebs.Count - 1; i >= 0; i--) {
             SpiderWebTrap web = spawnedWebs[i];
             if (web != null && web.transform.parent != segment.transform) {
@@ -256,7 +256,7 @@ public class SpiderWebSpawner: MonoBehaviour {
         );
     }
 
-    private bool TrySpawnWeb(DynamicTreeSegmentPrefabRoot segment) {
+    private bool TrySpawnWeb(TreeSegmentController segment) {
         Transform segmentXfm = segment.transform;
 
         // the trunk cylinder is centered on the segment pivot, so this keeps
@@ -332,6 +332,6 @@ public class SpiderWebSpawner: MonoBehaviour {
     private static bool IsBranchOrFruit(Collider hit) {
         return hit.CompareTag(BRANCH_TAG)
             || hit.CompareTag(FRUIT_TAG)
-            || hit.GetComponentInParent<BranchWithScriptRoot>() != null;
+            || hit.GetComponentInParent<BranchController>() != null;
     }
 }

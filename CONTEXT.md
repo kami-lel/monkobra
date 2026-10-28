@@ -78,7 +78,7 @@ graph LR
   Stamina[StaminaBarController] --> Game
   Game --> Screens[ScreensManager]
   Game -->|EndRun| Score
-  Pool[DTSPool] -->|Restart| Segment[DynamicTreeSegmentPrefabRoot]
+  Pool[DTSPool] -->|Restart| Segment[TreeSegmentController]
   Segment -->|BranchesGenerated| Spawner[SpiderWebSpawner]
   Segment -->|BranchesGenerated| CobraSpawner[FallingCobraSpawner]
   CobraSpawner --> FallCobra[FallingCobraController]
@@ -115,10 +115,10 @@ All under `Assets/_Monkobra/Scripts/`. Each row names the owner of the detail.
 | `Cameras/CameraEfxConfig` | ScriptableObject of the camera efx tuning: both cool-down steps (vignette, zoom-out) and their timing | [TDD](docs/monkobra-tdd.md#camera) |
 | `Player/HitBranchSensor` | singleton branch sensor: raises `BranchHit` and `Hit` (with a `HitKind`); `ReportHit` applies the same drop for a hazard touching the monkey outside the sensor | [Mobs](docs/mob-doc.md#hit-penalty) |
 | `Environment/TreeManager` | singleton on the mock tree, marks the trunk axis | [TDD](docs/monkobra-tdd.md#tree) |
-| `Environment/DynamicTreeSegmentPrefabRoot` | places branches on a segment, then raises the static `BranchesGenerated` | [Mobs](docs/mob-doc.md#placement) |
+| `Environment/TreeSegmentController` | places branches on a segment, then raises the static `BranchesGenerated` | [Mobs](docs/mob-doc.md#placement) |
 | `Environment/DTSPool` | on an empty base marker: instantiates the segments, then recycles the lowest segment over the top, restarting it, for an endless tree | [TDD](docs/monkobra-tdd.md#tree) |
 | `Environment/BranchFruitPlacementConfig` | ScriptableObject of branch placement | [Mobs](docs/mob-doc.md#placement) |
-| `Environment/BranchWithScriptRoot` | decides whether a branch bears a banana | [Grab](docs/grab-doc.md#fruit-supply) |
+| `Environment/BranchController` | decides whether a branch bears a banana | [Grab](docs/grab-doc.md#fruit-supply) |
 | `Environment/FruitOutlineListener` | two-tier banana outline | [Grab](docs/grab-doc.md#feedback) |
 | `MobSpiderWeb/SpiderWebSpawner` | on `Envs/DTSPool`: on each `BranchesGenerated`, rolls webs on that segment's trunk against a probability curve at its ramped difficulty | [Mobs](docs/mob-doc.md#placement-1) |
 | `MobSpiderWeb/SpiderWebTrap` | web prefab root with one deepened trigger box | [Mobs](docs/mob-doc.md#trap-and-escape) |

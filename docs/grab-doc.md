@@ -34,7 +34,7 @@ graph TD
 | `Player/MonkeyConfig` | reach speed, stroke tuning, and the interact action both arms and the camera read |
 | `Cameras/CameraRigManager` | swaps the behind, look-left, and look-right Cinemachine cameras |
 | `Environment/FruitOutlineListener` | two-tier outline on a banana |
-| `Environment/BranchWithScriptRoot` | decides whether a branch bears a banana |
+| `Environment/BranchController` | decides whether a branch bears a banana |
 | `Scoring/ScorePickup` | on a fruit, hands its points to `ScoreManager` once and switches the fruit off |
 | `UI/StaminaBarController` | `AddStaminaByFruit` restores stamina on a grab |
 
@@ -81,7 +81,7 @@ graph TD
 
 ## Fruit Supply
 
-Bananas come from branches, not their own spawner. `BranchWithScriptRoot` rolls once per branch in `Initialize`, called by the segment after placing it: with the banana chance (from the difficulty curve) it keeps the banana and stem, scaling the stem between 0.5x and 2x and rotating the banana randomly, otherwise it disables both. Branch density by height is in [Mobs](mob-doc.md#placement).
+Bananas come from branches, not their own spawner. `BranchController` rolls once per branch in `Initialize`, called by the segment after placing it: with the banana chance (from the difficulty curve) it keeps the banana and stem, scaling the stem between 0.5x and 2x and rotating the banana randomly, otherwise it disables both. Branch density by height is in [Mobs](mob-doc.md#placement).
 
 ## Tuning
 
