@@ -1,9 +1,10 @@
 # Monkobra CHANGELOG
 
 <!--
-Bug Erik tree branch created at player location & thus resulting failure
+BUG Erik tree branch created at player location & thus resulting failure
+FIXME Erik Keeps improving tutorial zone: larger range, smaller debuff, half the energy
+
 Fixme Pan: UI mpv
-Fixme Erik Keeps improving tutorial zone: larger range, smaller debuff, half the energy
 Todo Dont Pause screen
 Todo belle: 打滑事件
 Todo Erik Movement speed build up
