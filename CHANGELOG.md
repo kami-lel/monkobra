@@ -1,8 +1,20 @@
 # Monkobra CHANGELOG
 
 <!--
+Bug Erik tree branch created at player location & thus resulting failure
+Fixme Pan: UI mpv
+Fixme Erik Keeps improving tutorial zone: larger range, smaller debuff, half the energy
+Todo Dont Pause screen
+Todo belle: 打滑事件
+Todo Erik Movement speed build up
+Todo Dont boss fight
+Todo Pan: 数字显示和蛇的距离
+Todo Yuqing: 抓取椰子，往下扔，蛇往下掉
+Todo Erik Raycasting/2d anime for gaining
+Todo Erik 橡胶果实（手臂伸长，跳过一节）
+Todo Pan 排行榜（假的）
+
 bug spider web fail to load & log warning
-Bug tree branch created at player location & thus resulting failure
 -->
 
 
