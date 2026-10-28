@@ -13,7 +13,7 @@ using UnityEngine;
 /// Rolled like branches, from the Spider Web group of
 /// <see cref="GameBalanceConfig"/>: a fixed attempt count per segment, each
 /// attempt against the web probability curve sampled at the segment's ramped
-/// difficulty, read at its middle from <see cref="RampedDifficultyService"/>.
+/// difficulty, read at its middle from <see cref="RampedDifficultyManager"/>.
 /// </para>
 /// <para>
 /// A web lies on its segment's own stretch of bark facing outward: the
@@ -192,11 +192,11 @@ public class SpiderWebSpawner: MonoBehaviour {
         if (segment == null || prefabTrigger == null) {
             return;
         }
-        RampedDifficultyService difficulty = RampedDifficultyService.I;
+        RampedDifficultyManager difficulty = RampedDifficultyManager.I;
         if (difficulty == null) {
             if (!hasWarnedNoDifficulty) {
                 Debug.LogWarning(
-                    "SpiderWebSpawner:\tno RampedDifficultyService in scene, "
+                    "SpiderWebSpawner:\tno RampedDifficultyManager in scene, "
                         + "skip webs",
                     this
                 );

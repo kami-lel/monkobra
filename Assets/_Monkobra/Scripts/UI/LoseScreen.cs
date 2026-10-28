@@ -6,12 +6,12 @@ using UnityEngine;
 /// labels each time the screen is enabled. Attach to the lose screen panel.
 /// <para>
 /// Height is the highest point reached, read from
-/// <see cref="RampedDifficultyService.HighestPlayerClimbedYDistance"/>, shown
+/// <see cref="RampedDifficultyManager.HighestPlayerClimbedYDistance"/>, shown
 /// as whole units. Score is <see cref="ScoreManager.TotalScore"/>, bananas
 /// <see cref="ScoreManager.BananaCollectedCount"/>.
 /// </para>
 /// </summary>
-public class LoseScreenController: MonoBehaviour {
+public class LoseScreen: MonoBehaviour {
     // Inspector Fields  #######################################################
     [SerializeField]
     [Tooltip("label for the final height")]
@@ -42,21 +42,21 @@ public class LoseScreenController: MonoBehaviour {
         // Inspector Assignment Guard  -----------------------------------------
         if (finalHeightText == null) {
             Debug.LogError(
-                "LoseScreenController:\tmust assign Inspector Field: "
+                "LoseScreen:\tmust assign Inspector Field: "
                     + "Final Height Text",
                 this
             );
         }
         if (finalScoreText == null) {
             Debug.LogError(
-                "LoseScreenController:\tmust assign Inspector Field: "
+                "LoseScreen:\tmust assign Inspector Field: "
                     + "Final Score Text",
                 this
             );
         }
         if (bananaCollectedText == null) {
             Debug.LogError(
-                "LoseScreenController:\tmust assign Inspector Field: "
+                "LoseScreen:\tmust assign Inspector Field: "
                     + "Banana Collected Text",
                 this
             );
@@ -74,9 +74,9 @@ public class LoseScreenController: MonoBehaviour {
         if (finalHeightText == null) {
             return;
         }
-        if (RampedDifficultyService.I == null) {
+        if (RampedDifficultyManager.I == null) {
             Debug.LogWarning(
-                "LoseScreenController:\tRampedDifficultyService not found",
+                "LoseScreen:\tRampedDifficultyService not found",
                 this
             );
             return;
@@ -85,13 +85,13 @@ public class LoseScreenController: MonoBehaviour {
         int heightU = Mathf.Max(
             0,
             Mathf.FloorToInt(
-                RampedDifficultyService.I.HighestPlayerClimbedYDistance
+                RampedDifficultyManager.I.HighestPlayerClimbedYDistance
             )
         );
         finalHeightText.text = heightPrefix + heightU.ToString("N0");
 
         if (Debug.isDebugBuild) {
-            Debug.Log($"LoseScreenController:\tfinal height {heightU}");
+            Debug.Log($"LoseScreen:\tfinal height {heightU}");
         }
     }
 
@@ -101,7 +101,7 @@ public class LoseScreenController: MonoBehaviour {
         }
         if (ScoreManager.I == null) {
             Debug.LogWarning(
-                "LoseScreenController:\tScoreManager not found",
+                "LoseScreen:\tScoreManager not found",
                 this
             );
             return;
@@ -111,7 +111,7 @@ public class LoseScreenController: MonoBehaviour {
         finalScoreText.text = scorePrefix + score.ToString("N0");
 
         if (Debug.isDebugBuild) {
-            Debug.Log($"LoseScreenController:\tfinal score {score}");
+            Debug.Log($"LoseScreen:\tfinal score {score}");
         }
     }
 
@@ -121,7 +121,7 @@ public class LoseScreenController: MonoBehaviour {
         }
         if (ScoreManager.I == null) {
             Debug.LogWarning(
-                "LoseScreenController:\tScoreManager not found",
+                "LoseScreen:\tScoreManager not found",
                 this
             );
             return;
@@ -131,7 +131,7 @@ public class LoseScreenController: MonoBehaviour {
         bananaCollectedText.text = bananaPrefix + count.ToString("N0");
 
         if (Debug.isDebugBuild) {
-            Debug.Log($"LoseScreenController:\tbanana collected {count}");
+            Debug.Log($"LoseScreen:\tbanana collected {count}");
         }
     }
 }

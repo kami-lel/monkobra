@@ -146,11 +146,11 @@ public class FallingCobraSpawner: MonoBehaviour {
         if (segment == null) {
             return;
         }
-        RampedDifficultyService difficulty = RampedDifficultyService.I;
+        RampedDifficultyManager difficulty = RampedDifficultyManager.I;
         if (difficulty == null) {
             if (!hasWarnedNoDifficulty) {
                 Debug.LogWarning(
-                    "FallingCobraSpawner:\tno RampedDifficultyService in "
+                    "FallingCobraSpawner:\tno RampedDifficultyManager in "
                         + "scene, skip cobras",
                     this
                 );

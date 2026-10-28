@@ -13,7 +13,7 @@ using UnityEngine.Rendering.Universal;
 /// every <see cref="StaminaBarController.LowStaminaMoveAttempted"/>, and both
 /// values return to rest when the pulse ends or this component is disabled.
 /// </summary>
-public class CameraCoolDownEfx: MonoBehaviour {
+public class CameraCoolDownFeedback: MonoBehaviour {
     // Inspector Fields  #######################################################
     [Tooltip("tuning for both cool-down steps and their timing")]
     [SerializeField]
@@ -52,7 +52,7 @@ public class CameraCoolDownEfx: MonoBehaviour {
 
         if (Debug.isDebugBuild) {
             Debug.Log(
-                $"CameraCoolDownEfx:\tpulse {(isEmpty ? "empty" : "low")}",
+                $"CameraCoolDownFeedback:\tpulse {(isEmpty ? "empty" : "low")}",
                 this
             );
         }
@@ -63,13 +63,13 @@ public class CameraCoolDownEfx: MonoBehaviour {
         // Inspector Assignment Guard  -----------------------------------------
         if (config == null) {
             Debug.LogWarning(
-                "CameraCoolDownEfx:\tmust assign Inspector Field: config",
+                "CameraCoolDownFeedback:\tmust assign Inspector Field: config",
                 this
             );
         }
         if (volume == null) {
             Debug.LogWarning(
-                "CameraCoolDownEfx:\tmust assign Inspector Field: volume",
+                "CameraCoolDownFeedback:\tmust assign Inspector Field: volume",
                 this
             );
         }
@@ -82,7 +82,7 @@ public class CameraCoolDownEfx: MonoBehaviour {
         brain = GetComponent<CinemachineBrain>();
         if (brain == null) {
             Debug.LogWarning(
-                "CameraCoolDownEfx:\tfail to get Component: CinemachineBrain",
+                "CameraCoolDownFeedback:\tfail to get Component: CinemachineBrain",
                 this
             );
         }
@@ -94,7 +94,7 @@ public class CameraCoolDownEfx: MonoBehaviour {
         // profile (not sharedProfile): edits stay off the shared asset
         if (!volume.profile.TryGet(out vignette)) {
             Debug.LogWarning(
-                "CameraCoolDownEfx:\tvolume profile has no Vignette override",
+                "CameraCoolDownFeedback:\tvolume profile has no Vignette override",
                 this
             );
         }
@@ -105,7 +105,7 @@ public class CameraCoolDownEfx: MonoBehaviour {
         staminaBar = StaminaBarController.I;
         if (staminaBar == null) {
             Debug.LogError(
-                "CameraCoolDownEfx:\tfail to get singleton: "
+                "CameraCoolDownFeedback:\tfail to get singleton: "
                     + "StaminaBarController",
                 this
             );

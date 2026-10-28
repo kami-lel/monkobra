@@ -364,12 +364,12 @@ public class CobraMotor: MonoBehaviour {
         if (
             balanceConfig == null
             || player == null
-            || RampedDifficultyService.I == null
+            || RampedDifficultyManager.I == null
         ) {
             return climbSpeed;
         }
         float difficulty =
-            RampedDifficultyService.I.GetRampedValueFromYPosition(
+            RampedDifficultyManager.I.GetRampedValueFromYPosition(
                 player.position.y
             );
         return Mathf.Max(

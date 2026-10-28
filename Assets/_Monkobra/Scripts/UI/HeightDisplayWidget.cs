@@ -4,11 +4,11 @@ using UnityEngine;
 /// <summary>
 /// Shows the height the player has climbed since game start on a
 /// <see cref="TMP_Text"/> label, read from
-/// <see cref="RampedDifficultyService.CurrentPlayerClimbedYDistance"/>.
+/// <see cref="RampedDifficultyManager.CurrentPlayerClimbedYDistance"/>.
 /// Rewrites the text only when the whole-unit value changes.
 /// </summary>
 [RequireComponent(typeof(TMP_Text))]
-public class HeightDisplayController: MonoBehaviour {
+public class HeightDisplayWidget: MonoBehaviour {
     // Inspector Fields  #######################################################
     [SerializeField]
     [Tooltip("text before the number, e.g. Height: ")]
@@ -19,7 +19,7 @@ public class HeightDisplayController: MonoBehaviour {
         label = GetComponent<TMP_Text>();
         if (label == null) {
             Debug.LogError(
-                "HeightDisplayController:\tfail to get Component: TMP_Text",
+                "HeightDisplayWidget:\tfail to get Component: TMP_Text",
                 this
             );
         }
@@ -31,12 +31,12 @@ public class HeightDisplayController: MonoBehaviour {
     }
 
     private void LateUpdate() {
-        if (label == null || RampedDifficultyService.I == null) {
+        if (label == null || RampedDifficultyManager.I == null) {
             return;
         }
 
         float climbedYU =
-            RampedDifficultyService.I.CurrentPlayerClimbedYDistance;
+            RampedDifficultyManager.I.CurrentPlayerClimbedYDistance;
         if (float.IsNaN(climbedYU) || float.IsInfinity(climbedYU)) {
             return;
         }

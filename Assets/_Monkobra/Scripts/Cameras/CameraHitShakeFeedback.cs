@@ -9,7 +9,7 @@ using UnityEngine;
 /// <see cref="CinemachineImpulseSource"/> on the same camera, so amplitude
 /// and duration are tuned per kind in the Inspector.
 /// </summary>
-public class CameraHitShakeEfx: MonoBehaviour {
+public class CameraHitShakeFeedback: MonoBehaviour {
     // Inspector Fields  #######################################################
     [Tooltip("impulse for a branch hit, the lighter shake")]
     [SerializeField]
@@ -24,14 +24,14 @@ public class CameraHitShakeEfx: MonoBehaviour {
         // Inspector Assignment Guard  -----------------------------------------
         if (lightSource == null) {
             Debug.LogWarning(
-                "CameraHitShakeEfx:\tmust assign Inspector Field: "
+                "CameraHitShakeFeedback:\tmust assign Inspector Field: "
                     + "lightSource",
                 this
             );
         }
         if (heavySource == null) {
             Debug.LogWarning(
-                "CameraHitShakeEfx:\tmust assign Inspector Field: "
+                "CameraHitShakeFeedback:\tmust assign Inspector Field: "
                     + "heavySource",
                 this
             );
@@ -43,7 +43,7 @@ public class CameraHitShakeEfx: MonoBehaviour {
         sensor = HitBranchSensor.I;
         if (sensor == null) {
             Debug.LogError(
-                "CameraHitShakeEfx:\tfail to get singleton: "
+                "CameraHitShakeFeedback:\tfail to get singleton: "
                     + "HitBranchSensor",
                 this
             );
@@ -77,7 +77,7 @@ public class CameraHitShakeEfx: MonoBehaviour {
         source.GenerateImpulse();
 
         if (Debug.isDebugBuild) {
-            Debug.Log($"CameraHitShakeEfx:\tshake {kind}", this);
+            Debug.Log($"CameraHitShakeFeedback:\tshake {kind}", this);
         }
     }
 

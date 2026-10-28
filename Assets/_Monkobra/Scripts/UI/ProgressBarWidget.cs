@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 
 [RequireComponent(typeof(Scrollbar))]
-public class ProgressBarRoot: MonoBehaviour {
+public class ProgressBarWidget: MonoBehaviour {
     // Inspector Fields  #######################################################
     [Header("Cobra Marker")]
     [SerializeField]
@@ -58,12 +58,12 @@ public class ProgressBarRoot: MonoBehaviour {
         // Inspector Assignment Guard  -----------------------------------------
         if (cobraHead == null) {
             Debug.LogWarning(
-                "ProgressBarRoot:\tmust assign Inspector Field: cobraHead",
+                "ProgressBarWidget:\tmust assign Inspector Field: cobraHead",
                 this);
         }
         if (cobraMarker == null) {
             Debug.LogWarning(
-                "ProgressBarRoot:\tmust assign Inspector Field: cobraMarker",
+                "ProgressBarWidget:\tmust assign Inspector Field: cobraMarker",
                 this);
         }
 
@@ -71,7 +71,7 @@ public class ProgressBarRoot: MonoBehaviour {
 
         if (progressBar == null) {
             Debug.LogError(
-                "ProgressBarRoot:\tfail to get Component: Scrollbar",
+                "ProgressBarWidget:\tfail to get Component: Scrollbar",
                 this
             );
 
@@ -81,7 +81,7 @@ public class ProgressBarRoot: MonoBehaviour {
 
         if (windowSizeY <= 0f) {
             Debug.LogWarning(
-                "ProgressBarRoot:\twindowSizeY must be positive",
+                "ProgressBarWidget:\twindowSizeY must be positive",
                 this
             );
 
@@ -171,7 +171,7 @@ public class ProgressBarRoot: MonoBehaviour {
         if (playerObject == null) {
             if (!hasWarnedNoPlayer) {
                 Debug.LogWarning(
-                    "ProgressBarRoot:\tfail to find GameObject tagged: Player",
+                    "ProgressBarWidget:\tfail to find GameObject tagged: Player",
                     this
                 );
 

@@ -2,7 +2,7 @@ using TMPro;
 using UnityEngine;
 
 [RequireComponent(typeof(TMP_Text))]
-public class ScoreDisplay: MonoBehaviour {
+public class ScoreWidget: MonoBehaviour {
     // Inspector Fields  #######################################################
     [SerializeField]
     [Tooltip("score source")]
@@ -17,7 +17,7 @@ public class ScoreDisplay: MonoBehaviour {
         // Inspector Assignment Guard  -----------------------------------------
         if (scoreManager == null) {
             Debug.LogError(
-                "ScoreDisplay:\tmust assign Inspector Field: scoreManager",
+                "ScoreWidget:\tmust assign Inspector Field: scoreManager",
                 this);
         }
         label = GetComponent<TMP_Text>();

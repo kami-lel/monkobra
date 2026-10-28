@@ -16,7 +16,7 @@ using UnityEngine;
 /// on every scene load.
 /// </para>
 /// </summary>
-public class LowStaminaPrompt: MonoBehaviour {
+public class LowStaminaWidget: MonoBehaviour {
     // Inspector Fields  #######################################################
     [Header("Wiring")]
     [SerializeField]
@@ -44,7 +44,7 @@ public class LowStaminaPrompt: MonoBehaviour {
         // Inspector Assignment Guard  -----------------------------------------
         if (promptLabel == null) {
             Debug.LogWarning(
-                "LowStaminaPrompt:\tmust assign Inspector Field: promptLabel",
+                "LowStaminaWidget:\tmust assign Inspector Field: promptLabel",
                 this
             );
             enabled = false;
@@ -52,7 +52,7 @@ public class LowStaminaPrompt: MonoBehaviour {
         }
         if (struggle == null) {
             Debug.LogWarning(
-                "LowStaminaPrompt:\tmust assign Inspector Field: struggle",
+                "LowStaminaWidget:\tmust assign Inspector Field: struggle",
                 this
             );
         }
@@ -67,7 +67,7 @@ public class LowStaminaPrompt: MonoBehaviour {
         staminaBar = StaminaBarController.I;
         if (staminaBar == null) {
             Debug.LogError(
-                "LowStaminaPrompt:\tfail to get singleton: "
+                "LowStaminaWidget:\tfail to get singleton: "
                     + "StaminaBarController",
                 this
             );
@@ -79,7 +79,7 @@ public class LowStaminaPrompt: MonoBehaviour {
         gameController = GameController.I;
         if (gameController == null) {
             Debug.LogWarning(
-                "LowStaminaPrompt:\tfail to get singleton: GameController",
+                "LowStaminaWidget:\tfail to get singleton: GameController",
                 this
             );
             return;
@@ -117,7 +117,7 @@ public class LowStaminaPrompt: MonoBehaviour {
         remainingS = showDurationS;
 
         if (Debug.isDebugBuild) {
-            Debug.Log("LowStaminaPrompt:\tfirst low stamina, hint shown", this);
+            Debug.Log("LowStaminaWidget:\tfirst low stamina, hint shown", this);
         }
     }
 

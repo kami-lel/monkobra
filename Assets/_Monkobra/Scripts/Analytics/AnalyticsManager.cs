@@ -351,7 +351,7 @@ public class AnalyticsManager: MonoBehaviour {
 
     // snapshot of the moment and the height climbed above the run start
     private static EventStamp CreateStamp() {
-        RampedDifficultyService ramp = RampedDifficultyService.I;
+        RampedDifficultyManager ramp = RampedDifficultyManager.I;
         return new EventStamp(
             DateTime.Now,
             ramp != null ? ramp.CurrentPlayerClimbedYDistance : 0f
@@ -408,10 +408,10 @@ public class AnalyticsManager: MonoBehaviour {
         }
         run.Status = status;
         run.DurationS = Time.time - run.StartTime;
-        run.HighestHeight = RampedDifficultyService.I != null
+        run.HighestHeight = RampedDifficultyManager.I != null
             ? Mathf.Max(
                 0f,
-                RampedDifficultyService.I.HighestPlayerClimbedYDistance
+                RampedDifficultyManager.I.HighestPlayerClimbedYDistance
             )
             : 0f;
         ScoreManager scoreMgr = ScoreManager.I;

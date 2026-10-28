@@ -13,7 +13,7 @@ using UnityEngine;
 /// </para>
 /// </summary>
 [RequireComponent(typeof(TMP_Text))]
-public class HackShortcutHelp: MonoBehaviour {
+public class HackShortcutPanel: MonoBehaviour {
     // Inspector Fields  #######################################################
     [SerializeField]
     [Tooltip("dev/hack keys listed, in the order of its entries")]
@@ -29,7 +29,7 @@ public class HackShortcutHelp: MonoBehaviour {
         // Inspector Assignment Guard  -----------------------------------------
         if (hackShortcuts == null) {
             Debug.LogWarning(
-                "HackShortcutHelp:\tmust assign Inspector Field: Hack "
+                "HackShortcutPanel:\tmust assign Inspector Field: Hack "
                     + "Shortcuts",
                 this
             );
@@ -40,7 +40,7 @@ public class HackShortcutHelp: MonoBehaviour {
         TMP_Text label = GetComponent<TMP_Text>();
         if (label == null) {
             Debug.LogError(
-                "HackShortcutHelp:\tfail to get Component: TMP_Text",
+                "HackShortcutPanel:\tfail to get Component: TMP_Text",
                 this
             );
             enabled = false;
@@ -49,7 +49,7 @@ public class HackShortcutHelp: MonoBehaviour {
 
         label.text = BuildHelpText();
         if (Debug.isDebugBuild) {
-            Debug.Log("HackShortcutHelp:\thelp text ready");
+            Debug.Log("HackShortcutPanel:\thelp text ready");
         }
     }
 

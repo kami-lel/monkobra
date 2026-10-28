@@ -5,7 +5,7 @@ using UnityEngine;
 /// Attach to a detection trigger collider; reports a hit whenever it touches
 /// a collider tagged <c>Branch</c>, or a hazard calls
 /// <see cref="ReportHit(Collider, HitKind)"/>. Only detects: the camera
-/// shake is <see cref="CameraHitShakeEfx"/>'s job.
+/// shake is <see cref="CameraHitShakeFeedback"/>'s job.
 /// </summary>
 public class HitBranchSensor: MonoBehaviour {
     // Public Members  #########################################################

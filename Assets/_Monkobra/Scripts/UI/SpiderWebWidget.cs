@@ -12,7 +12,7 @@ using UnityEngine.UI;
 /// objects, so its event subscriptions live on while those are hidden.
 /// </para>
 /// </summary>
-public class SpiderWebPrompt: MonoBehaviour {
+public class SpiderWebWidget: MonoBehaviour {
     // Inspector Fields  #######################################################
     [Header("Wiring")]
     [SerializeField]
@@ -42,25 +42,25 @@ public class SpiderWebPrompt: MonoBehaviour {
         // Inspector Assignment Guard  -----------------------------------------
         if (struggle == null) {
             Debug.LogWarning(
-                "SpiderWebPrompt:\tmust assign Inspector Field: struggle",
+                "SpiderWebWidget:\tmust assign Inspector Field: struggle",
                 this
             );
         }
         if (promptLabel == null) {
             Debug.LogWarning(
-                "SpiderWebPrompt:\tmust assign Inspector Field: promptLabel",
+                "SpiderWebWidget:\tmust assign Inspector Field: promptLabel",
                 this
             );
         }
         if (progressBar == null) {
             Debug.LogWarning(
-                "SpiderWebPrompt:\tmust assign Inspector Field: progressBar",
+                "SpiderWebWidget:\tmust assign Inspector Field: progressBar",
                 this
             );
         }
         if (progressFill == null) {
             Debug.LogWarning(
-                "SpiderWebPrompt:\tmust assign Inspector Field: progressFill",
+                "SpiderWebWidget:\tmust assign Inspector Field: progressFill",
                 this
             );
         }

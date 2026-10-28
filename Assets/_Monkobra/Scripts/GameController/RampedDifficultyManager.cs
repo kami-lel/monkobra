@@ -5,9 +5,9 @@ using UnityEngine;
 /// </summary>
 // run first so other LateUpdate readers see this frame's height
 [DefaultExecutionOrder(-100)]
-public class RampedDifficultyService: MonoBehaviour {
+public class RampedDifficultyManager: MonoBehaviour {
     // Public Members  #########################################################
-    public static RampedDifficultyService I { get; private set; }
+    public static RampedDifficultyManager I { get; private set; }
     // player y at game start; world u
     public float PlayerGameStartYPosition { get; private set; }
     // player y above start y, refreshed every frame; world u

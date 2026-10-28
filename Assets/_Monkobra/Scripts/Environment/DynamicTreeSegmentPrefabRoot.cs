@@ -230,8 +230,8 @@ public class DynamicTreeSegmentPrefabRoot: MonoBehaviour {
 
     // 0 when no service in scene
     private float GetRampedDifficulty(float worldY) {
-        return RampedDifficultyService.I != null
-            ? RampedDifficultyService.I.GetRampedValueFromYPosition(worldY)
+        return RampedDifficultyManager.I != null
+            ? RampedDifficultyManager.I.GetRampedValueFromYPosition(worldY)
             : 0f;
     }
 

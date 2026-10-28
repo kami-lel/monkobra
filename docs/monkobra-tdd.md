@@ -103,7 +103,7 @@ Every dev key lives in one asset, `Settings/HackShortcuts/HackShortcutConfig.ass
 | F9 | close the analytics session and open a new file | `AnalyticsManager` |
 | F10 | save a mock analytics session file | `AnalyticsManager` |
 
-`HackShortcutHelp` on a TMP text writes these lines from the asset in `Awake`, and hides its object outside a development build. A new hack key is a new `HackAction` plus an entry in the asset.
+`HackShortcutPanel` on a TMP text writes these lines from the asset in `Awake`, and hides its object outside a development build. A new hack key is a new `HackAction` plus an entry in the asset.
 
 ## Game Balance
 
@@ -115,13 +115,13 @@ Every game balance number lives in one asset (how height becomes spawn chances i
 | Movement | `upSpeedU`, `downSpeedU`, `exhaustedSpeedMultiplier`, `idleStaminaRecoveryPerS` | `MonkeyController` |
 | Branch Hit | `hitStunDurationS`, `hitDropDistanceU`, `hitDropSpeedU` | `MonkeyController` |
 | Score | `pointsPerMeter`, `unitsPerMeter`, `scoreRewardPoints` | `ScoreManager` |
-| Ramped Difficulty | `rampedDifficultyCurve` | `RampedDifficultyService` |
+| Ramped Difficulty | `rampedDifficultyCurve` | `RampedDifficultyManager` |
 | Branch | `branchGenerationAttemptCount`, `branchSpawnProbabilityCurve`, `bananaSpawnProbabilityCurve` | `DynamicTreeSegmentPrefabRoot` |
 | Spider Web | `webAttemptCount`, `webSpawnProbabilityCurve` | `SpiderWebSpawner` |
 | Falling Cobra | `fallingCobraAttemptCount`, `fallingCobraSpawnProbabilityCurve`, `fallingCobraFallSpeedU`, `fallingCobraHorizontalSpeedU`, `fallingCobraReachWakeDistanceU`, `fallingCobraBananaAmbushChance`, `fallingCobraRehitGraceS`, `fallingCobraMaxHits` | `FallingCobraSpawner`, `FallingCobraController` |
 | Great Cobra | `cobraBaseSpeedCurve`, `cobraSurgePerMistakeS`, `cobraMaxSurgeS`, `cobraSurgeSpeedPerMistakeU`, `cobraMaxSurgeSpeedU`, `cobraSpeedChangeRateU` | `CobraMotor` |
 
-- Wiring: each reader holds a `GameBalanceConfig` inspector field (`balanceConfig` on `StaminaBarController`, `ScoreManager`, `MonkeyController`, `DynamicTreeSegmentPrefabRoot`, `RampedDifficultyService`, `SpiderWebSpawner`, `FallingCobraSpawner`, and `CobraMotor` on the `GreatCobra` prefab), all pointing at the same asset
+- Wiring: each reader holds a `GameBalanceConfig` inspector field (`balanceConfig` on `StaminaBarController`, `ScoreManager`, `MonkeyController`, `DynamicTreeSegmentPrefabRoot`, `RampedDifficultyManager`, `SpiderWebSpawner`, `FallingCobraSpawner`, and `CobraMotor` on the `GreatCobra` prefab), all pointing at the same asset
 - Not Balance: the arm stroke and reach, orbit speed, acceleration, and input actions stay in `MonkeyConfig`; branch radius, spacing, and retries stay in `BranchFruitPlacementConfig`; web radius, spacing, clearance, retries, and the test override stay on `SpiderWebSpawner`; cobra spawn radius, spacing, retries, and ambush height stay on `FallingCobraSpawner`, and its trigger and fall distances on the falling cobra prefab
 - Retired: `GameConfig`, `ScoreConfig`, and `ScoreReward` were folded into `GameBalanceConfig` and removed
 - Suffixes: `U` is world units, `S` is seconds, `Deg` is degrees, `PerU` is per world unit travelled
@@ -146,7 +146,7 @@ Climb speeds come from `Settings/GameBalanceConfig.asset`. Orbit speed, accelera
 The tree is a stack of static and dynamic trunk segments under a `TreeTop`, which carries no win zone: a run only loses.
 
 - Extent: `TreeManager` (singleton `I`) holds `MinY` and `MaxY`, 0 and 100 by default, from the finite tree; nothing reads them any more; `FallingCobraSpawner` takes each segment's pivot as the trunk axis
-- Climb Height: heights that drive difficulty are measured above the monkey's start y by `RampedDifficultyService.GetClimbedYDistance`: branch density, banana chance, web chance, falling cobra chance, the score, and the height HUD. Nothing shifts the world origin; if something ever does, it only has to move `PlayerGameStartYPosition` along
+- Climb Height: heights that drive difficulty are measured above the monkey's start y by `RampedDifficultyManager.GetClimbedYDistance`: branch density, banana chance, web chance, falling cobra chance, the score, and the height HUD. Nothing shifts the world origin; if something ever does, it only has to move `PlayerGameStartYPosition` along
 - Segments: each `DynamicTreeSegmentPrefabRoot` places branches on itself in `Start` and in every `Restart` ([Mobs](mob-doc.md#placement)), then raises the static `BranchesGenerated`, which `SpiderWebSpawner` answers with webs ([Mobs](mob-doc.md#placement-1)) and `FallingCobraSpawner` with falling cobras ([Mobs](mob-doc.md#spawning))
 - Pool: `DTSPool` sits on an empty object, finds the `Player`-tagged object once, and instantiates `segmentCount` copies of `segmentPrefab` end to end, the first (lowest) one created at the world height `firstSegmentY`. It keeps them in a FIFO: only when the stack top is less than `lookAheadU` above the player, and the lowest segment lies wholly under the player, that lowest one is moved over the stack top by `DynamicTreeSegmentPrefabRoot.Restart`, which clears its branches and webs and rolls branches again; the webs follow through `BranchesGenerated`, the pool never calls the spawner. Its `mockTree` field names an editor-only stand-in, `Envs/Tree` in `Lv1Scene`, that is deactivated at runtime, so nothing that must run may sit under it
 
@@ -159,7 +159,7 @@ The tree is a stack of static and dynamic trunk segments under a `TreeTop`, whic
 - Idle Recovery: `MonkeyController` adds `GameBalanceConfig.IdleStaminaRecoveryPerS` per second while no move key is pressed
 - Depletion: reaching 0 does not end the run: `MonkeyController` scales upward climb speed only by `GameBalanceConfig.ExhaustedSpeedMultiplier` until stamina is above 0 again
 - Label: the `StaminaBar` prefab carries a white TMP `Energy` label, `EnergyLabel`, above the left end of the bar; it is a child of the root, so it punches and shakes with the bar
-- First Low Hint: `LowStaminaPrompt` listens to the same `LowStaminaMoveAttempted`, so its once-per-scene hint opens with the first bar shake and cool-down pulse, at the same threshold ([UI](#ui))
+- First Low Hint: `LowStaminaWidget` listens to the same `LowStaminaMoveAttempted`, so its once-per-scene hint opens with the first bar shake and cool-down pulse, at the same threshold ([UI](#ui))
 
 All values live in `Settings/GameBalanceConfig.asset`.
 
@@ -167,10 +167,10 @@ All values live in `Settings/GameBalanceConfig.asset`.
 
 `ScoreManager` (singleton `I`, on the `GameController` object) keeps two scores and notifies the UI when the total changes.
 
-- Distance Score: whole meters of the highest point climbed, read from `RampedDifficultyService.CurrentPlayerClimbedYDistance`, refreshed every frame (player y minus the y at game start), times points per meter. Only a new high counts, so falling and re-climbing earns nothing
+- Distance Score: whole meters of the highest point climbed, read from `RampedDifficultyManager.CurrentPlayerClimbedYDistance`, refreshed every frame (player y minus the y at game start), times points per meter. Only a new high counts, so falling and re-climbing earns nothing
 - Reward Score: points from each banana collected through its `ScorePickup`; `ScoreManager.BananaCollectedCount` counts those pickups
 - Gate: `CanScore` is true only after start, before `EndRun`, while unpaused, and while the game is not over
-- Display: `ScoreDisplay` shows the total on the HUD and on the lose panel
+- Display: `ScoreWidget` shows the total on the HUD and on the lose panel
 
 All values live in `Settings/GameBalanceConfig.asset`; `ScorePickup` carries no reward asset of its own.
 
@@ -180,8 +180,8 @@ The test scenes have no `ScoreManager`.
 
 Three Cinemachine cameras (behind, look-left, look-right) are swapped by priority. Every camera script sits on the main camera, next to the `CinemachineBrain`, and finds gameplay objects through their `I` singletons.
 
-- Hit shake: `CameraHitShakeEfx` reads `HitBranchSensor.I` and fires one of two `CinemachineImpulseSource` components on the camera by hit kind, light for a branch, heavy for a falling cobra. Amplitude and duration are tuned on the sources, and the strength a view feels also scales with its camera's impulse listener gain
-- Cool-down: `CameraCoolDownEfx` listens to `StaminaBarController.LowStaminaMoveAttempted` and pulses a URP Vignette on a global Volume plus a field-of-view widen on the live Cinemachine camera, easing both back to rest. It has two steps: a lighter one while stamina is below the low fraction, a stronger one once the bar is empty, and a low pulse in flight steps up when the bar empties. Both steps and the timing live in the `CameraEfxConfig` asset (the hit shake stays on its two impulse sources, since Cinemachine owns those values). A running pulse ignores repeats and a short cooldown follows
+- Hit shake: `CameraHitShakeFeedback` reads `HitBranchSensor.I` and fires one of two `CinemachineImpulseSource` components on the camera by hit kind, light for a branch, heavy for a falling cobra. Amplitude and duration are tuned on the sources, and the strength a view feels also scales with its camera's impulse listener gain
+- Cool-down: `CameraCoolDownFeedback` listens to `StaminaBarController.LowStaminaMoveAttempted` and pulses a URP Vignette on a global Volume plus a field-of-view widen on the live Cinemachine camera, easing both back to rest. It has two steps: a lighter one while stamina is below the low fraction, a stronger one once the bar is empty, and a low pulse in flight steps up when the bar empties. Both steps and the timing live in the `CameraEfxConfig` asset (the hit shake stays on its two impulse sources, since Cinemachine owns those values). A running pulse ignores repeats and a short cooldown follows
 
 The swap rules are in the [Grab System](grab-doc.md#camera), the hit trigger in [Mobs](mob-doc.md#hit-penalty).
 
@@ -199,15 +199,15 @@ One asset, `Settings/_Shared/InputSystem_Actions`, holds all bindings, reference
 | Element | Script | Shows |
 | --- | --- | --- |
 | Stamina Bar | `UI/StaminaBarController` | current stamina, under an `Energy` label |
-| Climb Progress | `UI/ProgressBarRoot` | a window `windowSizeY` tall below the monkey, with a marker for how near the cobra's head is |
-| Score | `UI/ScoreDisplay` | total score, on the HUD and the lose panel |
-| Height | `UI/HeightDisplayController` | height climbed since game start, in world units |
+| Climb Progress | `UI/ProgressBarWidget` | a window `windowSizeY` tall below the monkey, with a marker for how near the cobra's head is |
+| Score | `UI/ScoreWidget` | total score, on the HUD and the lose panel |
+| Height | `UI/HeightDisplayWidget` | height climbed since game start, in world units |
 | Screens | `UI/ScreensManager` | tutorial and lose panels |
-| Lose Stats | `UI/LoseScreenController` | final height (highest point climbed), final score, and bananas collected, filled each time the lose panel is enabled |
-| Web Prompt | `UI/SpiderWebPrompt` | first-trap hint and the escape bar ([Mobs](mob-doc.md#trap-and-escape)) |
-| Low Stamina Prompt | `UI/LowStaminaPrompt` | first-low-stamina hint, once per scene load, below the screen center |
+| Lose Stats | `UI/LoseScreen` | final height (highest point climbed), final score, and bananas collected, filled each time the lose panel is enabled |
+| Web Prompt | `UI/SpiderWebWidget` | first-trap hint and the escape bar ([Mobs](mob-doc.md#trap-and-escape)) |
+| Low Stamina Prompt | `UI/LowStaminaWidget` | first-low-stamina hint, once per scene load, below the screen center |
 
-`LowStaminaPrompt` sits on an always-active Canvas child and toggles only its TMP label. The first `StaminaBarController.LowStaminaMoveAttempted` since the scene loaded, the event behind the bar shake and the camera cool-down, shows the hint for `showDurationS`; the script then drops its subscription, and nothing is static, so a reload brings the hint back. A loss hides it at once. While `SpiderWebStruggle.IsTrapped` it is hidden and its countdown waits, so it never shares the screen with the web prompt, and the rest plays after the escape; a held monkey reports no move attempts, so a trap can only cut in on a hint already showing. The label sits below the screen center, clear of the web prompt and the catch-up warning above it and of the vignette's dark edges; the Canvas has no render camera, so it draws as an overlay the vignette never darkens.
+`LowStaminaWidget` sits on an always-active Canvas child and toggles only its TMP label. The first `StaminaBarController.LowStaminaMoveAttempted` since the scene loaded, the event behind the bar shake and the camera cool-down, shows the hint for `showDurationS`; the script then drops its subscription, and nothing is static, so a reload brings the hint back. A loss hides it at once. While `SpiderWebStruggle.IsTrapped` it is hidden and its countdown waits, so it never shares the screen with the web prompt, and the rest plays after the escape; a held monkey reports no move attempts, so a trap can only cut in on a hint already showing. The label sits below the screen center, clear of the web prompt and the catch-up warning above it and of the vignette's dark edges; the Canvas has no render camera, so it draws as an overlay the vignette never darkens.
 
 The tutorial in `Lv1Scene` uses editable uGUI Images under `TutorialScreen/KeyboardControls` for the WASD cluster and a wide Space key. Thin white Image rectangles form each outline without a sprite dependency; the WASD keys also have inset keycap frames and diagonal bevel lines. Each key has an explicit, stretched Background child with a dark gray Image (alpha 0.82), ordered before its outlines and label to preserve contrast over the white overlay. Letters are white, and `space` sits inside the long rectangular key at the bottom left. Its uGUI Text captions show `Move`, `Grab Banana`, and `Hold to reach, release to grab`; the existing start prompt remains below them. Above the keys, `TutorialScreen/GoalText` states the goal, `Climb high. Eat bananas. Escape the cobra.`, as uGUI Text in white at size 40, the largest text on the panel, centered on the same vertical line as the start prompt. It uses the regular-weight `TextMesh Pro/Fonts/LiberationSans.ttf`, the source font of the start prompt's TMP asset, because the tutorial subset has only the SemiBold weight. The original translucent white overlay (alpha 0.392) washes out the game behind the tutorial to indicate that the run has not started. `ScreensManager` shows and hides the whole panel as before.
 
@@ -222,7 +222,7 @@ The tutorial in `Lv1Scene` uses editable uGUI Images under `TutorialScreen/Keybo
 - Tuning In Data: values stay in serialized fields, and shared tuning sits in a ScriptableObject: balance numbers in `GameBalanceConfig` ([Game Balance](#game-balance)), monkey arm and input in `MonkeyConfig`, branch geometry in `BranchFruitPlacementConfig`. Gameplay values are never hard-coded
 - Field Guards: required inspector fields are checked in `Awake` with a logged message naming the field
 - Kinematic Body: nothing about the monkey is mass or gravity driven. Each arm is posed purely by its joint drives
-- Style: `Player/`, `GameController/`, `Analytics/`, `MobGreatCobra/`, `MobFallingCobra/`, `UI/StaminaBarController`, `UI/ScreensManager`, and most of `Environment/` follow the house Unity style. `Scoring/`, `UI/ProgressBarRoot`, and `MobSpiderWeb/SpiderWebBuilder` are still in the template style, some with Chinese comments
+- Style: `Player/`, `GameController/`, `Analytics/`, `MobGreatCobra/`, `MobFallingCobra/`, `UI/StaminaBarController`, `UI/ScreensManager`, and most of `Environment/` follow the house Unity style. `Scoring/`, `UI/ProgressBarWidget`, and `MobSpiderWeb/SpiderWebBuilder` are still in the template style, some with Chinese comments
 
 ## Build and Deploy
 
