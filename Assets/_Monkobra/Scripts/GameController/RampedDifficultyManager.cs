@@ -23,6 +23,9 @@ public class RampedDifficultyManager: MonoBehaviour {
     public float RampBaseYPosition =>
         rampBase != null ? rampBase.position.y : PlayerGameStartYPosition;
 
+    /// <returns>the player's transform, null if none was found</returns>
+    public Transform PlayerTransform => player;
+
     // Public Methods  #########################################################
     /// <summary>
     /// Height of <paramref name="y"/> above the player's game start y, the

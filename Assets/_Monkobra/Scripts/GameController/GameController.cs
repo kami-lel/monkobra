@@ -23,6 +23,13 @@ public class GameController: MonoBehaviour {
     public bool IsRunLive =>
         State == GameState.Playing || State == GameState.StartingZone;
 
+    /// <summary>
+    /// if the run has not reached <see cref="GameState.Playing"/> yet: the
+    /// tutorial screen or the starting zone
+    /// </summary>
+    public bool IsBeforePlaying =>
+        State == GameState.Tutorial || State == GameState.StartingZone;
+
     /// <summary>if the starting zone is under way</summary>
     public bool IsInStartingZone => State == GameState.StartingZone;
 

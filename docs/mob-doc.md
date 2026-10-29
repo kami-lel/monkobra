@@ -41,6 +41,7 @@ The stun duration and drop distance and speed are in `Settings/GameBalanceConfig
 
 - Count: a fixed `branchGenerationAttemptCount` per segment (`GameBalanceConfig`); each attempt samples `branchSpawnProbabilityCurve` at the segment's ramped difficulty (`RampedDifficultyManager`) and spawns a branch if a random roll falls below that chance; why the curve is shaped by difficulty is in [Balance Design](balance-doc.md#one-roll-model)
 - Position: a random angle round the trunk and a random height in the segment, at a fixed radius, retried until a spot keeps the minimum separation from branches already placed on that segment, else the last try is accepted
+- Monkey Clearance: before the run is playing (tutorial screen and starting zone) a branch spot within `startingZoneBranchClearRadiusU` (`GameBalanceConfig`, 0 turns it off) of the monkey is rejected and retried; if no clear spot is found the branch is skipped, so a restart never spawns the monkey into a branch. The monkey is read from `RampedDifficultyManager.PlayerTransform`
 - Banana: `TreeSegmentController` samples `bananaSpawnProbabilityCurve` (`GameBalanceConfig`) at each placed branch's ramped difficulty and passes the chance to `BranchController.Initialize`, which rolls whether the branch bears a banana, then randomizes the stem length and banana rotation
 
 Attempt counts and the branch and banana chance curves are in `Settings/GameBalanceConfig.asset`; branch radius, separation, and placement retries are in `Settings/Mob/BranchFruitPlacementConfig.asset`.

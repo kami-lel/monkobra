@@ -53,6 +53,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   branchGenerationAttemptCount: 10
+  startingZoneBranchClearRadiusU: 6
   branchSpawnProbabilityCurve:
     serializedVersion: 2
     m_Curve:

@@ -62,6 +62,12 @@ public class GameBalanceConfig: ScriptableObject {
     /// <returns>branch creation attempts rolled per segment</returns>
     public int BranchGenerationAttemptCount => branchGenerationAttemptCount;
 
+    /// <returns>no branch grows within this distance of the monkey while the
+    /// starting zone lasts, so a restart never spawns the monkey into one;
+    /// u</returns>
+    public float StartingZoneBranchClearRadiusU =>
+        startingZoneBranchClearRadiusU;
+
     /// <returns>x: ramped difficulty 0~1; y: chance 0~1 that one attempt
     /// creates a branch</returns>
     public AnimationCurve BranchSpawnProbabilityCurve =>
@@ -245,6 +251,14 @@ public class GameBalanceConfig: ScriptableObject {
     [Min(0)]
     [Tooltip("branch creation attempts rolled per segment")]
     private int branchGenerationAttemptCount = 9;
+
+    [SerializeField]
+    [Min(0f)]
+    [Tooltip(
+        "no branch is placed within this distance of the monkey while the "
+            + "starting zone lasts; 0 turns it off; u"
+    )]
+    private float startingZoneBranchClearRadiusU = 6f;
 
     [SerializeField]
     [Tooltip(
