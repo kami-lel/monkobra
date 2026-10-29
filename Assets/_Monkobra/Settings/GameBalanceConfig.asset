@@ -268,3 +268,5 @@ MonoBehaviour:
   cobraSurgeSpeedPerMistakeU: 2.5
   cobraMaxSurgeSpeedU: 9
   cobraSpeedChangeRateU: 6
+  cobraExitBoostSpeedU: 3
+  cobraExitBoostDurationS: 5

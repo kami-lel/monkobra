@@ -144,6 +144,15 @@ public class GameBalanceConfig: ScriptableObject {
     /// target; u/s²</returns>
     public float CobraSpeedChangeRateU => cobraSpeedChangeRateU;
 
+    /// <returns>extra climb speed the great cobra gets over its base speed
+    /// for a while after the monkey leaves the starting zone; 0 turns it
+    /// off; u/s</returns>
+    public float CobraExitBoostSpeedU => cobraExitBoostSpeedU;
+
+    /// <returns>how long the great cobra's starting zone exit boost lasts;
+    /// s</returns>
+    public float CobraExitBoostDurationS => cobraExitBoostDurationS;
+
     /// <returns>fraction 0~1 of <see cref="MaxStamina"/> the monkey starts
     /// the level with, spent in the starting zone</returns>
     public float StartingZoneStartStaminaFraction =>
@@ -375,6 +384,19 @@ public class GameBalanceConfig: ScriptableObject {
     [Tooltip("how fast the climb speed eases toward its target; u/s²")]
     private float cobraSpeedChangeRateU = 6f;
 
+    [SerializeField]
+    [Min(0f)]
+    [Tooltip(
+        "extra climb speed over the base speed for a while after the monkey "
+            + "leaves the starting zone; 0 turns it off; u/s"
+    )]
+    private float cobraExitBoostSpeedU = 3f;
+
+    [SerializeField]
+    [Min(0f)]
+    [Tooltip("how long the starting zone exit boost lasts; s")]
+    private float cobraExitBoostDurationS = 5f;
+
     // Editor Validation  ######################################################
     private void OnValidate() {
         maxStamina = Mathf.Max(1f, maxStamina);
@@ -416,5 +438,7 @@ public class GameBalanceConfig: ScriptableObject {
         cobraSurgeSpeedPerMistakeU = Mathf.Max(0f, cobraSurgeSpeedPerMistakeU);
         cobraMaxSurgeSpeedU = Mathf.Max(0f, cobraMaxSurgeSpeedU);
         cobraSpeedChangeRateU = Mathf.Max(0.01f, cobraSpeedChangeRateU);
+        cobraExitBoostSpeedU = Mathf.Max(0f, cobraExitBoostSpeedU);
+        cobraExitBoostDurationS = Mathf.Max(0f, cobraExitBoostDurationS);
     }
 }
