@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1870131523001382540}
   - component: {fileID: 2561747855202310708}
   m_Layer: 0
-  m_Name: StarterZoneExitTrigger
+  m_Name: StartingZoneExitTrigger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -65,4 +65,4 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 68c8edb89f4a9b74e9bc653eea55c266, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::StarterZoneExitRelay
+  m_EditorClassIdentifier: Assembly-CSharp::StartingZoneExitRelay

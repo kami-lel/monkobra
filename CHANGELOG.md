@@ -2,7 +2,7 @@
 
 <!--
 BUG Erik tree branch created at player location & thus resulting failure
-FIXME Erik Keeps improving tutorial zone: larger range, smaller debuff, half the energy
+FIXME Erik Keeps improving starting zone: larger range, smaller debuff, half the energy
 
 Fixme Pan: UI mpv
 Todo Dont Pause screen
@@ -89,8 +89,8 @@ bug spider web fail to load & log warning
 
 - camera cool-down effect: vignette & zoom-out pulse on move attempts at low stamina, tuned in `CameraEfxConfig`
 - camera hit shake: light for branch hits, heavier for falling cobra
-- starter zone: live run before Playing begins, ended by the monkey entering an exit trigger; Great Cobra holds height meanwhile
-- ramped difficulty starts at 0 at the starter zone exit
+- starting zone: live run before Playing begins, ended by the monkey entering an exit trigger; Great Cobra holds height meanwhile
+- ramped difficulty starts at 0 at the starting zone exit
 - grab arm tracks its banana while interact is held
 
 ### Changed
@@ -101,7 +101,7 @@ bug spider web fail to load & log warning
 
 ##### Erik
 
-- difficulty ramp & branch/banana curves start above the starter zone exit
+- difficulty ramp & branch/banana curves start above the starting zone exit
 - Great Cobra starts lower (-5 → -10)
 - low stamina, not only empty, now triggers move-attempt feedback
 - `Lv1Scene` split into prefabs, easing scene merges

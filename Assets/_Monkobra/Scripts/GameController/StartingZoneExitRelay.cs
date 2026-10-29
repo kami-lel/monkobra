@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Sits on a trigger collider GO. When the monkey enters it, the starter zone
+/// Sits on a trigger collider GO. When the monkey enters it, the starting zone
 /// ends and the run moves on to <see cref="GameState.Playing"/>.
 /// <para>
 /// The monkey is recognised by the <c>Player</c> tag on its root collider; the
@@ -9,13 +9,13 @@ using UnityEngine;
 /// </para>
 /// </summary>
 [RequireComponent(typeof(Collider))]
-public class StarterZoneExitRelay: MonoBehaviour {
+public class StartingZoneExitRelay: MonoBehaviour {
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
         Collider zone = GetComponent<Collider>();
         if (!zone.isTrigger) {
             Debug.LogWarning(
-                "StarterZoneExitRelay:\tCollider must be a trigger", this);
+                "StartingZoneExitRelay:\tCollider must be a trigger", this);
         }
     }
 
@@ -25,15 +25,15 @@ public class StarterZoneExitRelay: MonoBehaviour {
         }
         if (GameController.I == null) {
             Debug.LogError(
-                "StarterZoneExitRelay:\tfail to get Singleton: GameController",
+                "StartingZoneExitRelay:\tfail to get Singleton: GameController",
                 this);
             return;
         }
 
         if (Debug.isDebugBuild) {
-            Debug.Log("StarterZoneExitRelay:\tmonkey entered, end zone");
+            Debug.Log("StartingZoneExitRelay:\tmonkey entered, end zone");
         }
-        GameController.I.EndStarterZone();
+        GameController.I.EndStartingZone();
     }
 
     // constants  ##############################################################

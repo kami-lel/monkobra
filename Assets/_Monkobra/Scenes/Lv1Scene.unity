@@ -630,7 +630,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 6468250871757858016, guid: 8579386181a55044980f3b31fd6eb883, type: 3}
       propertyPath: m_Name
-      value: StarterZoneExitTrigger
+      value: StartingZoneExitTrigger
       objectReference: {fileID: 0}
     - target: {fileID: 7773196388448305781, guid: 8579386181a55044980f3b31fd6eb883, type: 3}
       propertyPath: m_LocalPosition.x

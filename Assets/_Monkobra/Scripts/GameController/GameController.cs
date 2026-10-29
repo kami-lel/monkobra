@@ -21,7 +21,7 @@ public class GameController: MonoBehaviour {
     /// monkey is still protected
     /// </summary>
     public bool IsRunLive =>
-        State == GameState.Playing || State == GameState.StarterZone;
+        State == GameState.Playing || State == GameState.StartingZone;
 
     /// <summary>
     /// whether cobra collisions are ignored entirely, a debug cheat; warns
@@ -36,8 +36,8 @@ public class GameController: MonoBehaviour {
     }
 
     // Public Methods  #########################################################
-    public void EndStarterZone() {
-        if (State == GameState.StarterZone) {
+    public void EndStartingZone() {
+        if (State == GameState.StartingZone) {
             SetState(GameState.Playing);
         }
     }
@@ -139,7 +139,7 @@ public class GameController: MonoBehaviour {
     private void OnAnyPressed(InputControl _) {
         anyPressSub = null;
         if (State == GameState.Tutorial) {
-            SetState(GameState.StarterZone);
+            SetState(GameState.StartingZone);
         }
     }
 
@@ -179,7 +179,7 @@ public class GameController: MonoBehaviour {
     private void SetState(GameState next) {
         State = next;
         Time.timeScale = next == GameState.Playing
-            || next == GameState.StarterZone ? 1f : 0f;
+            || next == GameState.StartingZone ? 1f : 0f;
 
         if (next == GameState.Lost) {
             lostTime = Time.unscaledTime;

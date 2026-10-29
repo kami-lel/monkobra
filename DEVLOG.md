@@ -10,15 +10,15 @@ A first simple playtest of the web build turned up 2 issues:
 Our fixes:
 
 - Fixed Resolution: web builds lock to 1280x720 w/ a UI that scales to it. A scaling canvas & a `FitWindow` WebGL template keep 16:9 & fit any browser window, so the whole game shows the same on Mac Retina, 4K & Windows
-- Starter Zone: a safe zone at the foot of the tree, so the player is not rushed up. The Great Cobra holds its height & bananas and branches are plentiful, so the player can try, explore & learn to move & grab; once the monkey climbs out, the cobra starts to climb & difficulty ramps from 0
+- Starting Zone: a safe zone at the foot of the tree, so the player is not rushed up. The Great Cobra holds its height & bananas and branches are plentiful, so the player can try, explore & learn to move & grab; once the monkey climbs out, the cobra starts to climb & difficulty ramps from 0
 - Start Screen Controls: the start screen shows which key does what, so players need not guess. A drawn keyboard (WASD cluster & wide Space key) is captioned `Move`, `Grab Banana` & `Hold to reach, release to grab`, w/ a bundled font so it renders in WebGL
 - Camera Shake & Effects: added so hits & low stamina are felt, not only read off the bar. A Cinemachine impulse shake (light for a branch hit, heavier for a falling cobra), plus a vignette & zoom-out pulse on a move attempt at low stamina, lighter while low & stronger once empty. Tuning lives in one `CameraEfxConfig` asset
 
 ![Fixed 16:9 game view inside a taller browser window](devlog-assets/wk9-fixed-resolution.png)
 *Fixed resolution: in a tall browser window the web build keeps its 16:9 frame & fills the rest with black bars, so nothing is cropped; a Fullscreen button sits at bottom right*
 
-![Starter zone crowded with bananas and branches](devlog-assets/wk9-tutorial-zone.png)
-*Starter zone: Score & Height read 0 & branches carry bananas all round the monkey, so the player can practice moving & grabbing before the Great Cobra starts to climb. The banana at top left has the white outline of a grabbable fruit*
+![Starting zone crowded with bananas and branches](devlog-assets/wk9-starting-zone.png)
+*Starting zone: Score & Height read 0 & branches carry bananas all round the monkey, so the player can practice moving & grabbing before the Great Cobra starts to climb. The banana at top left has the white outline of a grabbable fruit*
 
 ![Start screen showing the key bindings](devlog-assets/wk9-start-screen.png)
 *Start screen: a drawn keyboard shows WASD to move & Space to grab a banana (hold to reach, release to grab), with a "Press Space to Start" prompt over the dimmed scene*

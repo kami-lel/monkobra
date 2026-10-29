@@ -69,8 +69,8 @@ Subsystems talk through scene singletons, C# events, and trigger callbacks, not 
 ```mermaid
 stateDiagram-v2
   [*] --> Tutorial: scene load
-  Tutorial --> StarterZone: any button
-  StarterZone --> Playing: EndStarterZone
+  Tutorial --> StartingZone: any button
+  StartingZone --> Playing: EndStartingZone
   Playing --> Lost: LoseGame
   Lost --> [*]: interact, reload scene
 ```
@@ -78,13 +78,13 @@ stateDiagram-v2
 | State | Time Scale | Screen |
 | --- | --- | --- |
 | Tutorial | 0 | tutorial panel, any button starts the run |
-| StarterZone | 1 | none, run is live, `LoseGame` works, until `EndStarterZone()`, called by `StarterZoneExitRelay` when the monkey enters its trigger |
+| StartingZone | 1 | none, run is live, `LoseGame` works, until `EndStartingZone()`, called by `StartingZoneExitRelay` when the monkey enters its trigger |
 | Playing | 1 | none, never paused |
 | Lost | 0 | lose panel, interact reloads the scene after `restartInputDelay` |
 
-`LoseGame()` runs once, from StarterZone or Playing: the cobra touches the monkey ([Mobs](mob-doc.md#contact)). It carries no cause: analytics infers one itself (`DeathCauseResolver`): a branch hit or web encounter w/i `AnalyticsConfig.DeathCauseWindowS` before the loss names the cause, otherwise it is the great cobra. `LoseGame` calls `ScoreManager.EndRun` so the score settles, then enters Lost. `ScreensManager` owns the panels: they start deactivated, and it shows the current state's panel in `Start` and on every `StateChanged`.
+`LoseGame()` runs once, from StartingZone or Playing: the cobra touches the monkey ([Mobs](mob-doc.md#contact)). It carries no cause: analytics infers one itself (`DeathCauseResolver`): a branch hit or web encounter w/i `AnalyticsConfig.DeathCauseWindowS` before the loss names the cause, otherwise it is the great cobra. `LoseGame` calls `ScoreManager.EndRun` so the score settles, then enters Lost. `ScreensManager` owns the panels: they start deactivated, and it shows the current state's panel in `Start` and on every `StateChanged`.
 
-Gameplay that must stop outside a run checks both `Time.timeScale <= 0` and the state. Grab, pickup, and scoring (`ArmController.TryGrabFruit`, `ScorePickup`, `ScoreManager.CanScore`) check `GameController.IsRunLive` (StarterZone or Playing); `SpiderWebStruggle` and the other HUD checkers still require `Playing`, so webs do not catch in the starter zone.
+Gameplay that must stop outside a run checks both `Time.timeScale <= 0` and the state. Grab, pickup, and scoring (`ArmController.TryGrabFruit`, `ScorePickup`, `ScoreManager.CanScore`) check `GameController.IsRunLive` (StartingZone or Playing); `SpiderWebStruggle` and the other HUD checkers still require `Playing`, so webs do not catch in the starting zone.
 
 ## Analytics
 
