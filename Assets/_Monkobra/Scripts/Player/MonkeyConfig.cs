@@ -3,8 +3,9 @@ using UnityEngine.InputSystem;
 
 /// <summary>
 /// Shared tuning for the monkey: arm stroke and reach, orbit speed, and the
-/// input actions every consumer reads. Climb speed, exhaustion and branch-hit
-/// numbers live in <see cref="GameBalanceConfig"/>. Consumed by
+/// input actions every consumer reads. Climb build-up and exhaustion live in
+/// <see cref="MovementConfig"/>, branch-hit numbers in
+/// <see cref="GameBalanceConfig"/>. Consumed by
 /// <see cref="ArmController"/> and <see cref="MonkeyController"/>.
 /// <para>
 /// <see cref="ArmController"/> takes nothing physical from here, springs, limits,
@@ -51,11 +52,8 @@ public class MonkeyConfig: ScriptableObject {
     /// <returns>orbit speed around the trunk; deg/s</returns>
     public float RotationSpeedDeg => rotationSpeedDeg;
 
-    /// <returns>ramp rate toward target velocity while input is held; u/s²
-    /// </returns>
-    public float AccelerationU => accelerationU;
-
-    /// <returns>ramp rate toward target velocity while idle; u/s²</returns>
+    /// <returns>ramp rate toward a stop once the climb key is released;
+    /// u/s²</returns>
     public float DecelerationU => decelerationU;
 
     /// <returns>directional input action every consumer reads, a Vector2
@@ -117,11 +115,7 @@ public class MonkeyConfig: ScriptableObject {
     private float rotationSpeedDeg = 50f;
 
     [SerializeField]
-    [Tooltip("ramp rate toward target velocity while input held; u/s²")]
-    private float accelerationU = 20f;
-
-    [SerializeField]
-    [Tooltip("ramp rate toward target velocity while idle; u/s²")]
+    [Tooltip("ramp rate toward a stop once the climb key is released; u/s²")]
     private float decelerationU = 30f;
 
     [Header("Input")]
@@ -147,7 +141,6 @@ public class MonkeyConfig: ScriptableObject {
         reachAimSpeedDeg = Mathf.Max(0f, reachAimSpeedDeg);
         armWidthU = Mathf.Max(0.001f, armWidthU);
         rotationSpeedDeg = Mathf.Max(0f, rotationSpeedDeg);
-        accelerationU = Mathf.Max(0f, accelerationU);
         decelerationU = Mathf.Max(0f, decelerationU);
     }
 }

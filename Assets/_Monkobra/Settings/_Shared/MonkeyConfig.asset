@@ -22,7 +22,6 @@ MonoBehaviour:
   upSpeedU: 6
   downSpeedU: 12
   rotationSpeedDeg: 50
-  accelerationU: 20
   decelerationU: 30
   hitStunDurationS: 0.75
   hitDropDistanceU: 10

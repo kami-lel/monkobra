@@ -16,8 +16,6 @@ MonoBehaviour:
   staminaUpwardDrainPerU: 0.5
   staminaSidewayDrainPerU: 0.3
   fruitStaminaRestore: 35
-  upSpeedU: 6
-  downSpeedU: 12
   startingZoneStartStaminaFraction: 0.3
   startingZoneExhaustedSpeedMultiplier: 0.5
   hitStunDurationS: 0.75

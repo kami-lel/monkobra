@@ -23,12 +23,6 @@ public class GameBalanceConfig: ScriptableObject {
     /// <returns>stamina restored per grabbed fruit</returns>
     public float FruitStaminaRestore => fruitStaminaRestore;
 
-    /// <returns>climb speed moving up; u/s</returns>
-    public float UpSpeedU => upSpeedU;
-
-    /// <returns>climb speed moving down; u/s</returns>
-    public float DownSpeedU => downSpeedU;
-
     /// <returns>how long control is lost after a branch hit; s</returns>
     public float HitStunDurationS => hitStunDurationS;
 
@@ -129,7 +123,7 @@ public class GameBalanceConfig: ScriptableObject {
     public float CobraSurgeSpeedPerMistakeU => cobraSurgeSpeedPerMistakeU;
 
     /// <returns>ceiling on the great cobra's surging climb speed, may pass
-    /// <see cref="UpSpeedU"/>; u/s</returns>
+    /// the monkey's top climb speed; u/s</returns>
     public float CobraMaxSurgeSpeedU => cobraMaxSurgeSpeedU;
 
     /// <returns>how fast the great cobra's climb speed eases toward its
@@ -178,15 +172,6 @@ public class GameBalanceConfig: ScriptableObject {
     [SerializeField]
     [Tooltip("stamina restored per grabbed fruit, capped at max stamina")]
     private float fruitStaminaRestore = 30f;
-
-    [Header("Movement")]
-    [SerializeField]
-    [Tooltip("climb speed moving up; u/s")]
-    private float upSpeedU = 6f;
-
-    [SerializeField]
-    [Tooltip("climb speed moving down; u/s")]
-    private float downSpeedU = 12f;
 
     [Header("Starting Zone")]
     [SerializeField]
@@ -387,8 +372,6 @@ public class GameBalanceConfig: ScriptableObject {
         staminaUpwardDrainPerU = Mathf.Max(0f, staminaUpwardDrainPerU);
         staminaSidewayDrainPerU = Mathf.Max(0f, staminaSidewayDrainPerU);
         fruitStaminaRestore = Mathf.Max(0f, fruitStaminaRestore);
-        upSpeedU = Mathf.Max(0f, upSpeedU);
-        downSpeedU = Mathf.Max(0f, downSpeedU);
         hitStunDurationS = Mathf.Max(0f, hitStunDurationS);
         hitDropDistanceU = Mathf.Max(0f, hitDropDistanceU);
         hitDropSpeedU = Mathf.Max(0f, hitDropSpeedU);
