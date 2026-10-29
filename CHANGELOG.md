@@ -6,7 +6,6 @@ Bug Belle falling snake should disappear after collision
 Fixme Pan: UI mpv
 Todo Dont Pause screen
 Todo belle: 打滑事件
-Todo Erik Movement speed build up
 Todo Dont boss fight
 Todo Pan: 数字显示和蛇的距离
 Todo Yuqing: 抓取椰子，往下扔，蛇往下掉
@@ -26,12 +25,14 @@ bug spider web fail to load & log warning
 
 - `Lv1Scene` split into nested prefabs: `World`, `Envs`, `Entities`, `Systems`, `UI` and a leaf prefab per unit, so teammates edit different files
 - Great Cobra exit boost: extra climb speed for a while after the monkey leaves the starting zone, w/ center warning "Run! The Great Cobra is chasing you!"; `cobraExitBoostSpeedU` & `cobraExitBoostDurationS` in `GameBalanceConfig`
+- `MovementConfig` asset: climb speed builds up along 2 curves (up, down) of how long the key is held, instead of a fixed acceleration
 - `startingZoneBranchClearRadiusU` in `GameBalanceConfig`: branch clearance round the monkey before the run is playing
 
 ### Changed
 
 ##### Erik
 
+- `exhaustedSpeedMultiplier` & `idleStaminaRecoveryPerS` moved from `GameBalanceConfig` to `MovementConfig`
 - Starter Zone → Starting Zone: `GameState.StartingZone`, `EndStartingZone()`, `StartingZoneExitRelay`, `StartingZoneExitTrigger` prefab; Tutorial state & screen unchanged
 - fruit grab aims at banana closest to monkey, not last to enter a detection zone; re-picked every physics step
 - scripts renamed to house role suffixes (`Controller`, `Sensor`, `Motor`, `Widget`, `Relay`, `Feedback`, ~), e.g. `ArmRoot` to `ArmController`, `HitBranchDetection` to `HitBranchSensor`, `RampedDifficultyService` to `RampedDifficultyManager`; no behavior change
@@ -45,6 +46,7 @@ bug spider web fail to load & log warning
 
 ##### Erik
 
+- `upSpeedU` & `downSpeedU` (`GameBalanceConfig`), replaced by the `MovementConfig` curves; `accelerationU` (`MonkeyConfig`)
 - orphan `GoalText` object in `Lv1Scene` (never drawn, no parent Canvas) and its mention in the TDD
 
 ### Fixed

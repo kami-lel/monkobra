@@ -50,7 +50,7 @@ monkobra/
 │   │   ├── Materials/ Environment/, Mob/, Player/
 │   │   ├── Input/     InputSystem_Actions
 │   │   ├── Shaders/   Environment/FruitOutline (inverted-hull Shader Graph)
-│   │   └── Settings/  GameBalanceConfig, Analytics/, HackShortcuts/, Mob/ placement, _Shared/ URP assets and MonkeyConfig
+│   │   └── Settings/  GameBalanceConfig, MovementConfig, Analytics/, HackShortcuts/, Mob/ placement, _Shared/ URP assets and MonkeyConfig
 │   ├── WebGLTemplates/ FitWindow/index.html, the 16:9 fit-to-window WebGL page
 │   ├── Settings/      Build Profiles/ (GithubPages, ItchIO), Unity-managed
 │   ├── TextMesh Pro/  imported TMP essentials, not authored
@@ -125,6 +125,7 @@ All under `Assets/_Monkobra/Scripts/`. Each row names the owner of the detail.
 | `GameController/GameBalanceConfig` | ScriptableObject holding every balance number | [Balance Design](docs/balance-doc.md) |
 | `Player/MonkeyController` | kinematic body: orbit, climb, stun, `IsHeld` | [TDD](docs/monkobra-tdd.md#monkey-movement) |
 | `Player/MonkeyConfig` | ScriptableObject of monkey tuning and input actions | [TDD](docs/monkobra-tdd.md#monkey-movement) |
+| `Player/MovementConfig` | ScriptableObject of the climb: held-time speed curves up and down, exhausted multiplier, idle stamina recovery | [TDD](docs/monkobra-tdd.md#monkey-movement) |
 | `Player/ArmController` | one arm: climb stroke, reach, release check | [Grab](docs/grab-doc.md#reach-and-release) |
 | `Player/DetectionZoneRelay` | side-tagged trigger forwarding enter and exit | [Grab](docs/grab-doc.md#detection) |
 | `Player/UpwardFruitSensor` | singleton, reachable and grabbable fruit; the target and reach side follow the fruit closest to the monkey, re-picked every physics step | [Grab](docs/grab-doc.md#detection) |
