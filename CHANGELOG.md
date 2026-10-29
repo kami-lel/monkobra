@@ -2,7 +2,6 @@
 
 <!--
 BUG Erik tree branch created at player location & thus resulting failure
-FIXME Erik Keeps improving starting zone: larger range, smaller debuff, half the energy
 
 Fixme Pan: UI mpv
 Todo Dont Pause screen

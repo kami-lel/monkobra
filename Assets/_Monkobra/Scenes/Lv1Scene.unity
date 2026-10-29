@@ -139,11 +139,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 2753568080222486700, guid: 281251d9a19cb4b4a8ccdeebd3105865, type: 3}
   m_PrefabInstance: {fileID: 1948603604111668740}
   m_PrefabAsset: {fileID: 0}
---- !u!4 &1700353540 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 7773196388448305781, guid: 8579386181a55044980f3b31fd6eb883, type: 3}
-  m_PrefabInstance: {fileID: 6461467497832640793}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1931554831 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2250517601124355002, guid: c5ecbf8dc14f9e747ae4d3c6632eb1ea, type: 3}
@@ -231,7 +226,7 @@ Transform:
   m_Children:
   - {fileID: 7808786385842667138}
   - {fileID: 8510962960014555773}
-  - {fileID: 1700353540}
+  - {fileID: 3635617223177171820}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1492552410464992010
@@ -536,6 +531,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bba17adcb9d67fb40951f47d895580b9, type: 3}
+--- !u!4 &3635617223177171820 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7773196388448305781, guid: 8579386181a55044980f3b31fd6eb883, type: 3}
+  m_PrefabInstance: {fileID: 6461467497832640793}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &5875065253668459042
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -547,7 +547,7 @@ PrefabInstance:
     - target: {fileID: 1544209386470739513, guid: c31179dd7d7b4974f9f6cdf16893bf9d, type: 3}
       propertyPath: rampBase
       value: 
-      objectReference: {fileID: 1700353540}
+      objectReference: {fileID: 3635617223177171820}
     - target: {fileID: 4732386835657357497, guid: c31179dd7d7b4974f9f6cdf16893bf9d, type: 3}
       propertyPath: m_Name
       value: GameController
@@ -638,7 +638,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7773196388448305781, guid: 8579386181a55044980f3b31fd6eb883, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 18
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 7773196388448305781, guid: 8579386181a55044980f3b31fd6eb883, type: 3}
       propertyPath: m_LocalPosition.z
