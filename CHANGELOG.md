@@ -25,13 +25,15 @@ bug spider web fail to load & log warning
 ##### Erik
 
 - `Lv1Scene` split into nested prefabs: `World`, `Envs`, `Entities`, `Systems`, `UI` and a leaf prefab per unit, so teammates edit different files
+- Great Cobra exit boost: extra climb speed for a while after the monkey leaves the starting zone, w/ center warning "Run! The Great Cobra is chasing you!"; `cobraExitBoostSpeedU` & `cobraExitBoostDurationS` in `GameBalanceConfig`
+- `startingZoneBranchClearRadiusU` in `GameBalanceConfig`: branch clearance round the monkey before the run is playing
 
 ### Changed
 
 ##### Erik
 
-- no branch grows within a configurable radius of the monkey (`startingZoneBranchClearRadiusU` in `GameBalanceConfig`) before the run is playing, so a restart cannot spawn the monkey into a branch
-- fruit grab aims at the banana closest to the monkey, not the last one to enter a detection zone; re-picked every physics step
+- Starter Zone → Starting Zone: `GameState.StartingZone`, `EndStartingZone()`, `StartingZoneExitRelay`, `StartingZoneExitTrigger` prefab; Tutorial state & screen unchanged
+- fruit grab aims at banana closest to monkey, not last to enter a detection zone; re-picked every physics step
 - scripts renamed to house role suffixes (`Controller`, `Sensor`, `Motor`, `Widget`, `Relay`, `Feedback`, ~), e.g. `ArmRoot` to `ArmController`, `HitBranchDetection` to `HitBranchSensor`, `RampedDifficultyService` to `RampedDifficultyManager`; no behavior change
 - code style pass over all scripts: same-line braces, MonoBehaviour section order with banners, Inspector guards, explicit types instead of `var`, plain logs gated by `isDebugBuild`
 - `World` and `Systems` wrapper prefabs dropped: the light, volume and event system are root prefabs, and `ScreensManager`, `ScoreManager`, `RampedDifficultyManager` are components of the `GameController` prefab
@@ -46,6 +48,10 @@ bug spider web fail to load & log warning
 - orphan `GoalText` object in `Lv1Scene` (never drawn, no parent Canvas) and its mention in the TDD
 
 ### Fixed
+
+##### Erik
+
+- restart could spawn monkey inside a tree branch: no branch grows w/i `startingZoneBranchClearRadiusU` of monkey before the run is playing
 
 ### Security
 
