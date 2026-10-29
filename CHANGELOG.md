@@ -22,6 +22,10 @@ bug spider web fail to load & log warning
 
 ### Added
 
+##### Belle Dai
+
+- slippery bark: wet patches on the trunk (`SlipperyBarkZone`, spawned by `SlipperyBarkSpawner`, one tutorial band) make the monkey slip & lose grip; wet grip slows the arm stroke (`ArmController`)
+
 ##### Erik
 
 - `Lv1Scene` split into nested prefabs: `World`, `Envs`, `Entities`, `Systems`, `UI` and a leaf prefab per unit, so teammates edit different files
@@ -34,13 +38,20 @@ bug spider web fail to load & log warning
 - code style pass over all scripts: same-line braces, MonoBehaviour section order with banners, Inspector guards, explicit types instead of `var`, plain logs gated by `isDebugBuild`
 - `World` and `Systems` wrapper prefabs dropped: the light, volume and event system are root prefabs, and `ScreensManager`, `ScoreManager`, `RampedDifficultyManager` are components of the `GameController` prefab
 - `AnalyticsManager` is now a component of the `GameController` prefab and no longer survives a scene reload, so each load starts a new session file
+- slippery bark scripts follow the Unity MonoBehaviour conventions: tooltips, assignment guard, section banners, 80 columns
+- Global Volume profile moved from `Scenes/Lv1Scene/` to `Settings/`
 
 ### Deprecated
 
 ### Removed
 
+##### Belle Dai
+
+- falling cobras removed on hit
+
 ##### Erik
 
+- `SlipTestScene` dev scene, after slippery bark landed in `Lv1Scene`
 - orphan `GoalText` object in `Lv1Scene` (never drawn, no parent Canvas) and its mention in the TDD
 
 ### Fixed

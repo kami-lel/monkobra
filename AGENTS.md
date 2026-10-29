@@ -27,6 +27,7 @@ Read these `docs/` files when their topic arises:
 
 - The repository root is the Unity project root: `Assets/`, `Packages/`, and `ProjectSettings/` sit at the top level
 - Authored assets live under `Assets/_Monkobra/`, laid out `<Type>/<Module>/<asset>` per the `coder-unity-engine` skill (e.g. `Scripts/`, `Prefabs/`, `Scenes/`, `Settings/_Shared/`)
+- Unity drops a new Volume profile into `Scenes/<Scene>/`; move it in the Editor to `Settings/<Module>/` (`Settings/_Shared/` when no one module owns it), since `Scenes/` holds `.unity` files only
 - Unity template leftovers and imports (`Assets/Readme.asset`, `Assets/TextMesh Pro/`) stay outside the game root
 - `Lv1Scene.unity` is a shell of 8 root prefab instances (`Cameras`, `DirectionalLight`, `GlobalVolume`, `EventSystem`, `Envs`, `Entities`, `GameController`, `UI`), see the Scene Hierarchy in [CONTEXT.md](CONTEXT.md#scene-hierarchy); open the owning prefab and edit it there, never an inline copy in the scene, so parallel work lands in different files
 - A new scene object becomes its own prefab under `Assets/_Monkobra/Prefabs/<Module>/`, nested in the matching root prefab; add a root only when no existing one fits

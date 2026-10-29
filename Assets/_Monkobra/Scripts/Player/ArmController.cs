@@ -73,6 +73,15 @@ public class ArmController: MonoBehaviour {
     )]
     private bool isRightArm;
 
+    [Header("Wet Grip")]
+    [SerializeField, Range(0f, 30f)]
+    [Tooltip("extra hand sweep angle at full grip loss; deg")]
+    private float wetGripHandDragDeg = 14f;
+
+    [SerializeField, Range(0f, 1f)]
+    [Tooltip("stroke speed scale at full grip loss; 1 = unaffected")]
+    private float wetGripStrokeScale = 0.18f;
+
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
         // Inspector Assignment Guard  -----------------------------------------
@@ -142,6 +151,8 @@ public class ArmController: MonoBehaviour {
         if (joint == null) {
             return;
         }
+        monkeyRoot = joint.connectedBody != null
+            ? joint.connectedBody.GetComponent<MonkeyController>() : null;
 
         reachZMotion = joint.zMotion;
         Vector3 outward = transform.position - ShoulderWorld;
@@ -399,6 +410,7 @@ public class ArmController: MonoBehaviour {
     // Cached References  ------------------------------------------------------
     private Rigidbody body;
     private ConfigurableJoint joint;
+    private MonkeyController monkeyRoot;
 
     // Private Methods  ########################################################
     // arm brushing the torso would shove the body and report the monkey as a
@@ -594,6 +606,7 @@ public class ArmController: MonoBehaviour {
     // hand over hand: sweep about the joint's primary axis, arm keeps its
     // rest length and the hand rides the end
     private void DriveClimb() {
+        float gripLoss = monkeyRoot != null ? monkeyRoot.WetGripLoss01 : 0f;
         Vector2 directionalInput =
             MoveAction != null
                 ? MoveAction.action.ReadValue<Vector2>()
@@ -612,6 +625,7 @@ public class ArmController: MonoBehaviour {
                 + direction
                     * inputScale
                     * config.StrokeSpeedCycles
+                    * Mathf.Lerp(1f, wetGripStrokeScale, gripLoss)
                     * Time.fixedDeltaTime,
             1f
         );
@@ -620,7 +634,8 @@ public class ArmController: MonoBehaviour {
         float phaseRad = cyclePhase * Mathf.PI * 2f;
         float midDeg = (config.MaxAngleDeg + config.MinAngleDeg) * 0.5f;
         float halfRangeDeg = (config.MaxAngleDeg - config.MinAngleDeg) * 0.5f;
-        float swingDeg = midDeg + halfRangeDeg * Mathf.Sin(phaseRad);
+        float swingDeg = midDeg + halfRangeDeg * Mathf.Sin(phaseRad)
+            + wetGripHandDragDeg * gripLoss;
 
         // targetRotation is in the joint's own frame: Axis right, Secondary
         // Axis up. Both arms take the same angles, the right arm's transform
