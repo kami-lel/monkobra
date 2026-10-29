@@ -85,6 +85,30 @@ public class UpwardFruitSensor: MonoBehaviour {
         return null;
     }
 
+    /// <returns>fruit in reach on <paramref name="side"/> nearest to the
+    /// monkey, the older entry on a tie, else null</returns>
+    public Collider GetClosestFruit(DetectionSide side) {
+        HashSet<Collider> fruits =
+            side == DetectionSide.Left ? leftFruits : rightFruits;
+        Collider closest = null;
+        float closestSqrDistance = float.MaxValue;
+        for (int i = 0; i < fruitOrder.Count; i++) {
+            Collider fruit = fruitOrder[i];
+            if (!fruits.Contains(fruit)) {
+                continue;
+            }
+
+            float sqrDistance = (fruit.bounds.center - transform.position)
+                .sqrMagnitude;
+            // strict lt keeps the older entry on a tie
+            if (sqrDistance < closestSqrDistance) {
+                closestSqrDistance = sqrDistance;
+                closest = fruit;
+            }
+        }
+        return closest;
+    }
+
     /// <summary>
     /// forgets <paramref name="fruit"/> on both sides, for a fruit switched
     /// off inside a zone, whose trigger exit may never fire
