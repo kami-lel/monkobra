@@ -1,11 +1,10 @@
 # Monkobra CHANGELOG
 
 <!--
-Bug Belle falling snake should disappear after collision
+Hack need to verify: slippery is working
 
 Fixme Pan: UI mpv
 Todo Dont Pause screen
-Todo belle: 打滑事件
 Todo Dont boss fight
 Todo Pan: 数字显示和蛇的距离
 Todo Yuqing: 抓取椰子，往下扔，蛇往下掉
