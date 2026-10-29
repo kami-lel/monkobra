@@ -16,10 +16,8 @@ using UnityEngine;
 /// monkey's angle about the tree axis and slides round the trunk toward it by
 /// the shortest arc, so it keeps homing on a monkey that orbits. Any part of
 /// the snake touching any part of the monkey (body, tail, hand, or its
-/// branch sensor) applies a branch-hit drop. After a hit the cobra stops
-/// homing, so the monkey can slip aside, and its hit shape rests through the
-/// stun plus a grace time; a monkey still inside it after that is dropped
-/// again, up to a hit limit per cobra. After
+/// branch sensor) applies one branch-hit drop and immediately switches the
+/// snake off. It cannot keep falling or strike the monkey again. After
 /// <c>maxFallDistanceU</c> it switches itself off; the segment's restart
 /// destroys it later.
 /// </para>
@@ -59,8 +57,6 @@ public class FallingCobraController: MonoBehaviour {
         fallSpeedU = config.FallingCobraFallSpeedU;
         horizontalSpeedU = config.FallingCobraHorizontalSpeedU;
         reachWakeDistanceU = config.FallingCobraReachWakeDistanceU;
-        hitRestS = config.HitStunDurationS + config.FallingCobraRehitGraceS;
-        maxHits = config.FallingCobraMaxHits;
         axisXZ = new Vector2(treeAxisPosition.x, treeAxisPosition.z);
         Vector3 position = transform.position;
         ringRadiusU = Vector2.Distance(
@@ -185,21 +181,15 @@ public class FallingCobraController: MonoBehaviour {
             StartFalling();
         }
         if (state == State.Falling) {
-            RestoreHitShape();
             StepFall();
         }
     }
 
     private void OnTriggerEnter(Collider other) {
-        if (other.GetComponent<HitBranchSensor>() != null) {
-            // the sensor raises the drop itself, as for a branch
-            RegisterHit();
-            return;
-        }
         TryHit(other);
     }
 
-    // still inside the snake once the hit shape is back: drop again
+    // Enter/stay and the monkey sensor all share the same one-hit guard.
     private void OnTriggerStay(Collider other) {
         TryHit(other);
     }
@@ -230,10 +220,6 @@ public class FallingCobraController: MonoBehaviour {
     // private members  ########################################################
     private State state = State.Dormant;
     private bool isInitialized; // if the spawner armed this cobra
-    private float hitRestS; // from config; stun plus re-hit grace; s
-    private int maxHits; // from config; drops one cobra may cause
-    private int hitCount; // drops caused so far
-    private float hitShapeBackTime; // Time.time the rested hit shape returns
     private float fallSpeedU; // from config; u/s
     private float horizontalSpeedU; // from config; u/s along the ring
     private float reachWakeDistanceU; // from config; wake range mid-grab; u
@@ -276,43 +262,31 @@ public class FallingCobraController: MonoBehaviour {
         fallStartTime = warningStartTime + warningDurationS;
     }
 
-    // any part of the monkey, the sensor included, once the last drop's stun
-    // is over; the sensor applies it, so it shakes and drops like a branch
-    private void TryHit(Collider other) {
-        if (state != State.Falling || !hitCollider.enabled) {
+    // Called from either side of the trigger pair. Claim the hit before
+    // notifying listeners so callback order cannot create duplicate damage.
+    public void TryHit(Collider other) {
+        if (other == null || state != State.Falling || !hitCollider.enabled
+            || GameController.I == null || !GameController.I.IsRunLive
+            || Time.timeScale <= 0f) {
             return;
         }
-        bool isSensor = other.GetComponent<HitBranchSensor>() != null;
+        HitBranchSensor sensor = other.GetComponent<HitBranchSensor>();
+        bool isSensor = sensor != null;
         if (!isSensor && !IsMonkeyPart(other)) {
             return;
         }
-        RegisterHit();
-        if (playerSensor != null) {
-            playerSensor.ReportHit(
+        state = State.Done;
+        hitCollider.enabled = false;
+        HitBranchSensor receiver = sensor != null ? sensor : playerSensor;
+        if (receiver != null) {
+            receiver.ReportHit(
                 hitCollider,
                 HitBranchSensor.HitKind.FallingCobraController
             );
         }
-    }
-
-    // a hit rests the hit shape through the stun and a grace time, so the
-    // monkey gets a moment to slip aside, and ends the homing for good
-    private void RegisterHit() {
-        hitCount++;
-        hitCollider.enabled = false;
-        hitShapeBackTime = Time.time + hitRestS;
-    }
-
-    private void RestoreHitShape() {
-        if (
-            hitCount > 0
-            && hitCount < maxHits
-            && !hitCollider.enabled
-            && Time.time >= hitShapeBackTime
-        ) {
-            // re-enabling raises trigger enter for an overlapping monkey
-            hitCollider.enabled = true;
-        }
+        // Keep the existing segment-owned cleanup lifecycle, but remove
+        // visuals, physics and movement immediately on the first contact.
+        gameObject.SetActive(false);
     }
 
     /// <returns>true for the monkey's physical parts: body, tail and hands;
@@ -385,10 +359,8 @@ public class FallingCobraController: MonoBehaviour {
         Vector3 position = body.position;
         position.y -= dropU;
 
-        // homing stops after the first hit, so the monkey can get away
         if (
-            hitCount == 0
-            && player != null
+            player != null
             && ringRadiusU > MIN_RING_RADIUS_U
         ) {
             Vector2 fromAxis = new Vector2(position.x, position.z) - axisXZ;

@@ -44,6 +44,17 @@ public static class SlipperyBarkSmokeCheck {
         EditorApplication.EnterPlaymode();
     }
 
+    public static void RunLevelOneBatch() {
+        EditorSceneManager.OpenScene("Assets/_Monkobra/Scenes/Lv1Scene.unity");
+        SessionState.SetBool(RunningKey, true);
+        EditorApplication.EnterPlaymode();
+    }
+
+    public static void IntegrateAndCheckLevelOneBatch() {
+        SlipperyBarkSetup.InstallLevelOneBatch();
+        RunLevelOneBatch();
+    }
+
     public static void RunVisualBatch() {
         SlipperyBarkSetup.InstallBatch();
         SlipperyBarkSetup.RenderWetPreview();
@@ -190,7 +201,9 @@ public static class SlipperyBarkSmokeCheck {
             Require(downhillSkidStartY - downhillSkidEndY > normalDescent + 0.15f,
                 "Downhill skid must add travel to the regular descent, not replace it with a slow drop.");
             CheckRandomPatches();
-            Finish(0, "PASS: uphill climb-skid-regrip; downhill re-entry adds a visible skid to normal descent; lateral control preserved; permanent wetness; varied puddle sizes and matching contact.");
+            CheckFallingCobraDisappears();
+            Require(runtimeError == null, "Unexpected runtime error: " + runtimeError);
+            Finish(0, "PASS: Lv1 slippery bark checks; falling cobra disappears after one hit, with one heavy-hit event for either callback order and body contact.");
         }
         catch (Exception error) {
             Finish(1, error.ToString());
@@ -289,6 +302,56 @@ public static class SlipperyBarkSmokeCheck {
             "Generation must produce genuinely different large and small puddles.");
         configField.SetValue(spawner, config);
         UnityEngine.Object.Destroy(testConfig);
+    }
+
+    private static void CheckFallingCobraDisappears() {
+        HitBranchSensor sensor = monkey.GetComponentInChildren<HitBranchSensor>(true);
+        Require(sensor != null, "Monkey must have a hit sensor.");
+        GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(
+            "Assets/_Monkobra/Prefabs/Mob/FallingCobra.prefab");
+        Require(prefab != null, "Falling cobra prefab must exist.");
+        for (int order = 0; order < 3; order++) {
+            GameObject instance = UnityEngine.Object.Instantiate(prefab,
+                new Vector3(100f, 100f, 100f), Quaternion.identity);
+            FallingCobraController cobra = instance.GetComponent<FallingCobraController>();
+            CapsuleCollider capsule = instance.GetComponent<CapsuleCollider>();
+            int hits = 0;
+            bool heavyHit = true;
+            Action<Collider, HitBranchSensor.HitKind> onHit = (source, kind) => {
+                if (source == capsule) {
+                    heavyHit &= kind == HitBranchSensor.HitKind.FallingCobraController;
+                    hits++;
+                }
+            };
+            sensor.Hit += onHit;
+            try {
+                typeof(FallingCobraController).GetField("playerSensor",
+                    BindingFlags.Instance | BindingFlags.NonPublic).SetValue(cobra, sensor);
+                typeof(FallingCobraController).GetMethod("StartFalling",
+                    BindingFlags.Instance | BindingFlags.NonPublic).Invoke(cobra, null);
+                Collider contact = order == 2 ? monkey.GetComponent<Collider>()
+                    : sensor.GetComponent<Collider>();
+                Require(contact != null, "Test contact must exist.");
+                if (order == 0) sensor.SendMessage("OnTriggerEnter", capsule);
+                else cobra.SendMessage("OnTriggerEnter", contact);
+                Require(!instance.activeSelf && !capsule.enabled && hits == 1 && heavyHit,
+                    "First contact must report one hit then immediately hide the snake.");
+                typeof(FallingCobraController).GetMethod("OnTriggerEnter",
+                    BindingFlags.Instance | BindingFlags.NonPublic).Invoke(cobra, new object[] { contact });
+                typeof(FallingCobraController).GetMethod("OnTriggerStay",
+                    BindingFlags.Instance | BindingFlags.NonPublic).Invoke(cobra, new object[] { contact });
+                sensor.SendMessage("OnTriggerEnter", capsule);
+                Vector3 stopped = instance.GetComponent<Rigidbody>().position;
+                typeof(FallingCobraController).GetMethod("FixedUpdate",
+                    BindingFlags.Instance | BindingFlags.NonPublic).Invoke(cobra, null);
+                Require(hits == 1 && heavyHit && instance.GetComponent<Rigidbody>().position == stopped,
+                    "Hidden snake must neither continue falling nor hit again.");
+            }
+            finally {
+                sensor.Hit -= onHit;
+                UnityEngine.Object.Destroy(instance);
+            }
+        }
     }
 
     private static void MoveBodyToY(float y) {

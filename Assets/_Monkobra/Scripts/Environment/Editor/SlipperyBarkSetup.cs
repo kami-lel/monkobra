@@ -21,6 +21,19 @@ public static class SlipperyBarkSetup {
         Install();
     }
 
+    /// <summary>Integrates the tested feature prefab into the game scene
+    /// without copying the development scene over existing level content.</summary>
+    public static void InstallLevelOneBatch() {
+        Scene scene = EditorSceneManager.OpenScene("Assets/_Monkobra/Scenes/Lv1Scene.unity");
+        GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
+        if (prefab == null) {
+            throw new System.InvalidOperationException("Missing tested slippery bark prefab.");
+        }
+        InstallInScene(scene, prefab);
+        EditorSceneManager.SaveScene(scene);
+        Debug.Log("Slippery Bark integrated into Lv1Scene under Envs.");
+    }
+
     private static void AutoInstall() {
         if (EditorApplication.isPlayingOrWillChangePlaymode
             || SessionState.GetBool(InstalledKey, false)
