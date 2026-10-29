@@ -4,8 +4,8 @@
 Hack need to verify: slippery is working
 
 Fixme Pan: UI mpv
-Todo Dont Pause screen
-Todo Dont boss fight
+Todo Dong: Pause screen
+Todo Dong: boss fight
 Todo Pan: 数字显示和蛇的距离
 Todo Yuqing: 抓取椰子，往下扔，蛇往下掉
 Todo Erik Raycasting/2d anime for gaining
