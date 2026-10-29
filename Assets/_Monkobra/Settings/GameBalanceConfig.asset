@@ -12,6 +12,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16bd46993ff9a7341bcad4578f206e4b, type: 3}
   m_Name: GameBalanceConfig
   m_EditorClassIdentifier: Assembly-CSharp::GameBalanceConfig
+  slipSlideDistanceU: 0.3
+  slipAnticipationS: 0.12
+  slipSlideDurationS: 0.2
+  slipRegripS: 0.12
+  slipImmunityS: 0.35
+  slipperyAttemptCount: 2
+  slipperySpawnProbabilityCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.1
+      inSlope: 0.6
+      outSlope: 0.6
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0.7
+      inSlope: 0.6
+      outSlope: 0.6
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   maxStamina: 100
   staminaUpwardDrainPerU: 0.5
   staminaSidewayDrainPerU: 0.3
