@@ -68,8 +68,12 @@ public class MonkeyController: MonoBehaviour {
     private MonkeyConfig config;
 
     [SerializeField]
-    [Tooltip("game balance tuning; climb speed, exhaustion and branch hit")]
+    [Tooltip("game balance tuning; climb speed and branch hit")]
     private GameBalanceConfig balanceConfig;
+
+    [SerializeField]
+    [Tooltip("climb build-up, exhaustion slow down and idle stamina recovery")]
+    private MovementConfig movementConfig;
 
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
@@ -99,6 +103,14 @@ public class MonkeyController: MonoBehaviour {
             Debug.LogWarning(
                 "MonkeyController:	must assign Inspector Field: "
                     + "balanceConfig",
+                this
+            );
+        }
+
+        if (movementConfig == null) {
+            Debug.LogWarning(
+                "MonkeyController:\tmust assign Inspector Field: "
+                    + "movementConfig",
                 this
             );
         }
@@ -153,7 +165,7 @@ public class MonkeyController: MonoBehaviour {
     }
 
     private void FixedUpdate() {
-        if (config == null || balanceConfig == null) {
+        if (config == null || balanceConfig == null || movementConfig == null) {
             return;
         }
 
@@ -195,7 +207,7 @@ public class MonkeyController: MonoBehaviour {
             && GameController.I.IsInStartingZone;
         float exhaustedScale = isInStartingZone
             ? balanceConfig.StartingZoneExhaustedSpeedMultiplier
-            : balanceConfig.ExhaustedSpeedMultiplier;
+            : movementConfig.ExhaustedSpeedMultiplier;
         float upSpeedScale = isExhausted ? exhaustedScale : 1f;
 
         orbitAngleDeg -= directionalInput.x
@@ -240,7 +252,7 @@ public class MonkeyController: MonoBehaviour {
             // standing still, no key pressed, regains stamina slowly
             if (!hasInput) {
                 staminaBar.AddStamina(
-                    balanceConfig.IdleStaminaRecoveryPerS
+                    movementConfig.IdleStaminaRecoveryPerS
                         * Time.fixedDeltaTime
                 );
             }

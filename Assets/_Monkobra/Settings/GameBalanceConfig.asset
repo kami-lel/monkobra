@@ -18,8 +18,6 @@ MonoBehaviour:
   fruitStaminaRestore: 35
   upSpeedU: 6
   downSpeedU: 12
-  exhaustedSpeedMultiplier: 0.2
-  idleStaminaRecoveryPerS: 2.5
   startingZoneStartStaminaFraction: 0.3
   startingZoneExhaustedSpeedMultiplier: 0.5
   hitStunDurationS: 0.75

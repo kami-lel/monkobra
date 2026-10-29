@@ -29,14 +29,6 @@ public class GameBalanceConfig: ScriptableObject {
     /// <returns>climb speed moving down; u/s</returns>
     public float DownSpeedU => downSpeedU;
 
-    /// <returns>multiplier on upward climb speed while stamina is empty
-    /// </returns>
-    public float ExhaustedSpeedMultiplier => exhaustedSpeedMultiplier;
-
-    /// <returns>stamina regained per s while the monkey gives no movement
-    /// input</returns>
-    public float IdleStaminaRecoveryPerS => idleStaminaRecoveryPerS;
-
     /// <returns>how long control is lost after a branch hit; s</returns>
     public float HitStunDurationS => hitStunDurationS;
 
@@ -158,8 +150,8 @@ public class GameBalanceConfig: ScriptableObject {
     public float StartingZoneStartStaminaFraction =>
         startingZoneStartStaminaFraction;
 
-    /// <returns>like <see cref="ExhaustedSpeedMultiplier"/>, but used while
-    /// the starting zone lasts</returns>
+    /// <returns>like <see cref="MovementConfig.ExhaustedSpeedMultiplier"/>,
+    /// but used while the starting zone lasts</returns>
     public float StartingZoneExhaustedSpeedMultiplier =>
         startingZoneExhaustedSpeedMultiplier;
 
@@ -195,14 +187,6 @@ public class GameBalanceConfig: ScriptableObject {
     [SerializeField]
     [Tooltip("climb speed moving down; u/s")]
     private float downSpeedU = 12f;
-
-    [SerializeField]
-    [Tooltip("upward climb speed multiplier while stamina is empty")]
-    private float exhaustedSpeedMultiplier = 0.2f;
-
-    [SerializeField]
-    [Tooltip("stamina regained per s while no movement key is pressed")]
-    private float idleStaminaRecoveryPerS = 2f;
 
     [Header("Starting Zone")]
     [SerializeField]
@@ -405,8 +389,6 @@ public class GameBalanceConfig: ScriptableObject {
         fruitStaminaRestore = Mathf.Max(0f, fruitStaminaRestore);
         upSpeedU = Mathf.Max(0f, upSpeedU);
         downSpeedU = Mathf.Max(0f, downSpeedU);
-        exhaustedSpeedMultiplier = Mathf.Clamp01(exhaustedSpeedMultiplier);
-        idleStaminaRecoveryPerS = Mathf.Max(0f, idleStaminaRecoveryPerS);
         hitStunDurationS = Mathf.Max(0f, hitStunDurationS);
         hitDropDistanceU = Mathf.Max(0f, hitDropDistanceU);
         hitDropSpeedU = Mathf.Max(0f, hitDropSpeedU);
