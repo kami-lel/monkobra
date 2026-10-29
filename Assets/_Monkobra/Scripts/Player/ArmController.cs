@@ -9,7 +9,7 @@ using UnityEngine.InputSystem;
 /// the shoulder, so this transform is the hand.
 /// <para>
 /// Sweeps a climb stroke on move input, left and right alternating. Holding
-/// interact picks the newest fruit, keeps re-aiming at it every physics step
+/// interact picks the closest fruit, keeps re-aiming at it every physics step
 /// and stretches out, releasing grabs the fruit iff the hand overlaps it
 /// then: too short or stretched past it is a miss.
 /// </para>
@@ -303,7 +303,7 @@ public class ArmController: MonoBehaviour {
             return;
         }
 
-        Collider fruit = fruitDetection.GetNewestFruit(armSide);
+        Collider fruit = fruitDetection.GetClosestFruit(armSide);
         if (fruit == null) {
             return;
         }

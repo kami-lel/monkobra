@@ -73,19 +73,6 @@ public class UpwardFruitSensor: MonoBehaviour {
         return leftFruits.Contains(fruit) || rightFruits.Contains(fruit);
     }
 
-    /// <returns>newest fruit in reach on <paramref name="side"/>, else null
-    /// </returns>
-    public Collider GetNewestFruit(DetectionSide side) {
-        HashSet<Collider> fruits =
-            side == DetectionSide.Left ? leftFruits : rightFruits;
-        for (int i = fruitOrder.Count - 1; i >= 0; i--) {
-            if (fruits.Contains(fruitOrder[i])) {
-                return fruitOrder[i];
-            }
-        }
-        return null;
-    }
-
     /// <returns>fruit in reach on <paramref name="side"/> nearest to the
     /// monkey, the older entry on a tie, else null</returns>
     public Collider GetClosestFruit(DetectionSide side) {
@@ -236,7 +223,7 @@ public class UpwardFruitSensor: MonoBehaviour {
     private readonly HashSet<Collider> leftFruits = new HashSet<Collider>();
     private readonly HashSet<Collider> rightFruits = new HashSet<Collider>();
 
-    // entry order across both sides, last is newest
+    // entry order across both sides, breaks distance ties for the older
     private readonly List<Collider> fruitOrder = new List<Collider>();
 
     private Collider grabbableFruit;
