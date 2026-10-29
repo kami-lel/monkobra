@@ -30,6 +30,12 @@ public class CobraMotor: MonoBehaviour {
     /// </summary>
     public event Action<int> CatchUpStarted;
 
+    /// <summary>
+    /// Raised once when the monkey leaves the starting zone and the cobra
+    /// starts chasing, for a short warning.
+    /// </summary>
+    public event Action ChaseStarted;
+
     // Inspector Fields  #######################################################
     [Header("References")]
     [SerializeField]
@@ -227,6 +233,8 @@ public class CobraMotor: MonoBehaviour {
 
         headAngle += Direction * orbitSpeedDegrees * Time.deltaTime;
 
+        StartExitBoostOnZoneExit();
+
         float baseClimbSpeed = BaseClimbSpeed();
         float targetClimbSpeed = baseClimbSpeed;
 
@@ -246,6 +254,10 @@ public class CobraMotor: MonoBehaviour {
                     balanceConfig.CobraMaxSurgeSpeedU
                 )
             );
+        } else if (Time.time < exitBoostEndTime) {
+            // leaving the starting zone releases the cobra with a burst
+            targetClimbSpeed = baseClimbSpeed
+                + balanceConfig.CobraExitBoostSpeedU;
         } else if (player != null && slowNearPlayer) {
             float coilTopHeight = headHeight - neckLiftU;
             float distanceBelowPlayer =
@@ -275,18 +287,18 @@ public class CobraMotor: MonoBehaviour {
         // always up, never held at the player's height and never down: the
         // coil climbs on into the monkey, and a monkey moving or dropping
         // down runs into it instead of pushing it
-        // except in the starter zone: the cobra stays active & orbits, but
+        // except in the starting zone: the cobra stays active & orbits, but
         // holds its height until the zone ends
-        if (!IsInStarterZone) {
+        if (!IsInStartingZone) {
             headHeight += currentClimbSpeed * Time.deltaTime;
         }
 
         UpdateBody();
     }
 
-    private static bool IsInStarterZone =>
+    private static bool IsInStartingZone =>
         GameController.I != null
-        && GameController.I.State == GameState.StarterZone;
+        && GameController.I.State == GameState.StartingZone;
 
     private void OnDestroy() {
         if (playerSensor != null) {
@@ -330,6 +342,8 @@ public class CobraMotor: MonoBehaviour {
     private bool isCatchingUp;
     private int surgeStacks; // mistakes stacked in the running surge
     private float surgeEndTime; // Time.time the running surge ends
+    private float exitBoostEndTime; // Time.time the zone exit boost ends
+    private GameState lastGameState; // state seen on the previous Update
     private float nextCountedHitTime; // Time.time b4 which hits add nothing
     private HitBranchSensor playerSensor;
     private SpiderWebStruggle playerStruggle;
@@ -376,6 +390,27 @@ public class CobraMotor: MonoBehaviour {
             0f,
             balanceConfig.CobraBaseSpeedCurve.Evaluate(difficulty)
         );
+    }
+
+    // the starting zone ending (to Playing) starts the one-off exit boost
+    private void StartExitBoostOnZoneExit() {
+        if (GameController.I == null) {
+            return;
+        }
+
+        GameState state = GameController.I.State;
+        bool didExitZone = lastGameState == GameState.StartingZone
+            && state == GameState.Playing;
+        lastGameState = state;
+        if (!didExitZone) {
+            return;
+        }
+
+        if (balanceConfig != null) {
+            exitBoostEndTime =
+                Time.time + balanceConfig.CobraExitBoostDurationS;
+        }
+        ChaseStarted?.Invoke();
     }
 
     // a branch or falling cobra hit, or a web, costs the monkey time; the

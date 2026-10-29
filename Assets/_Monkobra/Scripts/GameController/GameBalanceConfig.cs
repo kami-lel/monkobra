@@ -23,20 +23,6 @@ public class GameBalanceConfig: ScriptableObject {
     /// <returns>stamina restored per grabbed fruit</returns>
     public float FruitStaminaRestore => fruitStaminaRestore;
 
-    /// <returns>climb speed moving up; u/s</returns>
-    public float UpSpeedU => upSpeedU;
-
-    /// <returns>climb speed moving down; u/s</returns>
-    public float DownSpeedU => downSpeedU;
-
-    /// <returns>multiplier on upward climb speed while stamina is empty
-    /// </returns>
-    public float ExhaustedSpeedMultiplier => exhaustedSpeedMultiplier;
-
-    /// <returns>stamina regained per s while the monkey gives no movement
-    /// input</returns>
-    public float IdleStaminaRecoveryPerS => idleStaminaRecoveryPerS;
-
     /// <returns>how long control is lost after a branch hit; s</returns>
     public float HitStunDurationS => hitStunDurationS;
 
@@ -61,6 +47,12 @@ public class GameBalanceConfig: ScriptableObject {
 
     /// <returns>branch creation attempts rolled per segment</returns>
     public int BranchGenerationAttemptCount => branchGenerationAttemptCount;
+
+    /// <returns>no branch grows within this distance of the monkey while the
+    /// starting zone lasts, so a restart never spawns the monkey into one;
+    /// u</returns>
+    public float StartingZoneBranchClearRadiusU =>
+        startingZoneBranchClearRadiusU;
 
     /// <returns>x: ramped difficulty 0~1; y: chance 0~1 that one attempt
     /// creates a branch</returns>
@@ -131,12 +123,31 @@ public class GameBalanceConfig: ScriptableObject {
     public float CobraSurgeSpeedPerMistakeU => cobraSurgeSpeedPerMistakeU;
 
     /// <returns>ceiling on the great cobra's surging climb speed, may pass
-    /// <see cref="UpSpeedU"/>; u/s</returns>
+    /// the monkey's top climb speed; u/s</returns>
     public float CobraMaxSurgeSpeedU => cobraMaxSurgeSpeedU;
 
     /// <returns>how fast the great cobra's climb speed eases toward its
     /// target; u/s²</returns>
     public float CobraSpeedChangeRateU => cobraSpeedChangeRateU;
+
+    /// <returns>extra climb speed the great cobra gets over its base speed
+    /// for a while after the monkey leaves the starting zone; 0 turns it
+    /// off; u/s</returns>
+    public float CobraExitBoostSpeedU => cobraExitBoostSpeedU;
+
+    /// <returns>how long the great cobra's starting zone exit boost lasts;
+    /// s</returns>
+    public float CobraExitBoostDurationS => cobraExitBoostDurationS;
+
+    /// <returns>fraction 0~1 of <see cref="MaxStamina"/> the monkey starts
+    /// the level with, spent in the starting zone</returns>
+    public float StartingZoneStartStaminaFraction =>
+        startingZoneStartStaminaFraction;
+
+    /// <returns>like <see cref="MovementConfig.ExhaustedSpeedMultiplier"/>,
+    /// but used while the starting zone lasts</returns>
+    public float StartingZoneExhaustedSpeedMultiplier =>
+        startingZoneExhaustedSpeedMultiplier;
 
     // Inspector Fields  #######################################################
     public float SlipSlideDistanceU => slipSlideDistanceU;
@@ -194,22 +205,21 @@ public class GameBalanceConfig: ScriptableObject {
     [Tooltip("stamina restored per grabbed fruit, capped at max stamina")]
     private float fruitStaminaRestore = 30f;
 
-    [Header("Movement")]
+    [Header("Starting Zone")]
     [SerializeField]
-    [Tooltip("climb speed moving up; u/s")]
-    private float upSpeedU = 6f;
+    [Range(0f, 1f)]
+    [Tooltip(
+        "fraction of max stamina at level start, so the starting zone "
+            + "teaches the stamina limit; 0.3 = 30%"
+    )]
+    private float startingZoneStartStaminaFraction = 0.3f;
 
     [SerializeField]
-    [Tooltip("climb speed moving down; u/s")]
-    private float downSpeedU = 12f;
-
-    [SerializeField]
-    [Tooltip("upward climb speed multiplier while stamina is empty")]
-    private float exhaustedSpeedMultiplier = 0.2f;
-
-    [SerializeField]
-    [Tooltip("stamina regained per s while no movement key is pressed")]
-    private float idleStaminaRecoveryPerS = 2f;
+    [Tooltip(
+        "upward climb speed multiplier while stamina is empty, used "
+            + "during the starting zone only"
+    )]
+    private float startingZoneExhaustedSpeedMultiplier = 0.5f;
 
     [Header("Branch Hit")]
     [SerializeField]
@@ -251,6 +261,14 @@ public class GameBalanceConfig: ScriptableObject {
     [Min(0)]
     [Tooltip("branch creation attempts rolled per segment")]
     private int branchGenerationAttemptCount = 9;
+
+    [SerializeField]
+    [Min(0f)]
+    [Tooltip(
+        "no branch is placed within this distance of the monkey while the "
+            + "starting zone lasts; 0 turns it off; u"
+    )]
+    private float startingZoneBranchClearRadiusU = 6f;
 
     [SerializeField]
     [Tooltip(
@@ -367,6 +385,19 @@ public class GameBalanceConfig: ScriptableObject {
     [Tooltip("how fast the climb speed eases toward its target; u/s²")]
     private float cobraSpeedChangeRateU = 6f;
 
+    [SerializeField]
+    [Min(0f)]
+    [Tooltip(
+        "extra climb speed over the base speed for a while after the monkey "
+            + "leaves the starting zone; 0 turns it off; u/s"
+    )]
+    private float cobraExitBoostSpeedU = 3f;
+
+    [SerializeField]
+    [Min(0f)]
+    [Tooltip("how long the starting zone exit boost lasts; s")]
+    private float cobraExitBoostDurationS = 5f;
+
     // Editor Validation  ######################################################
     private void OnValidate() {
         slipSlideDistanceU = Mathf.Max(0f, slipSlideDistanceU);
@@ -379,10 +410,6 @@ public class GameBalanceConfig: ScriptableObject {
         staminaUpwardDrainPerU = Mathf.Max(0f, staminaUpwardDrainPerU);
         staminaSidewayDrainPerU = Mathf.Max(0f, staminaSidewayDrainPerU);
         fruitStaminaRestore = Mathf.Max(0f, fruitStaminaRestore);
-        upSpeedU = Mathf.Max(0f, upSpeedU);
-        downSpeedU = Mathf.Max(0f, downSpeedU);
-        exhaustedSpeedMultiplier = Mathf.Clamp01(exhaustedSpeedMultiplier);
-        idleStaminaRecoveryPerS = Mathf.Max(0f, idleStaminaRecoveryPerS);
         hitStunDurationS = Mathf.Max(0f, hitStunDurationS);
         hitDropDistanceU = Mathf.Max(0f, hitDropDistanceU);
         hitDropSpeedU = Mathf.Max(0f, hitDropSpeedU);
@@ -414,5 +441,7 @@ public class GameBalanceConfig: ScriptableObject {
         cobraSurgeSpeedPerMistakeU = Mathf.Max(0f, cobraSurgeSpeedPerMistakeU);
         cobraMaxSurgeSpeedU = Mathf.Max(0f, cobraMaxSurgeSpeedU);
         cobraSpeedChangeRateU = Mathf.Max(0.01f, cobraSpeedChangeRateU);
+        cobraExitBoostSpeedU = Mathf.Max(0f, cobraExitBoostSpeedU);
+        cobraExitBoostDurationS = Mathf.Max(0f, cobraExitBoostDurationS);
     }
 }

@@ -25,7 +25,7 @@ graph LR
 
 - Why Height: height is what the player is trying to maximize, so tying difficulty to it makes the tension track progress; a timer would punish slow play instead of rewarding fast play
 - Why 0 To 1: a normalized value lets every hazard curve use the same x axis, so reshaping when difficulty arrives never touches the hazard curves
-- Two Baselines: every climb height (score, height display) is measured above the monkey's start y (`GetClimbedYDistance`), while the ramp itself starts at 0 at the y of the starter zone exit trigger (`RampBaseYPosition`), so the protected start is not counted as climbing difficulty. Both are owned by `RampedDifficultyManager`, and nothing else reads raw world y for balance, so shifting the world only means moving those baselines
+- Two Baselines: every climb height (score, height display) is measured above the monkey's start y (`GetClimbedYDistance`), while the ramp itself starts at 0 at the y of the starting zone exit trigger (`RampBaseYPosition`), so the protected start is not counted as climbing difficulty. Both are owned by `RampedDifficultyManager`, and nothing else reads raw world y for balance, so shifting the world only means moving those baselines
 - Clamped: the ramp curve may extrapolate, but the service clamps its result to 0~1, so past the curve's end difficulty stays at its ceiling and below its start at its floor
 - Highest Not Current: score and the lose panel read the highest height reached, so falling and re-climbing is neither rewarded nor double counted
 

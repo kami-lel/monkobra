@@ -189,6 +189,7 @@ public class TreeSegmentController: MonoBehaviour {
         Vector3 branchPosition = Vector3.zero;
 
         int maxAttempts = placementConfig.MaxPlacementAttempts;
+        bool isClear = false;
         for (int attempt = 0; attempt < maxAttempts; attempt++) {
             branchRotation = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
             float branchHeight = Random.Range(0f, segmentHeight);
@@ -196,9 +197,18 @@ public class TreeSegmentController: MonoBehaviour {
                 branchRotation * Vector3.forward * placementConfig.BranchRadius
                 + Vector3.up * branchHeight;
 
-            if (IsFarEnoughFromExisting(branchPosition, placedPositions)) {
+            isClear = IsClearOfMonkey(branchPosition);
+            if (
+                isClear
+                && IsFarEnoughFromExisting(branchPosition, placedPositions)
+            ) {
                 break;
             }
+        }
+
+        // no spot clear of the monkey: skip, a branch there is a bad spawn
+        if (!isClear) {
+            return;
         }
 
         placedPositions.Add(branchPosition);
@@ -233,6 +243,26 @@ public class TreeSegmentController: MonoBehaviour {
         return RampedDifficultyManager.I != null
             ? RampedDifficultyManager.I.GetRampedValueFromYPosition(worldY)
             : 0f;
+    }
+
+    // iff the branch keeps the starting zone clearance from the monkey; always
+    // true once the run is playing or w/o a monkey or controller
+    private bool IsClearOfMonkey(Vector3 localPosition) {
+        float clearRadius = balanceConfig.StartingZoneBranchClearRadiusU;
+        if (
+            clearRadius <= 0f
+            || GameController.I == null
+            || !GameController.I.IsBeforePlaying
+            || RampedDifficultyManager.I == null
+            || RampedDifficultyManager.I.PlayerTransform == null
+        ) {
+            return true;
+        }
+
+        Vector3 worldPosition = transform.TransformPoint(localPosition);
+        Vector3 monkeyPosition =
+            RampedDifficultyManager.I.PlayerTransform.position;
+        return Vector3.Distance(worldPosition, monkeyPosition) >= clearRadius;
     }
 
     private bool IsFarEnoughFromExisting(

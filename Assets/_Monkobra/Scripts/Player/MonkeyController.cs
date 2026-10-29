@@ -35,6 +35,8 @@ public class MonkeyController: MonoBehaviour {
             if (value) {
                 slipActive = false;
             }
+            upHeldS = 0f;
+            downHeldS = 0f;
             // freed after a pull: glide back onto the ring, never snap
             if (!value && hasPullTarget) {
                 hasPullTarget = false;
@@ -114,8 +116,12 @@ public class MonkeyController: MonoBehaviour {
     private MonkeyConfig config;
 
     [SerializeField]
-    [Tooltip("game balance tuning; climb speed, exhaustion and branch hit")]
+    [Tooltip("game balance tuning; climb speed and branch hit")]
     private GameBalanceConfig balanceConfig;
+
+    [SerializeField]
+    [Tooltip("climb build-up, exhaustion slow down and idle stamina recovery")]
+    private MovementConfig movementConfig;
 
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
@@ -145,6 +151,14 @@ public class MonkeyController: MonoBehaviour {
             Debug.LogWarning(
                 "MonkeyController:	must assign Inspector Field: "
                     + "balanceConfig",
+                this
+            );
+        }
+
+        if (movementConfig == null) {
+            Debug.LogWarning(
+                "MonkeyController:\tmust assign Inspector Field: "
+                    + "movementConfig",
                 this
             );
         }
@@ -199,7 +213,7 @@ public class MonkeyController: MonoBehaviour {
     }
 
     private void FixedUpdate() {
-        if (config == null || balanceConfig == null) {
+        if (config == null || balanceConfig == null || movementConfig == null) {
             return;
         }
 
@@ -237,31 +251,43 @@ public class MonkeyController: MonoBehaviour {
         if (staminaBar != null && hasInput) {
             staminaBar.NotifyMoveAttempt();
         }
-        float upSpeedScale = isExhausted
-            ? balanceConfig.ExhaustedSpeedMultiplier
-            : 1f;
+        // the starting zone softens the exhaustion slow down
+        bool isInStartingZone = GameController.I != null
+            && GameController.I.IsInStartingZone;
+        float exhaustedScale = isInStartingZone
+            ? balanceConfig.StartingZoneExhaustedSpeedMultiplier
+            : movementConfig.ExhaustedSpeedMultiplier;
+        float upSpeedScale = isExhausted ? exhaustedScale : 1f;
 
         orbitAngleDeg -= directionalInput.x
             * config.RotationSpeedDeg
             * Time.fixedDeltaTime;
 
-        float maxClimbSpeed = directionalInput.y >= 0f
-            ? balanceConfig.UpSpeedU * upSpeedScale
-            : balanceConfig.DownSpeedU;
-        float rampRate = hasInput
-            ? config.AccelerationU
-            : config.DecelerationU;
-        climbSpeedU = Mathf.MoveTowards(
-            climbSpeedU,
-            directionalInput.y * maxClimbSpeed,
-            rampRate * Time.fixedDeltaTime
-        );
+        // speed builds up along a curve of how long the key has been held;
+        // with no vertical key the climb eases to a stop instead
+        UpdateHeldTimes(directionalInput.y);
+        if (upHeldS > 0f) {
+            climbSpeedU = directionalInput.y
+                * movementConfig.ClimbUpSpeedCurve.Evaluate(upHeldS)
+                * upSpeedScale;
+        } else if (downHeldS > 0f) {
+            climbSpeedU = directionalInput.y
+                * movementConfig.ClimbDownSpeedCurve.Evaluate(downHeldS);
+        } else {
+            climbSpeedU = Mathf.MoveTowards(
+                climbSpeedU,
+                0f,
+                config.DecelerationU * Time.fixedDeltaTime
+            );
+        }
 
         float nextY = transform.position.y + climbSpeedU * Time.fixedDeltaTime;
         if (isStunned) {
             // knocked off the climb: the ramp is bypassed, fall at a set
             // speed and stop dead on the drop target
             climbSpeedU = 0f;
+            upHeldS = 0f;
+            downHeldS = 0f;
             nextY = Mathf.Max(
                 dropTargetY,
                 transform.position.y
@@ -319,7 +345,7 @@ public class MonkeyController: MonoBehaviour {
             // standing still, no key pressed, regains stamina slowly
             if (!hasInput && !isSlipping) {
                 staminaBar.AddStamina(
-                    balanceConfig.IdleStaminaRecoveryPerS
+                    movementConfig.IdleStaminaRecoveryPerS
                         * Time.fixedDeltaTime
                 );
             }
@@ -379,7 +405,9 @@ public class MonkeyController: MonoBehaviour {
     // private members  ########################################################
     private float orbitAngleDeg;
     private float orbitRadius; // dist from parent root, set once in Awake
-    private float climbSpeedU; // ramped vertical speed, this script's own
+    private float climbSpeedU; // vertical speed, this script's own
+    private float upHeldS; // s the up key has been held without a break
+    private float downHeldS; // s the down key has been held without a break
     private float stunEndTime; // Time.time when control returns
     private float dropTargetY; // world Y where hit fall stops
     private bool slipActive;
@@ -401,6 +429,21 @@ public class MonkeyController: MonoBehaviour {
     private Rigidbody body;
 
     // private methods  ########################################################
+    // counts how long the up or down key has been held; a release or a flip
+    // of direction starts the count over
+    private void UpdateHeldTimes(float verticalInput) {
+        if (verticalInput > INPUT_DEADZONE) {
+            upHeldS += Time.fixedDeltaTime;
+            downHeldS = 0f;
+        } else if (verticalInput < -INPUT_DEADZONE) {
+            downHeldS += Time.fixedDeltaTime;
+            upHeldS = 0f;
+        } else {
+            upHeldS = 0f;
+            downHeldS = 0f;
+        }
+    }
+
     private Vector3 CalcOrbitOffset(float angleDeg) {
         float angleRad = angleDeg * Mathf.Deg2Rad;
         return new Vector3(Mathf.Sin(angleRad), 0f, Mathf.Cos(angleRad))

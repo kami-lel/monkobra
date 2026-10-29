@@ -16,12 +16,15 @@ public class RampedDifficultyManager: MonoBehaviour {
     public float HighestPlayerClimbedYDistance { get; private set; }
 
     /// <summary>
-    /// World y where the ramp sits at 0: the y of the starter zone exit
+    /// World y where the ramp sits at 0: the y of the starting zone exit
     /// trigger, falling back to <see cref="PlayerGameStartYPosition"/> while
     /// none is assigned. Climbed height for score and display is unaffected.
     /// </summary>
     public float RampBaseYPosition =>
         rampBase != null ? rampBase.position.y : PlayerGameStartYPosition;
+
+    /// <returns>the player's transform, null if none was found</returns>
+    public Transform PlayerTransform => player;
 
     // Public Methods  #########################################################
     /// <summary>
@@ -58,7 +61,7 @@ public class RampedDifficultyManager: MonoBehaviour {
     private GameBalanceConfig balanceConfig;
 
     [SerializeField]
-    [Tooltip("starter zone exit trigger; its y is where the ramp starts at 0")]
+    [Tooltip("starting zone exit trigger; its y is where the ramp starts at 0")]
     private Transform rampBase;
 
     // MonoBehaviour Lifecycle  ################################################

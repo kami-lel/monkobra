@@ -1,12 +1,11 @@
 # Monkobra CHANGELOG
 
 <!--
-Bug Erik tree branch created at player location & thus resulting failure
+Bug Belle falling snake should disappear after collision
+
 Fixme Pan: UI mpv
-Fixme Erik Keeps improving tutorial zone: larger range, smaller debuff, half the energy
 Todo Dont Pause screen
 Todo belle: 打滑事件
-Todo Erik Movement speed build up
 Todo Dont boss fight
 Todo Pan: 数字显示和蛇的距离
 Todo Yuqing: 抓取椰子，往下扔，蛇往下掉
@@ -29,11 +28,17 @@ bug spider web fail to load & log warning
 ##### Erik
 
 - `Lv1Scene` split into nested prefabs: `World`, `Envs`, `Entities`, `Systems`, `UI` and a leaf prefab per unit, so teammates edit different files
+- Great Cobra exit boost: extra climb speed for a while after the monkey leaves the starting zone, w/ center warning "Run! The Great Cobra is chasing you!"; `cobraExitBoostSpeedU` & `cobraExitBoostDurationS` in `GameBalanceConfig`
+- `MovementConfig` asset: climb speed builds up along 2 curves (up, down) of how long the key is held, instead of a fixed acceleration
+- `startingZoneBranchClearRadiusU` in `GameBalanceConfig`: branch clearance round the monkey before the run is playing
 
 ### Changed
 
 ##### Erik
 
+- `exhaustedSpeedMultiplier` & `idleStaminaRecoveryPerS` moved from `GameBalanceConfig` to `MovementConfig`
+- Starter Zone → Starting Zone: `GameState.StartingZone`, `EndStartingZone()`, `StartingZoneExitRelay`, `StartingZoneExitTrigger` prefab; Tutorial state & screen unchanged
+- fruit grab aims at banana closest to monkey, not last to enter a detection zone; re-picked every physics step
 - scripts renamed to house role suffixes (`Controller`, `Sensor`, `Motor`, `Widget`, `Relay`, `Feedback`, ~), e.g. `ArmRoot` to `ArmController`, `HitBranchDetection` to `HitBranchSensor`, `RampedDifficultyService` to `RampedDifficultyManager`; no behavior change
 - code style pass over all scripts: same-line braces, MonoBehaviour section order with banners, Inspector guards, explicit types instead of `var`, plain logs gated by `isDebugBuild`
 - `World` and `Systems` wrapper prefabs dropped: the light, volume and event system are root prefabs, and `ScreensManager`, `ScoreManager`, `RampedDifficultyManager` are components of the `GameController` prefab
@@ -52,9 +57,14 @@ bug spider web fail to load & log warning
 ##### Erik
 
 - `SlipTestScene` dev scene, after slippery bark landed in `Lv1Scene`
+- `upSpeedU` & `downSpeedU` (`GameBalanceConfig`), replaced by the `MovementConfig` curves; `accelerationU` (`MonkeyConfig`)
 - orphan `GoalText` object in `Lv1Scene` (never drawn, no parent Canvas) and its mention in the TDD
 
 ### Fixed
+
+##### Erik
+
+- restart could spawn monkey inside a tree branch: no branch grows w/i `startingZoneBranchClearRadiusU` of monkey before the run is playing
 
 ### Security
 
@@ -99,8 +109,8 @@ bug spider web fail to load & log warning
 
 - camera cool-down effect: vignette & zoom-out pulse on move attempts at low stamina, tuned in `CameraEfxConfig`
 - camera hit shake: light for branch hits, heavier for falling cobra
-- starter zone: live run before Playing begins, ended by the monkey entering an exit trigger; Great Cobra holds height meanwhile
-- ramped difficulty starts at 0 at the starter zone exit
+- starting zone: live run before Playing begins, ended by the monkey entering an exit trigger; Great Cobra holds height meanwhile
+- ramped difficulty starts at 0 at the starting zone exit
 - grab arm tracks its banana while interact is held
 
 ### Changed
@@ -111,7 +121,7 @@ bug spider web fail to load & log warning
 
 ##### Erik
 
-- difficulty ramp & branch/banana curves start above the starter zone exit
+- difficulty ramp & branch/banana curves start above the starting zone exit
 - Great Cobra starts lower (-5 → -10)
 - low stamina, not only empty, now triggers move-attempt feedback
 - `Lv1Scene` split into prefabs, easing scene merges

@@ -130,7 +130,9 @@ public class StaminaBarController: MonoBehaviour {
         I = this;
         staminaSlider = GetComponent<Slider>();
 
-        currentStamina = balanceConfig.MaxStamina;
+        // the level opens on the starting zone, which starts below full
+        currentStamina = balanceConfig.MaxStamina
+            * balanceConfig.StartingZoneStartStaminaFraction;
         staminaSlider.minValue = 0f;
         staminaSlider.maxValue = balanceConfig.MaxStamina;
         staminaSlider.value = currentStamina;

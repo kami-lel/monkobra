@@ -26,6 +26,11 @@ public class ProgressBarWidget: MonoBehaviour {
     private string catchUpText = "The cobra is speeding up!";
 
     [SerializeField]
+    [Tooltip("warning at screen center when the monkey leaves the starting "
+        + "zone and the cobra starts chasing")]
+    private string chaseStartText = "Run! The Great Cobra is chasing you!";
+
+    [SerializeField]
     [Tooltip("appended w/ stack count from 2nd stacked mistake on")]
     private string catchUpStackFormat = " x{0}";
 
@@ -102,12 +107,14 @@ public class ProgressBarWidget: MonoBehaviour {
 
         if (cobra != null) {
             cobra.CatchUpStarted += OnCatchUpStarted;
+            cobra.ChaseStarted += OnChaseStarted;
         }
     }
 
     private void OnDestroy() {
         if (cobra != null) {
             cobra.CatchUpStarted -= OnCatchUpStarted;
+            cobra.ChaseStarted -= OnChaseStarted;
         }
     }
 
@@ -125,14 +132,25 @@ public class ProgressBarWidget: MonoBehaviour {
 
     // Event Handlers  #########################################################
     private void OnCatchUpStarted(int stacks) {
+        ShowWarning(
+            stacks > 1
+                ? catchUpText + string.Format(catchUpStackFormat, stacks)
+                : catchUpText
+        );
+    }
+
+    private void OnChaseStarted() {
+        ShowWarning(chaseStartText);
+    }
+
+    // shows the center warning w/ the given text, same look for every cue
+    private void ShowWarning(string text) {
         catchUpHideTime = Time.time + catchUpShowS;
         if (catchUpLabel == null) {
             return;
         }
 
-        catchUpLabel.text = stacks > 1
-            ? catchUpText + string.Format(catchUpStackFormat, stacks)
-            : catchUpText;
+        catchUpLabel.text = text;
 
         // re-sized on every show, in case the window size changed
         Canvas canvas = catchUpLabel.canvas;
