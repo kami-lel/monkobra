@@ -2,6 +2,7 @@
 
 <!--
 BUG Erik tree branch created at player location & thus resulting failure
+FIXME decide closest
 
 Fixme Pan: UI mpv
 Todo Dont Pause screen
