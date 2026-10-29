@@ -138,6 +138,16 @@ public class GameBalanceConfig: ScriptableObject {
     /// target; u/s²</returns>
     public float CobraSpeedChangeRateU => cobraSpeedChangeRateU;
 
+    /// <returns>fraction 0~1 of <see cref="MaxStamina"/> the monkey starts
+    /// the level with, spent in the starting zone</returns>
+    public float StartingZoneStartStaminaFraction =>
+        startingZoneStartStaminaFraction;
+
+    /// <returns>like <see cref="ExhaustedSpeedMultiplier"/>, but used while
+    /// the starting zone lasts</returns>
+    public float StartingZoneExhaustedSpeedMultiplier =>
+        startingZoneExhaustedSpeedMultiplier;
+
     // Inspector Fields  #######################################################
     [Header("Stamina")]
     [SerializeField]
@@ -178,6 +188,22 @@ public class GameBalanceConfig: ScriptableObject {
     [SerializeField]
     [Tooltip("stamina regained per s while no movement key is pressed")]
     private float idleStaminaRecoveryPerS = 2f;
+
+    [Header("Starting Zone")]
+    [SerializeField]
+    [Range(0f, 1f)]
+    [Tooltip(
+        "fraction of max stamina at level start, so the starting zone "
+            + "teaches the stamina limit; 0.3 = 30%"
+    )]
+    private float startingZoneStartStaminaFraction = 0.3f;
+
+    [SerializeField]
+    [Tooltip(
+        "upward climb speed multiplier while stamina is empty, used "
+            + "during the starting zone only"
+    )]
+    private float startingZoneExhaustedSpeedMultiplier = 0.5f;
 
     [Header("Branch Hit")]
     [SerializeField]
