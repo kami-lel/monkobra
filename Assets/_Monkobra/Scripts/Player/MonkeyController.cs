@@ -190,9 +190,13 @@ public class MonkeyController: MonoBehaviour {
         if (staminaBar != null && hasInput) {
             staminaBar.NotifyMoveAttempt();
         }
-        float upSpeedScale = isExhausted
-            ? balanceConfig.ExhaustedSpeedMultiplier
-            : 1f;
+        // the starting zone softens the exhaustion slow down
+        bool isInStartingZone = GameController.I != null
+            && GameController.I.IsInStartingZone;
+        float exhaustedScale = isInStartingZone
+            ? balanceConfig.StartingZoneExhaustedSpeedMultiplier
+            : balanceConfig.ExhaustedSpeedMultiplier;
+        float upSpeedScale = isExhausted ? exhaustedScale : 1f;
 
         orbitAngleDeg -= directionalInput.x
             * config.RotationSpeedDeg

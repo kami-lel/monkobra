@@ -23,6 +23,9 @@ public class GameController: MonoBehaviour {
     public bool IsRunLive =>
         State == GameState.Playing || State == GameState.StartingZone;
 
+    /// <summary>if the starting zone is under way</summary>
+    public bool IsInStartingZone => State == GameState.StartingZone;
+
     /// <summary>
     /// whether cobra collisions are ignored entirely, a debug cheat; warns
     /// each time it is switched on
