@@ -2,7 +2,6 @@
 
 <!--
 BUG Erik tree branch created at player location & thus resulting failure
-FIXME decide closest
 
 Fixme Pan: UI mpv
 Todo Dont Pause screen
@@ -31,6 +30,7 @@ bug spider web fail to load & log warning
 
 ##### Erik
 
+- fruit grab aims at the banana closest to the monkey, not the last one to enter a detection zone; re-picked every physics step
 - scripts renamed to house role suffixes (`Controller`, `Sensor`, `Motor`, `Widget`, `Relay`, `Feedback`, ~), e.g. `ArmRoot` to `ArmController`, `HitBranchDetection` to `HitBranchSensor`, `RampedDifficultyService` to `RampedDifficultyManager`; no behavior change
 - code style pass over all scripts: same-line braces, MonoBehaviour section order with banners, Inspector guards, explicit types instead of `var`, plain logs gated by `isDebugBuild`
 - `World` and `Systems` wrapper prefabs dropped: the light, volume and event system are root prefabs, and `ScreensManager`, `ScoreManager`, `RampedDifficultyManager` are components of the `GameController` prefab

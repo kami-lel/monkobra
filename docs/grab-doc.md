@@ -10,7 +10,7 @@ graph TD
   Fruit -->|reachable| Outline[FruitOutlineListener]
   Fruit -->|ReachSide| Cam[CameraRigManager]
   Press[Interact pressed] --> Arm[ArmController]
-  Fruit -->|newest fruit on side| Arm
+  Fruit -->|closest fruit on side| Arm
   Arm -->|hand overlaps fruit| Grabbable[SetGrabbableFruit]
   Grabbable --> Outline
   Release[Interact released] --> Arm
@@ -20,7 +20,7 @@ graph TD
 ```
 
 1. a banana enters a side's detection zone and becomes reachable
-2. the player presses interact: the matching arm locks onto the newest banana on that side and the camera swings to that side
+2. the player presses interact: the matching arm locks onto the banana closest to the monkey on that side and the camera swings to that side
 3. while interact is held the arm keeps re-aiming at the locked banana every physics step while it stretches
 4. on release, the grab succeeds only if the hand overlaps the banana at that instant
 
@@ -42,10 +42,10 @@ graph TD
 
 - Zones: two `DetectionZoneRelay` triggers (`LeftDetection`, `RightDetection`, under `Detections` on the monkey prefab) flank the monkey. Each forwards `Entered` and `Exited` with its side
 - Filter: `UpwardFruitSensor` keeps only colliders tagged `FruitCollider`, in a set per side plus one entry-order list across both
-- Reach Side: `ReachSide` is right only when the right zone has fruit and the left does not, else left, including when neither or both have fruit. Only the arm on that side reaches
-- Newest Fruit: the target is the most recent entry on that side
+- Reach Side: `ReachSide` is the side of the closest fruit across both zones, left when none is in reach; a fruit in both zones takes the side of the monkey's right vector it lies on. Only the arm on that side reaches
+- Closest Fruit: any fruit in a zone is grabbable, and the target is the one nearest the monkey by 3D distance from the `_Monkey` root to the fruit collider's bounds centre, the older entry on a tie. `UpwardFruitSensor` re-evaluates it every physics step, so the choice follows the climb
 - Reach Events: `FruitReachChanged` fires when a fruit enters or leaves both zones combined, so a fruit in the other zone still counts as reachable
-- Reach Target: `ReachTarget` is the single fruit a reach would aim at, the newest on `ReachSide`, and `ReachTargetChanged` fires when it changes. While an arm reaches, `SetLockedTarget` pins it to the aimed fruit, so a newer fruit never steals the outline. Only that fruit is outlined
+- Reach Target: `ReachTarget` is the single fruit a reach would aim at, the closest on `ReachSide`, and `ReachTargetChanged` fires when it changes. While an arm reaches, `SetLockedTarget` pins it to the aimed fruit, so a closer fruit never steals the outline. Only that fruit is outlined
 - Removal: a grabbed fruit is switched off inside a zone, where its trigger exit may never fire, so `RemoveFruit` clears it from both sides explicitly
 
 ## Reach and Release
