@@ -67,6 +67,11 @@ public class HitBranchSensor: MonoBehaviour {
 
     // Event Handlers  #########################################################
     private void OnTriggerEnter(Collider other) {
+        FallingCobraController fallingCobra = other.GetComponentInParent<FallingCobraController>(true);
+        if (fallingCobra != null) {
+            fallingCobra.TryHit(GetComponent<Collider>());
+            return;
+        }
         if (!other.CompareTag(BRANCH_TAG)) {
             return;
         }
