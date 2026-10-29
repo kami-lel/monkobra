@@ -134,6 +134,8 @@ All under `Assets/_Monkobra/Scripts/`. Each row names the owner of the detail.
 | `Cameras/CameraCoolDownFeedback` | on the main camera: vignette blackdown and zoom-out pulse on each low-stamina move attempt, a lighter step while low and a stronger one when empty | [TDD](docs/monkobra-tdd.md#camera) |
 | `Cameras/CameraEfxConfig` | ScriptableObject of the camera efx tuning: both cool-down steps (vignette, zoom-out) and their timing | [TDD](docs/monkobra-tdd.md#camera) |
 | `Player/HitBranchSensor` | singleton branch sensor: raises `BranchHit` and `Hit` (with a `HitKind`); `ReportHit` applies the same drop for a hazard touching the monkey outside the sensor | [Mobs](docs/mob-doc.md#hit-penalty) |
+| `Environment/SlipperyBarkZone` | wet patch on the trunk: its wavy outline is the contact area; each pass can make the monkey slip via `MonkeyController.TrySlip` | none |
+| `Environment/SlipperyBarkSpawner` | on the `SlipperyBarkSystem` prefab: one tutorial band, then on each `BranchesGenerated` rolls patches on that segment against a curve in `GameBalanceConfig` | none |
 | `Environment/TreeManager` | singleton on the mock tree, marks the trunk axis | [TDD](docs/monkobra-tdd.md#tree) |
 | `Environment/TreeSegmentController` | places branches on a segment, then raises the static `BranchesGenerated` | [Mobs](docs/mob-doc.md#placement) |
 | `Environment/DTSPool` | on an empty base marker: instantiates the segments, then recycles the lowest segment over the top, restarting it, for an endless tree | [TDD](docs/monkobra-tdd.md#tree) |
