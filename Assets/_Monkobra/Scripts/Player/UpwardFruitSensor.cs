@@ -18,11 +18,12 @@ public class UpwardFruitSensor: MonoBehaviour {
     public bool ReachForLeft => leftFruits.Count > 0;
     public bool ReachForRight => rightFruits.Count > 0;
 
-    /// <summary>side to reach for: right iff only right has fruit</summary>
-    public DetectionSide ReachSide =>
-        ReachForRight && !ReachForLeft
-            ? DetectionSide.Right
-            : DetectionSide.Left;
+    /// <summary>
+    /// side of the fruit closest to the monkey across both zones, left when
+    /// none is in reach
+    /// </summary>
+    public DetectionSide ReachSide => FindClosestFruit(out DetectionSide side)
+        != null ? side : DetectionSide.Left;
 
     /// <summary>raised w/ (fruit, isInReach) when a fruit enters or leaves
     /// the reach of both zones combined</summary>
@@ -192,6 +193,11 @@ public class UpwardFruitSensor: MonoBehaviour {
         }
     }
 
+    private void FixedUpdate() {
+        // the closest fruit changes as the monkey climbs, not just on events
+        RefreshReachTarget();
+    }
+
     // Event Handlers  #########################################################
     private void OnZoneEntered(DetectionSide side, Collider other) {
         if (!other.CompareTag(FRUIT_TAG)) {
@@ -238,10 +244,47 @@ public class UpwardFruitSensor: MonoBehaviour {
     private Collider lockedTarget; // fruit an arm is reaching for, else null
 
     // Private Methods  ########################################################
-    // pinned fruit wins, else the one ArmController would pick on the reach side
+    // closest fruit across both zones and the side it sits on; a fruit in both
+    // zones takes the side of the monkey's right vector it lies on
+    private Collider FindClosestFruit(out DetectionSide side) {
+        side = DetectionSide.Left;
+        Collider left = GetClosestFruit(DetectionSide.Left);
+        Collider right = GetClosestFruit(DetectionSide.Right);
+        if (left == null && right == null) {
+            return null;
+        }
+
+        Collider closest = left;
+        if (left == null || right != null && IsCloser(right, left)) {
+            closest = right;
+        }
+
+        if (leftFruits.Contains(closest) && rightFruits.Contains(closest)) {
+            float sideDot = Vector3.Dot(
+                closest.bounds.center - transform.position,
+                transform.right
+            );
+            side = sideDot > 0f ? DetectionSide.Right : DetectionSide.Left;
+        } else {
+            side = rightFruits.Contains(closest)
+                ? DetectionSide.Right
+                : DetectionSide.Left;
+        }
+        return closest;
+    }
+
+    // strict, so an equal distance keeps the left candidate
+    private bool IsCloser(Collider a, Collider b) {
+        Vector3 origin = transform.position;
+        return (a.bounds.center - origin).sqrMagnitude
+            < (b.bounds.center - origin).sqrMagnitude;
+    }
+
+    // pinned fruit wins, else the closest fruit across both zones
     private void RefreshReachTarget() {
-        Collider next =
-            lockedTarget != null ? lockedTarget : GetNewestFruit(ReachSide);
+        Collider next = lockedTarget != null
+            ? lockedTarget
+            : FindClosestFruit(out DetectionSide _);
         if (next == reachTarget) {
             return;
         }
