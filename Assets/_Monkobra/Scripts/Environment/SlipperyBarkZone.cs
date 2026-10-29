@@ -1,21 +1,12 @@
 using UnityEngine;
 
 /// <summary>A permanent wet patch on the trunk. The visible wavy outline
-/// also defines contact. Each new traversal can lose grip again.</summary>
+/// also defines contact. Each new traversal can lose grip again</summary>
 public class SlipperyBarkZone: MonoBehaviour {
+    // Public Members  #########################################################
     public float HeightU => heightU;
-    [SerializeField, Min(0.1f)] private float heightU = 2.6f;
-    [SerializeField, Min(0.1f)] private float radiusU = 5.05f;
-    [SerializeField, Min(0f)] private float radialToleranceU = 3f;
-    [SerializeField, Range(1f, 360f)] private float arcDeg = 360f;
-    [SerializeField] private float centerAngleDeg;
-    [SerializeField] private int shapeSeed = 42;
-    [SerializeField, Min(0f)] private float passageMarginU = 0.25f;
-    private MonkeyController monkey;
-    private Mesh ownedMesh;
-    private bool slippedThisPass;
-    private float reentryBelowU;
 
+    // Public Methods  #########################################################
     public void Initialize(float radius, float height, float angle, float arc,
         Material material, bool buildMesh, int seed = 42) {
         radiusU = radius;
@@ -26,11 +17,44 @@ public class SlipperyBarkZone: MonoBehaviour {
         if (buildMesh) BuildMesh(material);
     }
 
-    /// <summary>The actual puddle-shaped surface, not rectangular dry corners.</summary>
+    /// <summary>if the point lies on the puddle-shaped surface, not on its
+    /// rectangular dry corners</summary>
     public bool Contains(Vector3 position) {
         return ContainsWithMargin(position, 0f, 0f);
     }
 
+    // Inspector Fields  #######################################################
+    [Header("Shape")]
+    [SerializeField, Min(0.1f)]
+    [Tooltip("patch height; u")]
+    private float heightU = 2.6f;
+
+    [SerializeField, Min(0.1f)]
+    [Tooltip("trunk surface radius; u")]
+    private float radiusU = 5.05f;
+
+    [SerializeField, Range(1f, 360f)]
+    [Tooltip("angular width; 360 = full ring; deg")]
+    private float arcDeg = 360f;
+
+    [SerializeField]
+    [Tooltip("arc middle around trunk; deg")]
+    private float centerAngleDeg = 0f;
+
+    [SerializeField]
+    [Tooltip("seed of wavy edge outline")]
+    private int shapeSeed = 42;
+
+    [Header("Contact")]
+    [SerializeField, Min(0f)]
+    [Tooltip("radial slack b/t body & trunk surface; u")]
+    private float radialToleranceU = 3f;
+
+    [SerializeField, Min(0f)]
+    [Tooltip("extra reach below entry edge b4 re-arming slip; u")]
+    private float passageMarginU = 0.25f;
+
+    // MonoBehaviour Lifecycle  ################################################
     private void Start() {
         monkey = FindFirstObjectByType<MonkeyController>();
     }
@@ -40,10 +64,9 @@ public class SlipperyBarkZone: MonoBehaviour {
             || !GameController.I.IsRunLive) return;
         Vector3 point = monkey.transform.position;
         if (slippedThisPass) {
-            // The slide itself can carry the body below the entry edge.
-            // Latch until a real exit so holding up can cross a full ring.
-            // Re-arm as soon as the body clears the visible top or sides.
-            // Only the lower edge needs hysteresis against the slide itself.
+            // slide can carry body below entry edge, so latch until real
+            // exit: holding up then crosses a full ring. Re-arm once body
+            // clears visible top/sides; only lower edge needs hysteresis
             if (!monkey.IsSlipping && !ContainsWithMargin(point,
                 0f, reentryBelowU + passageMarginU)) slippedThisPass = false;
             else return;
@@ -54,7 +77,19 @@ public class SlipperyBarkZone: MonoBehaviour {
         }
     }
 
-    private bool ContainsWithMargin(Vector3 position, float margin, float below) {
+    private void OnDestroy() {
+        ReleaseMesh();
+    }
+
+    // private members  ########################################################
+    private MonkeyController monkey;
+    private Mesh ownedMesh;
+    private bool slippedThisPass;
+    private float reentryBelowU;
+
+    // private methods  ########################################################
+    private bool ContainsWithMargin(Vector3 position, float margin,
+        float below) {
         Vector3 offset = position - transform.position;
         if (Mathf.Abs(new Vector2(offset.x, offset.z).magnitude - radiusU)
             > radialToleranceU + margin) return false;
@@ -69,7 +104,7 @@ public class SlipperyBarkZone: MonoBehaviour {
         return offset.y >= bottom - margin - below && offset.y <= top + margin;
     }
 
-    // Independent meandering edges and rounded ends make a splash on bark.
+    // independent meandering edges & rounded ends make a splash on bark
     private void GetEdges(float t, out float bottom, out float top) {
         float phase = shapeSeed * 0.61803399f;
         float a = t * Mathf.PI * 2f;
@@ -83,10 +118,6 @@ public class SlipperyBarkZone: MonoBehaviour {
             + 0.08f * Mathf.Cos(a * 6f + phase);
         bottom = center - heightU * 0.5f * taper * lower;
         top = center + heightU * 0.5f * taper * upper;
-    }
-
-    private void OnDestroy() {
-        ReleaseMesh();
     }
 
     private void ReleaseMesh() {
@@ -107,7 +138,8 @@ public class SlipperyBarkZone: MonoBehaviour {
             float degrees = centerAngleDeg + (t - 0.5f) * arcDeg;
             float angle = degrees * Mathf.Deg2Rad;
             Vector3 normal = new(Mathf.Sin(angle), 0f, Mathf.Cos(angle));
-            float shapeT = arcDeg >= 360f ? Mathf.Repeat(degrees, 360f) / 360f : t;
+            float shapeT = arcDeg >= 360f
+                ? Mathf.Repeat(degrees, 360f) / 360f : t;
             GetEdges(shapeT, out float bottom, out float top);
             vertices[2 * i] = normal * radiusU + Vector3.up * bottom;
             vertices[2 * i + 1] = normal * radiusU + Vector3.up * top;

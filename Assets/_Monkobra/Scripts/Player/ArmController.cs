@@ -73,6 +73,15 @@ public class ArmController: MonoBehaviour {
     )]
     private bool isRightArm;
 
+    [Header("Wet Grip")]
+    [SerializeField, Range(0f, 30f)]
+    [Tooltip("extra hand sweep angle at full grip loss; deg")]
+    private float wetGripHandDragDeg = 14f;
+
+    [SerializeField, Range(0f, 1f)]
+    [Tooltip("stroke speed scale at full grip loss; 1 = unaffected")]
+    private float wetGripStrokeScale = 0.18f;
+
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
         // Inspector Assignment Guard  -----------------------------------------
@@ -402,8 +411,6 @@ public class ArmController: MonoBehaviour {
     private Rigidbody body;
     private ConfigurableJoint joint;
     private MonkeyController monkeyRoot;
-    [SerializeField, Range(0f, 30f)] private float wetGripHandDragDeg = 14f;
-    [SerializeField, Range(0f, 1f)] private float wetGripStrokeScale = 0.18f;
 
     // Private Methods  ########################################################
     // arm brushing the torso would shove the body and report the monkey as a
@@ -617,8 +624,8 @@ public class ArmController: MonoBehaviour {
             cyclePhase
                 + direction
                     * inputScale
-                      * config.StrokeSpeedCycles
-                      * Mathf.Lerp(1f, wetGripStrokeScale, gripLoss)
+                    * config.StrokeSpeedCycles
+                    * Mathf.Lerp(1f, wetGripStrokeScale, gripLoss)
                     * Time.fixedDeltaTime,
             1f
         );

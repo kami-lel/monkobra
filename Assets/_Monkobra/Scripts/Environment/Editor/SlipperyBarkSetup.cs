@@ -5,11 +5,14 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /// <summary>Installs the prototype through Unity's prefab and scene APIs.
-/// Runs once when the saved SlipTestScene is open, or from the Tools menu.</summary>
+/// Runs once when the saved SlipTestScene is open, or from the Tools
+/// menu</summary>
 [InitializeOnLoad]
 public static class SlipperyBarkSetup {
-    private const string PrefabPath = "Assets/_Monkobra/Prefabs/Environment/SlipperyBarkSystem.prefab";
-    private const string ScenePath = "Assets/_Monkobra/Scenes/SlipTestScene.unity";
+    private const string PrefabPath =
+        "Assets/_Monkobra/Prefabs/Environment/SlipperyBarkSystem.prefab";
+    private const string ScenePath =
+        "Assets/_Monkobra/Scenes/SlipTestScene.unity";
     private const string InstalledKey = "Monkobra.SlipperyBark.Installed.v1";
 
     static SlipperyBarkSetup() {
@@ -22,12 +25,15 @@ public static class SlipperyBarkSetup {
     }
 
     /// <summary>Integrates the tested feature prefab into the game scene
-    /// without copying the development scene over existing level content.</summary>
+    /// without copying the dev scene over existing level content</summary>
     public static void InstallLevelOneBatch() {
-        Scene scene = EditorSceneManager.OpenScene("Assets/_Monkobra/Scenes/Lv1Scene.unity");
-        GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
+        Scene scene = EditorSceneManager.OpenScene(
+            "Assets/_Monkobra/Scenes/Lv1Scene.unity");
+        GameObject prefab =
+            AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
         if (prefab == null) {
-            throw new System.InvalidOperationException("Missing tested slippery bark prefab.");
+            throw new System.InvalidOperationException(
+                "Missing tested slippery bark prefab.");
         }
         InstallInScene(scene, prefab);
         EditorSceneManager.SaveScene(scene);
@@ -51,34 +57,44 @@ public static class SlipperyBarkSetup {
         }
         Scene current = SceneManager.GetActiveScene();
         if (current.path != ScenePath) {
-            Debug.LogWarning("Slippery Bark: open SlipTestScene before installing.");
+            Debug.LogWarning(
+                "Slippery Bark: open SlipTestScene before installing.");
             return;
         }
         Material material = AssetDatabase.LoadAssetAtPath<Material>(
             "Assets/_Monkobra/Materials/Environment/SlipperyBark.mat");
-        GameBalanceConfig balance = AssetDatabase.LoadAssetAtPath<GameBalanceConfig>(
-            "Assets/_Monkobra/Settings/GameBalanceConfig.asset");
+        GameBalanceConfig balance =
+            AssetDatabase.LoadAssetAtPath<GameBalanceConfig>(
+                "Assets/_Monkobra/Settings/GameBalanceConfig.asset");
         if (material == null || balance == null) {
-            Debug.LogError("Slippery Bark: missing material or balance asset.");
+            Debug.LogError(
+                "Slippery Bark: missing material or balance asset.");
             return;
         }
-        GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
+        GameObject prefab =
+            AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
         if (prefab == null) {
             GameObject root = new("SlipperyBarkSystem");
             try {
-                GameObject band = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                GameObject band =
+                    GameObject.CreatePrimitive(PrimitiveType.Cylinder);
                 band.name = "SlipperyTutorialRing";
                 Object.DestroyImmediate(band.GetComponent<Collider>());
                 band.transform.SetParent(root.transform, false);
                 band.transform.localPosition = new Vector3(0f, 8f, 0f);
                 band.transform.localScale = new Vector3(10.1f, 0.3f, 10.1f);
                 band.GetComponent<Renderer>().sharedMaterial = material;
-                SlipperyBarkZone tutorial = band.AddComponent<SlipperyBarkZone>();
-                SlipperyBarkSpawner spawner = root.AddComponent<SlipperyBarkSpawner>();
+                SlipperyBarkZone tutorial =
+                    band.AddComponent<SlipperyBarkZone>();
+                SlipperyBarkSpawner spawner =
+                    root.AddComponent<SlipperyBarkSpawner>();
                 SerializedObject fields = new(spawner);
-                fields.FindProperty("balanceConfig").objectReferenceValue = balance;
-                fields.FindProperty("barkMaterial").objectReferenceValue = material;
-                fields.FindProperty("tutorialZone").objectReferenceValue = tutorial;
+                fields.FindProperty("balanceConfig").objectReferenceValue =
+                    balance;
+                fields.FindProperty("barkMaterial").objectReferenceValue =
+                    material;
+                fields.FindProperty("tutorialZone").objectReferenceValue =
+                    tutorial;
                 fields.ApplyModifiedPropertiesWithoutUndo();
                 prefab = PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
             }
@@ -87,7 +103,8 @@ public static class SlipperyBarkSetup {
             }
         }
         if (prefab == null) {
-            throw new System.InvalidOperationException("Failed to create slippery bark prefab.");
+            throw new System.InvalidOperationException(
+                "Failed to create slippery bark prefab.");
         }
 
         UpgradeWetSurface(material);
@@ -100,28 +117,37 @@ public static class SlipperyBarkSetup {
         Directory.CreateDirectory("Temp");
         File.WriteAllText("Temp/SlipperyBarkSetup.log",
             "Installed slippery bark prefab in SlipTestScene only.\n");
-        Debug.Log("Slippery Bark ready: tutorial at Y=8, random partial patches above starter zone.");
+        Debug.Log("Slippery Bark ready: tutorial at Y=8, random partial "
+            + "patches above starter zone.");
     }
 
-    // Preserve prefab identity and store a mesh for the Edit-mode preview.
+    // keep prefab identity, store a mesh for the Edit-mode preview
     private static void UpgradeWetSurface(Material material) {
         GameObject root = PrefabUtility.LoadPrefabContents(PrefabPath);
         try {
-            SlipperyBarkSpawner spawner = root.GetComponent<SlipperyBarkSpawner>();
+            SlipperyBarkSpawner spawner =
+                root.GetComponent<SlipperyBarkSpawner>();
             SerializedObject fields = new(spawner);
-            fields.FindProperty("patchHeightRangeU").vector2Value = new Vector2(1.2f, 4.2f);
+            fields.FindProperty("patchHeightRangeU").vector2Value =
+                new Vector2(1.2f, 4.2f);
             fields.FindProperty("tutorialHeightU").floatValue = 2.6f;
-            fields.FindProperty("patchArcRangeDeg").vector2Value = new Vector2(30f, 125f);
+            fields.FindProperty("patchArcRangeDeg").vector2Value =
+                new Vector2(30f, 125f);
             fields.FindProperty("patchSeparationU").floatValue = 4f;
             fields.ApplyModifiedPropertiesWithoutUndo();
-            SlipperyBarkZone band = root.GetComponentInChildren<SlipperyBarkZone>();
+            SlipperyBarkZone band =
+                root.GetComponentInChildren<SlipperyBarkZone>();
             band.transform.localScale = Vector3.one;
             band.Initialize(5.05f, 2.6f, 0f, 360f, material, true);
             if (!AssetDatabase.IsValidFolder("Assets/_Monkobra/Meshes"))
                 AssetDatabase.CreateFolder("Assets/_Monkobra", "Meshes");
-            if (!AssetDatabase.IsValidFolder("Assets/_Monkobra/Meshes/Environment"))
-                AssetDatabase.CreateFolder("Assets/_Monkobra/Meshes", "Environment");
-            const string meshPath = "Assets/_Monkobra/Meshes/Environment/SlipperyTutorialBand.asset";
+            if (!AssetDatabase.IsValidFolder(
+                "Assets/_Monkobra/Meshes/Environment"))
+                AssetDatabase.CreateFolder(
+                    "Assets/_Monkobra/Meshes", "Environment");
+            const string meshPath =
+                "Assets/_Monkobra/Meshes/Environment/"
+                + "SlipperyTutorialBand.asset";
             MeshFilter filter = band.GetComponent<MeshFilter>();
             Mesh saved = AssetDatabase.LoadAssetAtPath<Mesh>(meshPath);
             if (saved == null) {
@@ -133,7 +159,8 @@ public static class SlipperyBarkSetup {
             }
             filter.sharedMesh = saved;
             PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
-            material.SetColor("_BaseColor", new Color(0.2f, 0.59f, 0.72f, 1f));
+            material.SetColor("_BaseColor",
+                new Color(0.2f, 0.59f, 0.72f, 1f));
             material.SetFloat("_Smoothness", 0.92f);
             material.SetFloat("_GlossyReflections", 1f);
             EditorUtility.SetDirty(material);
@@ -150,7 +177,8 @@ public static class SlipperyBarkSetup {
         RenderTexture target = new(960, 720, 24);
         Texture2D pixels = new(960, 720, TextureFormat.RGB24, false);
         try {
-            GameObject trunk = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            GameObject trunk =
+                GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             trunk.layer = 31;
             trunk.transform.SetParent(root.transform);
             trunk.transform.localScale = new Vector3(10f, 8f, 10f);
@@ -185,8 +213,9 @@ public static class SlipperyBarkSetup {
                 zone.Initialize(5.05f, height, 180f, arc,
                     wet, true, i == 0 ? 42 : 91);
                 camera.targetTexture = target;
-                UnityEngine.Rendering.RenderPipeline.SubmitRenderRequest(camera,
-                    new UnityEngine.Rendering.Universal.UniversalRenderPipeline.SingleCameraRequest {
+                UnityEngine.Rendering.RenderPipeline.SubmitRenderRequest(
+                    camera, new UnityEngine.Rendering.Universal
+                        .UniversalRenderPipeline.SingleCameraRequest {
                         destination = target
                     });
                 RenderTexture.active = target;
@@ -194,7 +223,8 @@ public static class SlipperyBarkSetup {
                 pixels.Apply();
                 string path = i == 0 ? "Temp/SlipperyRing.png"
                     : i == 2 ? "Temp/SlipperyPuddleSmall.png"
-                    : i == 3 ? "Temp/SlipperyPuddleLarge.png" : "Temp/SlipperyPuddle.png";
+                    : i == 3 ? "Temp/SlipperyPuddleLarge.png"
+                    : "Temp/SlipperyPuddle.png";
                 File.WriteAllBytes(path,
                     pixels.EncodeToPNG());
             }
@@ -217,15 +247,17 @@ public static class SlipperyBarkSetup {
             }
         }
         if (env == null) {
-            throw new System.InvalidOperationException("Scene has no Envs root: " + scene.path);
+            throw new System.InvalidOperationException(
+                "Scene has no Envs root: " + scene.path);
         }
         if (env.GetComponentInChildren<SlipperyBarkSpawner>(true) == null) {
-            GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab, scene);
+            GameObject instance =
+                (GameObject)PrefabUtility.InstantiatePrefab(prefab, scene);
             Undo.RegisterCreatedObjectUndo(instance, "Install slippery bark");
             instance.transform.SetParent(env.transform, false);
         }
-        // Replace only the two manually authored prototype objects, keeping
-        // all other user scene changes and the material intact.
+        // replace only the 2 hand-authored prototype objects, keep all
+        // other scene changes & the material intact
         foreach (GameObject root in scene.GetRootGameObjects()) {
             if (root.name == "SlipperyTutorialRing"
                 || root.name == "SlipperyTutorialTrigger") {
