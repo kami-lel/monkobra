@@ -112,15 +112,6 @@ public class ArmController: MonoBehaviour {
     )]
     private bool isRightArm;
 
-    [Header("Wet Grip")]
-    [SerializeField, Range(0f, 30f)]
-    [Tooltip("extra hand sweep angle at full grip loss; deg")]
-    private float wetGripHandDragDeg = 14f;
-
-    [SerializeField, Range(0f, 1f)]
-    [Tooltip("stroke speed scale at full grip loss; 1 = unaffected")]
-    private float wetGripStrokeScale = 0.18f;
-
     // MonoBehaviour Lifecycle  ################################################
     private void Awake() {
         // Inspector Assignment Guard  -----------------------------------------
@@ -720,7 +711,7 @@ public class ArmController: MonoBehaviour {
     // hand over hand: sweep about the joint's primary axis, arm keeps its
     // rest length and the hand rides the end
     private void DriveClimb() {
-        float gripLoss = monkeyRoot != null ? monkeyRoot.WetGripLoss01 : 0f;
+        float surfaceScale = monkeyRoot != null ? monkeyRoot.RoughBarkSpeedScale : 1f;
         Vector2 directionalInput =
             MoveAction != null
                 ? MoveAction.action.ReadValue<Vector2>()
@@ -739,7 +730,7 @@ public class ArmController: MonoBehaviour {
                 + direction
                     * inputScale
                     * config.StrokeSpeedCycles
-                    * Mathf.Lerp(1f, wetGripStrokeScale, gripLoss)
+                    * surfaceScale
                     * Time.fixedDeltaTime,
             1f
         );
@@ -748,8 +739,7 @@ public class ArmController: MonoBehaviour {
         float phaseRad = cyclePhase * Mathf.PI * 2f;
         float midDeg = (config.MaxAngleDeg + config.MinAngleDeg) * 0.5f;
         float halfRangeDeg = (config.MaxAngleDeg - config.MinAngleDeg) * 0.5f;
-        float swingDeg = midDeg + halfRangeDeg * Mathf.Sin(phaseRad)
-            + wetGripHandDragDeg * gripLoss;
+        float swingDeg = midDeg + halfRangeDeg * Mathf.Sin(phaseRad);
 
         // targetRotation is in the joint's own frame: Axis right, Secondary
         // Axis up. Both arms take the same angles, the right arm's transform

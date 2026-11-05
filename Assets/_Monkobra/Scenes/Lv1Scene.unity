@@ -200,7 +200,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1763912861199848260, guid: 6e0db3b547721d14e821efc0e24a7fcc, type: 3}
       propertyPath: m_Name
-      value: SlipperyBarkSystem
+      value: RoughBarkSystem
       objectReference: {fileID: 0}
     - target: {fileID: 3798734188507280561, guid: 6e0db3b547721d14e821efc0e24a7fcc, type: 3}
       propertyPath: m_LocalPosition.x

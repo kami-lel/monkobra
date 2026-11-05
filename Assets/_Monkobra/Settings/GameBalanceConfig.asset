@@ -12,13 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16bd46993ff9a7341bcad4578f206e4b, type: 3}
   m_Name: GameBalanceConfig
   m_EditorClassIdentifier: Assembly-CSharp::GameBalanceConfig
-  slipSlideDistanceU: 0.3
-  slipAnticipationS: 0.12
-  slipSlideDurationS: 0.2
-  slipRegripS: 0.12
-  slipImmunityS: 0.35
-  slipperyAttemptCount: 2
-  slipperySpawnProbabilityCurve:
+  roughBarkStartScore: 3000
+  roughBarkSpeedMultiplier: 0.35
+  roughBarkBlendS: 0.18
+  roughBarkAttemptCount: 2
+  roughBarkSpawnProbabilityCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3

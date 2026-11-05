@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -32,9 +33,6 @@ public class MonkeyController: MonoBehaviour {
         set {
             isHeld = value;
             climbSpeedU = 0f;
-            if (value) {
-                slipActive = false;
-            }
             upHeldS = 0f;
             downHeldS = 0f;
             // freed after a pull: glide back onto the ring, never snap
@@ -46,50 +44,14 @@ public class MonkeyController: MonoBehaviour {
     }
 
     // Public Methods  #########################################################
-    public bool IsSlipping => slipActive;
-    public float CurrentSlipDistanceU => balanceConfig != null
-        ? balanceConfig.SlipSlideDistanceU : 0f;
-    public event System.Action SlipStarted;
-    public event System.Action SlipSlideStarted;
-    public bool IsWetGripSliding => slipActive && balanceConfig != null
-        && slipElapsedS >= balanceConfig.SlipAnticipationS
-        && slipElapsedS < balanceConfig.SlipAnticipationS + balanceConfig.SlipSlideDurationS;
-    public float WetGripLoss01 {
-        get {
-            if (!slipActive || balanceConfig == null) return 0f;
-            float start = balanceConfig.SlipAnticipationS;
-            float end = start + balanceConfig.SlipSlideDurationS;
-            if (slipElapsedS < start)
-                return Mathf.SmoothStep(0f, 1f, slipElapsedS / Mathf.Max(0.01f, start));
-            return slipElapsedS < end ? 1f : 1f - Mathf.SmoothStep(0f, 1f,
-                (slipElapsedS - end) / Mathf.Max(0.01f, balanceConfig.SlipRegripS));
-        }
+    public float RoughBarkSpeedScale => roughBarkSpeedScale;
+
+    /// <summary>Tracks actual surface contact; overlap never stacks slowdown.</summary>
+    public void SetRoughBarkContact(RoughBarkZone zone, bool touching) {
+        if (zone == null) return;
+        if (touching) roughContacts.Add(zone);
+        else roughContacts.Remove(zone);
     }
-
-    public bool IsClimbingUp => MoveAction != null
-        && MoveAction.action.ReadValue<Vector2>().y > INPUT_DEADZONE;
-    public bool IsMovingOnTrunk => MoveAction != null
-        && MoveAction.action.ReadValue<Vector2>().sqrMagnitude > INPUT_DEADZONE_SQR;
-
-    /// <summary>Briefly loses vertical grip while remaining against the
-    /// trunk. Circling stays available; this never uses the hit stun.</summary>
-    public bool TrySlip() {
-        if (!isActiveAndEnabled || balanceConfig == null || isHeld
-            || IsStunned || IsSlipping || Time.time < slipImmuneUntil
-            || GameController.I == null || !GameController.I.IsRunLive
-            || GameController.I.IsLeaping
-            || Time.timeScale <= 0f || !IsMovingOnTrunk) {
-            return false;
-        }
-        slipActive = balanceConfig.SlipSlideDistanceU > 0f;
-        slipElapsedS = 0f;
-        slipSlideAnnounced = false;
-        if (slipActive) {
-            SlipStarted?.Invoke();
-        }
-        return slipActive;
-    }
-
     /// <summary>
     /// While held, slides the body to <paramref name="worldPos"/> in 3D, e.g.
     /// the hub of the web that caught it. Releasing the hold glides the body
@@ -256,7 +218,13 @@ public class MonkeyController: MonoBehaviour {
         }
 
         bool isStunned = IsStunned;
-        bool isSlipping = IsSlipping;
+        roughContacts.RemoveWhere(zone => zone == null || !zone.isActiveAndEnabled);
+        bool roughContact = roughContacts.Count > 0 && GameController.I != null
+            && GameController.I.IsRunLive && !GameController.I.IsLeaping;
+        float targetScale = roughContact ? balanceConfig.RoughBarkSpeedMultiplier : 1f;
+        float blendStep = (1f - balanceConfig.RoughBarkSpeedMultiplier)
+            * Time.fixedDeltaTime / Mathf.Max(0.01f, balanceConfig.RoughBarkBlendS);
+        roughBarkSpeedScale = Mathf.MoveTowards(roughBarkSpeedScale, targetScale, blendStep);
         Vector2 directionalInput = isStunned || MoveAction == null
             ? Vector2.zero
             : MoveAction.action.ReadValue<Vector2>();
@@ -280,7 +248,7 @@ public class MonkeyController: MonoBehaviour {
         float upSpeedScale = isExhausted ? exhaustedScale : 1f;
 
         orbitAngleDeg -= directionalInput.x
-            * config.RotationSpeedDeg
+            * config.RotationSpeedDeg * roughBarkSpeedScale
             * Time.fixedDeltaTime;
 
         // speed builds up along a curve of how long the key has been held;
@@ -301,7 +269,7 @@ public class MonkeyController: MonoBehaviour {
             );
         }
 
-        float nextY = transform.position.y + climbSpeedU * Time.fixedDeltaTime;
+        float nextY = transform.position.y + climbSpeedU * roughBarkSpeedScale * Time.fixedDeltaTime;
         if (isStunned) {
             // knocked off the climb: the ramp is bypassed, fall at a set
             // speed and stop dead on the drop target
@@ -315,55 +283,19 @@ public class MonkeyController: MonoBehaviour {
             );
         }
 
-        else if (isSlipping) {
-            float anticipation = balanceConfig.SlipAnticipationS;
-            float duration = Mathf.Max(0.01f, balanceConfig.SlipSlideDurationS);
-            float elapsedBefore = slipElapsedS;
-            slipElapsedS += Time.fixedDeltaTime;
-            if (slipElapsedS > anticipation && elapsedBefore < anticipation + duration) {
-                if (!slipSlideAnnounced) {
-                    slipSlideAnnounced = true;
-                    SlipSlideStarted?.Invoke();
-                }
-                float before = Mathf.Clamp01((elapsedBefore - anticipation) / duration);
-                float after = Mathf.Clamp01((slipElapsedS - anticipation) / duration);
-                float step = balanceConfig.SlipSlideDistanceU
-                    * (Mathf.SmoothStep(0f, 1f, after) - Mathf.SmoothStep(0f, 1f, before));
-                // Descending already moves faster than the uphill skid.
-                // Add the grip loss to that motion instead of replacing it
-                // with a slower slide, so downhill contact visibly slips too.
-                nextY = transform.position.y
-                    + Mathf.Min(0f, climbSpeedU) * Time.fixedDeltaTime - step;
-            }
-            else if (elapsedBefore >= anticipation + duration) {
-                float grip = Mathf.SmoothStep(0f, 1f,
-                    (slipElapsedS - anticipation - duration)
-                        / Mathf.Max(0.01f, balanceConfig.SlipRegripS));
-                float movementScale = climbSpeedU < 0f ? 1f : grip;
-                nextY = transform.position.y
-                    + climbSpeedU * movementScale * Time.fixedDeltaTime;
-            }
-            // Keep the climb motor live throughout. Regripping blends back
-            // into its held input rather than stopping and restarting it.
-            if (slipElapsedS >= anticipation + duration + balanceConfig.SlipRegripS) {
-                slipActive = false;
-                slipImmuneUntil = Time.time + balanceConfig.SlipImmunityS;
-            }
-        }
-
         // the stun fall is involuntary and so is descending: only voluntary
         // upward and sideways travel costs stamina
         if (!isStunned && staminaBar != null) {
             float climbedU = Mathf.Max(0f, nextY - transform.position.y);
             float orbitedU = Mathf.Abs(directionalInput.x)
-                * config.RotationSpeedDeg
+                * config.RotationSpeedDeg * roughBarkSpeedScale
                 * Time.fixedDeltaTime
                 * Mathf.Deg2Rad
                 * orbitRadius;
             staminaBar.DrainByMovement(climbedU, orbitedU);
 
             // standing still, no key pressed, regains stamina slowly
-            if (!hasInput && !isSlipping) {
+            if (!hasInput) {
                 staminaBar.AddStamina(
                     movementConfig.IdleStaminaRecoveryPerS
                         * Time.fixedDeltaTime
@@ -407,7 +339,6 @@ public class MonkeyController: MonoBehaviour {
         }
 
         stunEndTime = Time.time + balanceConfig.HitStunDurationS;
-        slipActive = false;
         dropTargetY =
             transform.position.y - balanceConfig.HitDropDistanceU;
         if (Debug.isDebugBuild) {
@@ -430,10 +361,8 @@ public class MonkeyController: MonoBehaviour {
     private float downHeldS; // s the down key has been held without a break
     private float stunEndTime; // Time.time when control returns
     private float dropTargetY; // world Y where hit fall stops
-    private bool slipActive;
-    private float slipElapsedS;
-    private bool slipSlideAnnounced;
-    private float slipImmuneUntil;
+    private readonly HashSet<RoughBarkZone> roughContacts = new();
+    private float roughBarkSpeedScale = 1f;
     private bool isHeld; // body frozen in place, see IsHeld
     private Vector3 pullTarget; // world pos the held body slides to
     private bool hasPullTarget; // whether the held body is being pulled

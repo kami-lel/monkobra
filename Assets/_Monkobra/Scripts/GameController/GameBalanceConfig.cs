@@ -190,38 +190,29 @@ public class GameBalanceConfig: ScriptableObject {
     public float CoconutThrowDistanceU => coconutThrowDistanceU;
 
     // Inspector Fields  #######################################################
-    public float SlipSlideDistanceU => slipSlideDistanceU;
-    public float SlipAnticipationS => slipAnticipationS;
-    public float SlipSlideDurationS => slipSlideDurationS;
-    public float SlipRegripS => slipRegripS;
-    public float SlipImmunityS => slipImmunityS;
-    public int SlipperyAttemptCount => slipperyAttemptCount;
-    public AnimationCurve SlipperySpawnProbabilityCurve => slipperySpawnProbabilityCurve;
+    public int RoughBarkStartScore => roughBarkStartScore;
+    public float RoughBarkSpeedMultiplier => roughBarkSpeedMultiplier;
+    public float RoughBarkBlendS => roughBarkBlendS;
+    public int RoughBarkAttemptCount => roughBarkAttemptCount;
+    public AnimationCurve RoughBarkSpawnProbabilityCurve => roughBarkSpawnProbabilityCurve;
 
-    [Header("Slippery Bark")]
-    [SerializeField, Min(0f)]
-    [Tooltip("short smooth slide along wet bark; u")]
-    private float slipSlideDistanceU = 0.3f;
-    [SerializeField, Min(0f)]
-    [Tooltip("climb continues briefly as wet grip loosens; s")]
-    private float slipAnticipationS = 0.12f;
-    [SerializeField, Min(0.01f)]
-    [Tooltip("time for the eased wet-bark slide; s")]
-    private float slipSlideDurationS = 0.2f;
-    [SerializeField, Min(0.01f)]
-    [Tooltip("blend directly back into held climb input; s")]
-    private float slipRegripS = 0.12f;
-    [SerializeField, Min(0f)]
-    [Tooltip("protection from other slippery patches after recovery; s")]
-    private float slipImmunityS = 0.35f;
+    [Header("Rough Bark")]
     [SerializeField, Min(0)]
-    [Tooltip("slippery patch attempts per recycled tree segment")]
-    private int slipperyAttemptCount = 2;
+    [Tooltip("minimum total HUD score before rough patches begin appearing")]
+    private int roughBarkStartScore = 3000;
+    [SerializeField, Range(0.1f, 1f)]
+    [Tooltip("movement speed on rough bark, applied equally to climbing and circling")]
+    private float roughBarkSpeedMultiplier = 0.35f;
+    [SerializeField, Min(0.01f)]
+    [Tooltip("time to blend into or out of the slowdown; s")]
+    private float roughBarkBlendS = 0.18f;
+    [SerializeField, Min(0)]
+    [Tooltip("rough patch attempts per recycled tree segment")]
+    private int roughBarkAttemptCount = 2;
     [SerializeField]
-    [Tooltip("x: ramped difficulty 0~1; y: patch spawn chance 0~1")]
-    private AnimationCurve slipperySpawnProbabilityCurve =
+    [Tooltip("x: height difficulty 0~1; y: rough patch chance 0~1")]
+    private AnimationCurve roughBarkSpawnProbabilityCurve =
         AnimationCurve.Linear(0f, 0.1f, 1f, 0.7f);
-
     [Header("Stamina")]
     [SerializeField]
     [Tooltip("stamina at level start, also the ceiling for restores")]
@@ -499,12 +490,10 @@ public class GameBalanceConfig: ScriptableObject {
 
     // Editor Validation  ######################################################
     private void OnValidate() {
-        slipSlideDistanceU = Mathf.Max(0f, slipSlideDistanceU);
-        slipAnticipationS = Mathf.Max(0f, slipAnticipationS);
-        slipSlideDurationS = Mathf.Max(0.01f, slipSlideDurationS);
-        slipRegripS = Mathf.Max(0.01f, slipRegripS);
-        slipImmunityS = Mathf.Max(0f, slipImmunityS);
-        slipperyAttemptCount = Mathf.Max(0, slipperyAttemptCount);
+        roughBarkStartScore = Mathf.Max(0, roughBarkStartScore);
+        roughBarkSpeedMultiplier = Mathf.Clamp(roughBarkSpeedMultiplier, 0.1f, 1f);
+        roughBarkBlendS = Mathf.Max(0.01f, roughBarkBlendS);
+        roughBarkAttemptCount = Mathf.Max(0, roughBarkAttemptCount);
         maxStamina = Mathf.Max(1f, maxStamina);
         staminaUpwardDrainPerU = Mathf.Max(0f, staminaUpwardDrainPerU);
         staminaSidewayDrainPerU = Mathf.Max(0f, staminaSidewayDrainPerU);
