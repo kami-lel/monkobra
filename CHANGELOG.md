@@ -13,6 +13,10 @@ Todo upd gdd
 
 ### Changed
 
+##### Wenhai Dong
+
+- fewer falling cobras after the boss fight: `fallingCobraSpawnProbabilityCurve` drops to 0.1 right past difficulty 1 & rises to 0.2 by 2 (was 0.2 to 0.35); the climb b4 the boss is unchanged
+
 ### Deprecated
 
 ### Removed
