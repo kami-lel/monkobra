@@ -253,6 +253,7 @@ public class MonkeyController: MonoBehaviour {
     private void Update() {
         UpdateSpeedBuffKey();
         UpdateBossJumpKey();
+        UpdateSpiderJumpKey();
     }
 
     private void FixedUpdate() {
@@ -493,6 +494,53 @@ public class MonkeyController: MonoBehaviour {
 
     // dev/hack key teleporting the monkey to the boss zone start, so the
     // approach to the fight can be tested from its first metre
+    // like the boss jump, to the spider jump height below the Spider King;
+    // the Cobra King is skipped as if beaten, so it never starts on the way
+    private void UpdateSpiderJumpKey() {
+        if (hackShortcuts == null || !HackShortcutConfig.IsActive) {
+            return;
+        }
+
+        Keyboard keyboard = Keyboard.current;
+        Key spiderJumpKey = hackShortcuts.GetKey(HackAction.SpiderJump);
+        if (
+            keyboard == null
+            || spiderJumpKey == Key.None
+            || !keyboard[spiderJumpKey].wasPressedThisFrame
+        ) {
+            return;
+        }
+
+        RampedDifficultyManager ramp = RampedDifficultyManager.I;
+        bool isLive = GameController.I != null && GameController.I.IsRunLive;
+        if (ramp == null || worldBalanceConfig == null || body == null
+            || !isLive) {
+            return;
+        }
+
+        GameController.I.EndStartingZone();
+        BossFightController cobraKing = BossFightController.I;
+        if (cobraKing != null) {
+            cobraKing.SkipForTest();
+        }
+
+        Vector3 target = transform.position;
+        target.y = ramp.PlayerGameStartYPosition
+            + worldBalanceConfig.SpiderJumpHeightU;
+        transform.position = target;
+        body.position = target;
+        climbSpeedU = 0f;
+        upHeldS = 0f;
+        downHeldS = 0f;
+        Physics.SyncTransforms();
+        if (Debug.isDebugBuild) {
+            Debug.Log(
+                $"MonkeyController:\tspider jump to y {target.y}",
+                this
+            );
+        }
+    }
+
     private void UpdateBossJumpKey() {
         if (hackShortcuts == null || !HackShortcutConfig.IsActive) {
             return;

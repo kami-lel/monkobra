@@ -105,6 +105,23 @@ public class WorldBalanceConfig: ScriptableObject {
     /// </returns>
     public int BossBananaDamage => bossBananaDamage;
 
+    /// <returns>climbed height where the Spider King's zone begins: only
+    /// its fight generates anything from here to its zone end; u</returns>
+    public float SpiderZoneStartU => spiderZoneStartU;
+
+    /// <returns>climbed height at which the Spider King fight begins; u
+    /// </returns>
+    public float SpiderTriggerHeightU => spiderTriggerHeightU;
+
+    /// <returns>climbed height where the Spider King's zone ends; u</returns>
+    public float SpiderZoneEndU => spiderZoneEndU;
+
+    /// <returns>climbed height the spider jump hack key lands at; u</returns>
+    public float SpiderJumpHeightU => spiderJumpHeightU;
+
+    /// <returns>health of the Spider King</returns>
+    public int SpiderMaxHealth => spiderMaxHealth;
+
     // Inspector Fields  #######################################################
     [Header("Ramped Difficulty")]
     [SerializeField]
@@ -289,6 +306,30 @@ public class WorldBalanceConfig: ScriptableObject {
     [Tooltip("health a thrown banana takes off the Cobra King per hit")]
     private int bossBananaDamage = 1;
 
+    [Header("Spider Fight")]
+    [SerializeField]
+    [Tooltip(
+        "climbed height where the Spider King's zone begins: only its fight "
+            + "generates anything from here to its zone end; u"
+    )]
+    private float spiderZoneStartU = 1025f;
+
+    [SerializeField]
+    [Tooltip("climbed height at which the Spider King fight begins; u")]
+    private float spiderTriggerHeightU = 1050f;
+
+    [SerializeField]
+    [Tooltip("climbed height where the Spider King's zone ends; u")]
+    private float spiderZoneEndU = 1100f;
+
+    [SerializeField]
+    [Tooltip("climbed height the spider jump hack key lands at; u")]
+    private float spiderJumpHeightU = 1000f;
+
+    [SerializeField]
+    [Tooltip("health of the Spider King, one ripped silk knot takes 1 or 2")]
+    private int spiderMaxHealth = 10;
+
     // Editor Validation  ######################################################
     private void OnValidate() {
         emptyBranchAttemptCount = Mathf.Max(0, emptyBranchAttemptCount);
@@ -309,5 +350,13 @@ public class WorldBalanceConfig: ScriptableObject {
         bossZoneEndU = Mathf.Max(bossTriggerHeightU, bossZoneEndU);
         bossMaxHealth = Mathf.Max(1, bossMaxHealth);
         bossBananaDamage = Mathf.Max(1, bossBananaDamage);
+        // the spider zone sits above the cobra's, ordered the same way
+        spiderZoneStartU = Mathf.Max(bossZoneEndU, spiderZoneStartU);
+        spiderTriggerHeightU = Mathf.Max(spiderZoneStartU, spiderTriggerHeightU);
+        spiderZoneEndU = Mathf.Max(spiderTriggerHeightU, spiderZoneEndU);
+        spiderJumpHeightU = Mathf.Clamp(
+            spiderJumpHeightU, bossZoneEndU, spiderTriggerHeightU
+        );
+        spiderMaxHealth = Mathf.Max(1, spiderMaxHealth);
     }
 }

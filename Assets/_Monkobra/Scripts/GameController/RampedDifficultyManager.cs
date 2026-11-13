@@ -57,8 +57,12 @@ public class RampedDifficultyManager: MonoBehaviour {
             return false;
         }
         float climbedY = GetClimbedYDistance(y);
-        return climbedY >= worldBalanceConfig.BossZoneStartU
+        bool isInCobraZone = climbedY >= worldBalanceConfig.BossZoneStartU
             && climbedY <= worldBalanceConfig.BossZoneEndU;
+        // the Spider King's zone higher up is kept just as clear
+        bool isInSpiderZone = climbedY >= worldBalanceConfig.SpiderZoneStartU
+            && climbedY <= worldBalanceConfig.SpiderZoneEndU;
+        return isInCobraZone || isInSpiderZone;
     }
 
     /// <summary>

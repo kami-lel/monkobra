@@ -106,6 +106,41 @@ public class BossFightController: MonoBehaviour {
     /// <returns>true if the catch was handled here, so the sensor must not
     /// end the run: absorbed by the armor, or in the fight turned into a
     /// boss fight loss that offers a revive</returns>
+    /// <returns>if the Cobra King is beaten (or skipped) & the climb is on
+    /// past it, eg so the Spider King may start</returns>
+    public bool IsDone => phase == Phase.Done;
+
+    /// <returns>if the monkey still wears the gold armor won from the Cobra
+    /// King, not yet spent on the climb after</returns>
+    public bool HasArmor => hasShield && phase == Phase.Done;
+
+    /// <summary>
+    /// Spends the kept gold armor on a fatal hit somewhere else, eg in the
+    /// Spider King fight: the badge goes & "Saved!" pops at the monkey.
+    /// </summary>
+    /// <returns>if there was armor to spend</returns>
+    public bool TrySpendArmor() {
+        if (!HasArmor || monkey == null) {
+            return false;
+        }
+        hasShield = false;
+        ArmorAbsorbed?.Invoke();
+        hud.ShowArmorBadge(false);
+        hud.PopText("Saved!", monkey.position, goldenColor);
+        hud.Flash(goldenColor);
+        return true;
+    }
+
+    /// <summary>
+    /// Test hook for the spider jump hack key: a fight not begun yet is
+    /// skipped as if beaten, in the armor, like the endless start.
+    /// </summary>
+    public void SkipForTest() {
+        if (phase == Phase.Waiting) {
+            StartAsDone();
+        }
+    }
+
     public bool TryAbsorbCobraCatch() {
         if (monkey == null) {
             return false;
@@ -1003,7 +1038,11 @@ public class BossFightController: MonoBehaviour {
         if (phase == Phase.Done) {
             UpdateShieldRing();
             UpdateSparks();
-            UpdateCameraFocus();
+            // the Spider King fight frames the camera itself
+            SpiderFightController spiderFight = SpiderFightController.I;
+            if (spiderFight == null || !spiderFight.IsFraming) {
+                UpdateCameraFocus();
+            }
             UpdateChaseWarning();
             return;
         }

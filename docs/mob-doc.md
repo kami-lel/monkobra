@@ -225,6 +225,48 @@ The run does not end: `victoryDelayS` after the crown lands the boss bar goes, t
 
 UI (`BossFightHud`) is built at runtime on the root Canvas, under the screens: entry flash, name and health bar, speech bubble over the king's head while it is well in view, else docked under the health bar so no line is missed, key prompt, EASY / NORMAL tags, damage numbers and words, banners (armor intro, K.O., win), the revive card and the mock course ad.
 
+## Spider King (Boss 2)
+
+The `Boss/SpiderFight` prefab (`SpiderFightController`, `SpiderKingBody`, `BossFightHud`) sits at the root of `FullPlayScene`; like the Cobra King, everything is built at runtime from primitives.
+
+- Trigger: once the Cobra King is beaten (`BossFightController.IsDone`) and the monkey has climbed `spiderTriggerHeightU` (1050 u, `WorldBalanceConfig` Spider Fight group) in Playing and not mid leap. Never in Endless mode
+- Bare Zone: `spiderZoneStartU`~`spiderZoneEndU` (1025~1100) counts as a boss zone in `RampedDifficultyManager.IsInBossZoneY`, so no branch, web, falling cobra or rough bark is generated there; branches left near the arena are removed when the fight begins
+- Arena: `arenaHeightU` above the entry, the climb capped there (`SetHeightCeiling`); the great cobra guards `guardDepthU` below (`StartGuard`), the camera pulls back `cameraDistanceScale`
+- Spider: crawls on the bark (`SpiderKingBody`: dark body, red back mark, small gold crown, 8 legs, 6 eyes), stalking the monkey till `stalkDistanceU` away. A red dotted ring of `territoryRadiusU` round it on the bark is its territory, brighter while the monkey is inside
+- Health: `spiderMaxHealth` (10)
+
+### Silk Knots (how to win)
+
+- `knotCount` glowing silk balls hang on banana branches round the arena (the banana model hidden, its collider kept), grabbed like any fruit; `ArmController` hands the grab to `SpiderFightController.TryGrab`
+- A rip takes `knotDamage` (1); a knot inside the territory glows gold and takes `territoryKnotDamage` (2), and makes the spider attack sooner
+- Repair: a ripped knot within `repairRangeU` of the spider is crawled to and re-spun in `repairS`, healing `repairHeal` (1), at most once per `repairCooldownS`; a far knot just grows back after `knotRegrowS` with no heal
+
+### Attacks
+
+Every attack is telegraphed by the eyes glowing red over its wind up, plus a red "!" sign (`BossFightHud.AddWarning`).
+
+| Attack | When | Effect | Counter |
+| --- | --- | --- | --- |
+| Web Shot (WEB!) | out of the territory | a silk ball flies to where the monkey was `webShotLockS` before the shot and sticks a real `SpiderWebTrap` there; a miss stays on the trunk as a sticky web (`maxStickyWebs`, the oldest goes) | keep moving |
+| Silk Hook (SILK!) | `dragChance` within `dragRangeU` | a silk line reels the monkey along the bark at `dragSpeedU`; reaching `dragReachU` is a wrap (fatal) | tap Space `dragEscapeTaps` times, or grab anything |
+| Cocoon | the monkey is trapped in any web | the spider crawls over at `cocoonSpeedU`; arriving within `cocoonReachU` is a wrap (fatal) | mash Space to break the web first |
+| Leg Swipe (SWIPE!) | the monkey in the territory | front legs rear up, a knock-down within `swipeRangeU`, never fatal | leave the ring |
+
+Rest between attacks is `restS`, times `territoryRestScale` while the monkey is in the territory, down to `lowHealthRestScale` as health runs out.
+
+### Fruit Lure
+
+- `lureFruitCount` bananas (normal, regrow after `lureRespawnS`); a grab restores stamina and tosses a banana copy round the trunk to the side opposite the monkey, away from the spider, since the player cannot aim
+- The spider drops its wind up, runs there (`lureRunSpeedU`) and eats `lureEatS`, taking its territory along: the window to rip the knots near it safely
+
+### Armor, Loss & Win
+
+- Armor: the Cobra King's gold armor, if not used on the climb (`BossFightController.HasArmor`), saves one fatal hit (`TrySpendArmor`): the spider is stunned `armorStunS` and backs off; a used armor stays used
+- Great Cobra: a catch by the guard is a fatal hit too (`CobraSensor` asks `SpiderFightController.TryAbsorbCobraCatch` first)
+- Loss: the same slow K.O., revive offer and mock course ad as the Cobra King; a revive restarts the fight at full health
+- Win: the spider falls off the trunk, a reward panel stops time till Space or Continue: the Silk Gloves, `SpiderWebStruggle.EscapeGainScale` = `glovesEscapeGainScale` (2) for the rest of the run; then the great cobra chases again from `winCobraDropU` down
+- Test: the `SpiderJump` hack key (F9, `HackShortcutConfig`) skips the Cobra King as beaten (`SkipForTest`, armor worn) and teleports the monkey to `spiderJumpHeightU` (1000 u)
+
 ## Known Gaps
 
 - Mob tuning for the web escape and web geometry lives on scene components, not in a shared ScriptableObject; only the web spawn rates and attempt counts are in `WorldBalanceConfig`, and the falling cobra and great cobra numbers in `CobraBalanceConfig`

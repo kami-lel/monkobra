@@ -615,6 +615,12 @@ public class ArmController: MonoBehaviour {
 
         FruitGrabbed?.Invoke(fruit);
 
+        // in the Spider King fight a grab rips a silk knot or lures it away
+        SpiderFightController spiderFight = SpiderFightController.I;
+        if (spiderFight != null && spiderFight.TryGrab(fruit, fruitCentre)) {
+            return;
+        }
+
         // in the boss fight a grabbed banana is also thrown at the boss
         BossFightController bossFight = BossFightController.I;
         if (bossFight != null && bossFight.TryThrow(fruit, fruitCentre)) {

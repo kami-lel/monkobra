@@ -806,3 +806,8 @@ MonoBehaviour:
   bossZoneEndU: 550
   bossMaxHealth: 12
   bossBananaDamage: 1
+  spiderZoneStartU: 1025
+  spiderTriggerHeightU: 1050
+  spiderZoneEndU: 1100
+  spiderJumpHeightU: 1000
+  spiderMaxHealth: 10

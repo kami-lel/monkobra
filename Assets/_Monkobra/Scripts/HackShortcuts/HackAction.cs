@@ -38,4 +38,8 @@ public enum HackAction {
 
     /// <summary>saves a mock analytics session file, for layout checks</summary>
     MockSession,
+
+    /// <summary>teleports the monkey to the spider jump height, below the
+    /// Spider King, w/ the Cobra King skipped as if beaten</summary>
+    SpiderJump,
 }

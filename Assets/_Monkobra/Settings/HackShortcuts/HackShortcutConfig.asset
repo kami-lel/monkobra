@@ -46,3 +46,6 @@ MonoBehaviour:
   - action: 10
     key: 105
     description: mock session
+  - action: 11
+    key: 102
+    description: jump to spider boss
