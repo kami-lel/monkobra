@@ -76,6 +76,7 @@ MonoBehaviour:
   fallingCobraFallSpeedU: 6
   fallingCobraHorizontalSpeedU: 4
   fallingCobraReachWakeDistanceU: 20
+  fallingCobraAttackDistanceU: 6
   fallingCobraBananaAmbushChance: 0.5
   fallingCobraRehitGraceS: 1
   fallingCobraMaxHits: 2
