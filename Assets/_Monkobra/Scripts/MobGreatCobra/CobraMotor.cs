@@ -304,6 +304,95 @@ public class CobraMotor: MonoBehaviour {
     [Tooltip("slither waves passing down the body; 1/s")]
     private float waveSpeedHz = 0.4f;
 
+    [Header("Cartoon Appearance")]
+    [SerializeField]
+    private CartoonCobraVisual.Settings cartoonAppearance = new();
+    [Header("Chase Head Pose")]
+    [SerializeField, Min(0.1f)]
+    private float headFollowSharpness = 5f;
+
+    [SerializeField, Min(0f)]
+    private float headTurnSpeedDegrees = 180f;
+
+    [SerializeField, Min(.1f)] private float headRaiseStartDistanceU = 9f;
+    [SerializeField, Min(.1f)] private float headRaiseFullDistanceU = 3.5f;
+
+    private float ChaseHeadRaiseBlend() {
+        if (isGuarding) return 1f;
+        if (player == null || pathCenter == null) return 0f;
+        float distance = Vector3.Distance(player.position, GetPathPosition(headAngle,headHeight));
+        return Mathf.SmoothStep(0f,1f,Mathf.InverseLerp(headRaiseStartDistanceU,
+            Mathf.Min(headRaiseFullDistanceU,headRaiseStartDistanceU-.01f),distance));
+    }
+
+    [Header("Close Chase Hiss")]
+    [SerializeField] private AudioClip proximityHiss;
+    [SerializeField, Min(.1f)] private float hissStartDistanceU = 7f;
+    [SerializeField, Min(0f)] private float hissExitPaddingU = 1f;
+    [SerializeField, Min(.1f)] private float hissIntervalS = 2.8f;
+    [SerializeField, Range(0f,1f)] private float hissVolume = .75f;
+    [SerializeField, Range(.1f,2f)] private float hissPitch = .82f;
+    [SerializeField, Min(.1f)] private float hissMinDistanceU = 3f;
+    [SerializeField, Min(.1f)] private float hissMaxDistanceU = 35f;
+    private AudioSource proximityHissSource;
+    private CapsuleCollider[] hissBodyShapes;
+    private float nextProximityHissTime;
+    private bool wasInHissRange;
+
+    private void CreateProximityHiss() {
+        if (proximityHiss == null) return;
+        hissBodyShapes=new CapsuleCollider[bodySegments.Length];
+        for(int i=0;i<bodySegments.Length;i++) {
+            if(bodySegments[i]!=null)bodySegments[i].TryGetComponent(out hissBodyShapes[i]);
+        }
+        var voice=new GameObject("GreatCobraHiss");
+        voice.transform.SetParent(transform,false);
+        proximityHissSource=voice.AddComponent<AudioSource>();
+        proximityHissSource.clip=proximityHiss;
+        proximityHissSource.playOnAwake=false;
+        proximityHissSource.loop=false;
+        proximityHissSource.volume=hissVolume;
+        proximityHissSource.pitch=hissPitch;
+        proximityHissSource.spatialBlend=1f;
+        proximityHissSource.dopplerLevel=0f;
+        proximityHissSource.rolloffMode=AudioRolloffMode.Linear;
+        proximityHissSource.minDistance=hissMinDistanceU;
+        proximityHissSource.maxDistance=Mathf.Max(hissMinDistanceU,hissMaxDistanceU);
+    }
+
+    private void UpdateProximityHiss(Vector3 headPosition) {
+        if (proximityHissSource == null) return;
+        Vector3 nearest=headPosition;
+        float distanceSquared=player!=null?(player.position-nearest).sqrMagnitude:float.PositiveInfinity;
+        if(player!=null && hissBodyShapes!=null)foreach(var shape in hissBodyShapes) {
+            if(shape==null || !shape.enabled || !shape.gameObject.activeInHierarchy)continue;
+            Vector3 point=shape.ClosestPoint(player.position);
+            float candidate=(point-player.position).sqrMagnitude;
+            if(candidate<distanceSquared){distanceSquared=candidate;nearest=point;}
+        }
+        proximityHissSource.transform.position=nearest;
+        bool near=player != null && !isFrozen && !isGuarding && Time.timeScale>0f
+            && (GameController.I == null || GameController.I.IsRunLive)
+            && distanceSquared<=Mathf.Pow(hissStartDistanceU+(wasInHissRange?hissExitPaddingU:0f),2f);
+        if (!near) { StopProximityHiss(); return; }
+        if (!wasInHissRange) nextProximityHissTime=Time.time;
+        wasInHissRange=true;
+        if (Time.time>=nextProximityHissTime && !proximityHissSource.isPlaying) {
+            proximityHissSource.Play();
+            nextProximityHissTime=Time.time+Mathf.Max(hissIntervalS,proximityHiss.length/Mathf.Max(.1f,hissPitch));
+        }
+    }
+
+    private void StopProximityHiss() {
+        wasInHissRange=false;
+        if (proximityHissSource!=null && proximityHissSource.isPlaying) proximityHissSource.Stop();
+    }
+
+    private void OnDisable() { StopProximityHiss(); }
+
+    private Quaternion cartoonHeadRotation;
+    private bool cartoonHeadRotationInitialized;
+
     [Header("Eyes")]
     [SerializeField]
     [Tooltip("eye diameter, eyes are skipped at 0; U")]
@@ -368,6 +457,7 @@ public class CobraMotor: MonoBehaviour {
         FillCoilSegments();
         segmentPositions = new Vector3[bodySegments.Length];
         StyleBody();
+        CreateProximityHiss();
     }
 
     private void Start() {
@@ -464,6 +554,7 @@ public class CobraMotor: MonoBehaviour {
         && GameController.I.State == GameState.StartingZone;
 
     private void OnDestroy() {
+        cartoonVisual?.Dispose();
         if (playerSensor != null) {
             playerSensor.BranchHit -= OnMonkeyHit;
         }
@@ -496,6 +587,10 @@ public class CobraMotor: MonoBehaviour {
         Shader.PropertyToID("_BaseColor");
 
     private static readonly int COLOR_ID = Shader.PropertyToID("_Color");
+
+    private CartoonCobraVisual cartoonVisual;
+    private float[] cartoonRadii;
+    private Vector3[] cartoonOutward;
 
     private float headAngle;
     private float headHeight;
@@ -827,7 +922,22 @@ public class CobraMotor: MonoBehaviour {
             StretchHitShape(segment, arcStep);
         }
 
-        if (eyeSizeU > 0f && bodySegments[0] != null) {
+        if (cartoonAppearance.enabled && bodySegments[0] != null
+            && bodySegments[0].TryGetComponent(out Renderer source)) {
+            cartoonVisual = new CartoonCobraVisual(transform, source.sharedMaterial, cartoonAppearance);
+            cartoonVisual.BuildHead(bodySegments[0], maxThicknessU);
+            cartoonRadii = new float[bodySegments.Length];
+            cartoonOutward = new Vector3[bodySegments.Length];
+            for (int i = 0; i < bodySegments.Length; i++) {
+                if (bodySegments[i].TryGetComponent(out Renderer renderer)) {
+                    renderer.enabled = false;
+                }
+                float t = i / (float)LastIndex;
+                cartoonRadii[i] = maxThicknessU * 0.5f
+                    * Mathf.Max(0.05f, thicknessProfile.Evaluate(t))
+                    * (1f - Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.8f, 1f, t)));
+            }
+        } else if (eyeSizeU > 0f && bodySegments[0] != null) {
             AddEyes(bodySegments[0], colorBlock);
         }
     }
@@ -926,7 +1036,7 @@ public class CobraMotor: MonoBehaviour {
             float bodyDistance = i * arcStep;
             float neckFraction = Mathf.Clamp01(bodyDistance / neckLengthU);
 
-            float lift = neckLiftU * (1f - neckFraction) * (1f - neckFraction);
+            float lift = neckLiftU * ChaseHeadRaiseBlend() * (1f - neckFraction) * (1f - neckFraction);
             float wave = waveAmplitudeU * neckFraction * Mathf.Sin(
                 wavePhase - bodyDistance / waveLengthU * 2f * Mathf.PI
             );
@@ -967,6 +1077,63 @@ public class CobraMotor: MonoBehaviour {
                 Quaternion.LookRotation(alongBody, awayFromTrunk)
                 * Quaternion.Euler(90f, 0f, 0f);
         }
+    }
+
+    private void LateUpdate() {
+        if (cartoonVisual == null) {
+            return;
+        }
+        for (int i = 0; i < segmentPositions.Length; i++) {
+            Vector3 radial = segmentPositions[i] - pathCenter.position;
+            radial.y = 0f;
+            cartoonOutward[i] = radial.normalized;
+        }
+        Vector3 travelDirection = segmentPositions[0] - segmentPositions[1];
+        if (!isGuarding) travelDirection.y = 0f;
+        travelDirection = Vector3.ProjectOnPlane(travelDirection, cartoonOutward[0]).normalized;
+        if (travelDirection.sqrMagnitude < 0.001f) travelDirection = Vector3.Cross(cartoonOutward[0], Vector3.up) * Direction;
+        Vector3 neckDirection = travelDirection;
+        if (!isGuarding && player != null) {
+            Vector3 toPlayer = player.position - segmentPositions[0];
+            Vector3 towardPlayer = Vector3.ProjectOnPlane(toPlayer, cartoonOutward[0]);
+            if (towardPlayer.sqrMagnitude > 0.001f) {
+                neckDirection = Vector3.Slerp(travelDirection,towardPlayer.normalized,ChaseHeadRaiseBlend()).normalized;
+            }
+        }
+        Quaternion desiredHeadRotation = Quaternion.LookRotation(cartoonOutward[0], neckDirection);
+        if (!cartoonHeadRotationInitialized) {
+            cartoonHeadRotation = desiredHeadRotation;
+            cartoonHeadRotationInitialized = true;
+        } else if (!isFrozen) {
+            Quaternion followedRotation = Quaternion.Slerp(cartoonHeadRotation, desiredHeadRotation,
+                1f - Mathf.Exp(-headFollowSharpness * Time.deltaTime));
+            cartoonHeadRotation = Quaternion.RotateTowards(cartoonHeadRotation, followedRotation,
+                headTurnSpeedDegrees * Time.deltaTime);
+        }
+        Quaternion headRotation = cartoonHeadRotation;
+        Vector3 headPosition = segmentPositions[0];
+        if (cartoonAppearance.referenceHead != null) {
+            Bounds headBounds = cartoonAppearance.referenceHead.GetComponent<MeshFilter>().sharedMesh.bounds;
+            float headSize = maxThicknessU * cartoonAppearance.headScale;
+            float innerProjection = 0f;
+            for (int corner = 0; corner < 8; corner++) {
+                Vector3 point = headBounds.center + Vector3.Scale(headBounds.extents,
+                    new Vector3((corner & 1) == 0 ? -1f : 1f,
+                        (corner & 2) == 0 ? -1f : 1f,
+                        (corner & 4) == 0 ? -1f : 1f));
+                innerProjection = Mathf.Min(innerProjection,
+                    Vector3.Dot(headRotation * (point * headSize), cartoonOutward[0]));
+            }
+            // Keep the inward-facing muzzle clear of the trunk while the neck stays upright.
+            headPosition += cartoonOutward[0]
+                * Mathf.Max(0f, -innerProjection - maxThicknessU * 0.5f);
+        } else {
+            headPosition += cartoonOutward[0] * maxThicknessU * 0.6f
+                + Vector3.up * maxThicknessU * 0.2f;
+        }
+        cartoonVisual.PoseHead(headPosition, headRotation);
+        UpdateProximityHiss(headPosition);
+        cartoonVisual.UpdateBody(segmentPositions, cartoonRadii, cartoonOutward, bellyInward: true);
     }
 
     private Vector3 GetPathPosition(float angleDegrees, float height) {

@@ -1918,10 +1918,99 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FallingCobra
   triggerDistanceU: 12
-  warningDurationS: 1.25
+  warningDurationS: 2.5
+  alertExitPaddingU: 3
+  warningHiss: {fileID: 8300000, guid: 34e7c832cfb4cd5448d8d365a2a9f4f9, type: 3}
+  warningHissVolume: 0.3
+  warningHissIntervalS: 2.4
+  warningHissMinDistanceU: 3
+  waitingLookDownDegrees: 35
+  waitingHeadLiftU: 0.7
+  standingFaceHeightU: 2.2
+  standingNeckLengthU: 1.8
+  standingChestLiftU: 0.4
+  bodyTwistDegreesPerU: 480
+  maximumSupportBellyAngle: 75
+  standingBaseHeightU: 1
+  standingCoilOuterRadiusU: 0.8
+  standingCoilInnerRadiusU: 0.35
+  standingCoilTurns: 1.1
+  branchCoilSpanU: 1.8
+  branchCoilTurns: 3
+  sittingCoilRadiusAlongU: 1.05
+  sittingCoilRadiusAcrossU: 0.6
+  sittingCoilInnerScale: 0.35
+  sittingCoilLayerRiseU: 0.36
+  branchSkinClearanceU: 0.01
+  branchHeadForwardU: 0.25
+  hoodNeckSetbackU: 0.24
+  hoodNeckClearanceLengthU: 0.65
+  branchEscapeClearanceU: 0.12
+  branchHeadSideU: 1.1
+  standReleaseDurationS: 0.7
+  standReleaseReachU: 0.15
+  headPoseSharpness: 4
   maxFallDistanceU: 30
+  maximumFallDurationS: 2.5
+  attackSpeedRampS: 0.45
+  attackSideBrakeDistanceU: 0.8
+  treeSurfaceRadiusU: 5
+  treeSurfaceClearanceU: 0.02
+  bellyPressDepthU: 0.06
+  headTrailSmoothTimeS: 0.16
+  headTurnDropU: 1.25
+  headTrackingRangeU: 10
+  headTrackingExitPaddingU: 0.75
+  headLookTurnSpeedDegrees: 300
+  flatHeadPitchDegrees: 16
+  upwardHeadPitchDegrees: 55
+  surfaceHeadTurnDegrees: 25
+  headBarkGapU: 0.015
+  headContactRadiusU: 0.42
+  bodyContactSections: 24
+  steadyAimDistanceU: 2
+  closeAimSwayScale: 0.1
+  headSteeringSharpness: 18
+  minimumApproachFallScale: 0.45
+  approachDropRangeU: 3
+  headAimGain: 6
+  headAimDamping: 1
+  eyeAnchorsReady: 1
+  leftEyeSurfaceLocal: {x: 0.23245883, y: -0.5315881, z: 0.30910403}
+  rightEyeSurfaceLocal: {x: 0.4506514, y: -0.535934, z: 0.11822308}
+  leftEyeNormalLocal: {x: 0.041077737, y: -0.7017314, z: 0.71125644}
+  rightEyeNormalLocal: {x: 0.75730133, y: -0.6373377, z: 0.14246161}
+  eyeWhiteRadiusU: 0.11377119
+  eyePupilRadiusU: 0.038682207
   segmentSpacingU: 0.35
   hitRadiusU: 0.5
+  cartoonAppearance:
+    enabled: 1
+    referenceHead: {fileID: 0}
+    referenceBody: {fileID: 2811962148143008209, guid: d24c080ef5609114e9354b0e29571916, type: 3}
+    skin: {r: 0.25, g: 0.66, b: 0.055, a: 1}
+    belly: {r: 1, g: 0.83, b: 0.32, a: 1}
+    spots: {r: 0.52, g: 0.85, b: 0.16, a: 1}
+    smoothness: 0.38
+    headScale: 1
+  referenceSizeMultiplier: 1.5
+  referenceFaceDirection: {x: -0.435, y: -0.265, z: -0.861}
+  bodyWaveSpeedHz: 1
+  bodyWaveCycles: 0.8
+  swimTurnSharpness: 8
+  smoothBodyLengthU: 15.2
+  smoothBodyRadiusU: 0.24
+  bodyBendDegrees: 38
+  headSwayAmplitudeU: 0.26
+  swimWavelengthU: 3.6
+  headSwayEntryDistanceU: 1.8
+  headGazeStabilization: 0.55
+  neckFollowLengthU: 1.25
+  maximumHeadLeanDegrees: 50
+  risingFaceClearanceU: 0.28
+  neckWaistScale: 0.74
+  releaseCurveDurationS: 1.15
+  headContactBlendLengthU: 0.45
 --- !u!136 &3902953696277176351
 CapsuleCollider:
   m_ObjectHideFlags: 0

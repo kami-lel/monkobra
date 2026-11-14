@@ -1349,7 +1349,33 @@ MonoBehaviour:
   waveAmplitudeU: 0.12
   waveLengthU: 2.5
   waveSpeedHz: 1
+  cartoonAppearance:
+    enabled: 1
+    referenceHead: {fileID: 778248084479127927, guid: 00aa6109974b64c40ac781c2123cc387, type: 3}
+    referenceBody: {fileID: 0}
+    skin: {r: 0.25, g: 0.66, b: 0.055, a: 1}
+    belly: {r: 1, g: 0.83, b: 0.32, a: 1}
+    spots: {r: 0.52, g: 0.85, b: 0.16, a: 1}
+    smoothness: 0.38
+    headScale: 1
+  headFollowSharpness: 5
+  headTurnSpeedDegrees: 180
+  headRaiseStartDistanceU: 9
+  headRaiseFullDistanceU: 3.5
+  proximityHiss: {fileID: 8300000, guid: 34e7c832cfb4cd5448d8d365a2a9f4f9, type: 3}
+  hissStartDistanceU: 7
+  hissExitPaddingU: 1
+  hissIntervalS: 2.8
+  hissVolume: 0.75
+  hissPitch: 0.82
+  hissMinDistanceU: 3
+  hissMaxDistanceU: 35
   eyeSizeU: 0.14
+  peekIntervalRangeS: {x: 4, y: 7}
+  peekRiseU: 3.5
+  peekNeckU: 3.5
+  peekCurlU: 0.8
+  peekTimesS: {x: 0.25, y: 0.4, z: 0.5}
 --- !u!114 &260591372920793710
 MonoBehaviour:
   m_ObjectHideFlags: 0

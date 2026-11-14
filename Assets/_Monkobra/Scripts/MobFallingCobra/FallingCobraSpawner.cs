@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 
 /// <summary>
-/// Hangs dormant <see cref="FallingCobraController"/>s on the trunk of each
+/// Perches dormant <see cref="FallingCobraController"/>s on the trunk of each
 /// <see cref="TreeSegmentController"/> as soon as it has rolled its
 /// branches, on its first Start and after every restart by
 /// <see cref="DynamicTreeSegmentPool"/>, by listening to
@@ -18,10 +18,9 @@ using UnityEngine.Serialization;
 /// removes it.
 /// </para>
 /// <para>
-/// A cobra hangs at a random angle on a ring of <c>spawnRadiusU</c> about the
-/// segment's pivot, which sits on the trunk axis, at a random height that
-/// keeps the whole snake inside the segment. A spot too close to another
-/// cobra of the segment is retried, and skipped when retries run out.
+/// A cobra wraps its resting body around an existing branch of the segment.
+/// A segment without branches receives no cobra. Branches too close to
+/// another cobra are retried, then skipped.
 /// </para>
 /// <para>
 /// Ambush: with <see cref="CobraBalanceConfig.FallingCobraBananaAmbushChance"/>
@@ -197,144 +196,40 @@ public class FallingCobraSpawner: MonoBehaviour {
     }
 
     private bool TrySpawnCobra(TreeSegmentController segment) {
-        Transform segmentXfm = segment.transform;
-
-        // the prefab builds its hit capsule in Awake, so its length is only
-        // known on an instance
-        FallingCobraController cobra = Instantiate(cobraPrefab, segmentXfm);
-
-        // the trunk cylinder is centered on the segment pivot; keep the whole
-        // snake, tail to head, inside the segment's own height
-        float halfHeight = segment.GetHeight() * 0.5f;
-        float tailU = cobra.TailBelowPivotU;
-        float minLocalY = -halfHeight + tailU;
-        float maxLocalY = halfHeight - (cobra.LengthU - tailU);
-        if (maxLocalY < minLocalY) {
-            Destroy(cobra.gameObject);
-            return false;
+        var branches = new List<BoxCollider>();
+        var fruitBranches = new List<BoxCollider>();
+        foreach (BranchController owner in segment.GetComponentsInChildren<BranchController>()) {
+            foreach (BoxCollider box in owner.GetComponentsInChildren<BoxCollider>()) {
+                if (!box.enabled || box.isTrigger || !box.CompareTag("Branch")) continue;
+                branches.Add(box);
+                if (owner.Kind != BranchKind.Empty) fruitBranches.Add(box);
+            }
         }
-
-        // an ambush aims at one banana of the segment, picked once
-        Vector3? bananaLocal = null;
-        if (Random.value < cobraBalanceConfig.FallingCobraBananaAmbushChance) {
-            bananaLocal = PickBananaLocal(segmentXfm);
-        }
-
+        // Every waiting snake needs real wood beneath its coil. No branch means no spawn.
+        if (branches.Count == 0) return false;
+        List<BoxCollider> candidates = fruitBranches.Count > 0 && Random.value < cobraBalanceConfig.FallingCobraBananaAmbushChance
+            ? fruitBranches : branches;
+        FallingCobraController cobra = Instantiate(cobraPrefab, segment.transform);
         for (int attempt = 0; attempt < maxPlacementAttempts; attempt++) {
-            // above a banana, at its angle round the trunk, else anywhere
-            Vector3 localPosition = Vector3.zero;
-            bool isAmbush =
-                bananaLocal.HasValue
-                && TryAmbushLocal(
-                    bananaLocal.Value,
-                    minLocalY,
-                    maxLocalY,
-                    out localPosition
-                );
-            if (!isAmbush) {
-                Quaternion yaw =
-                    Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
-                localPosition =
-                    yaw * Vector3.forward * spawnRadiusU
-                    + Vector3.up * Random.Range(minLocalY, maxLocalY);
-            }
-            Vector3 position = segmentXfm.TransformPoint(localPosition);
-            // only the boss fight grows anything in the boss zone, snake
-            // tail to head included
-            if (
-                IsSnakeInBossZone(position, tailU, cobra.LengthU)
-                || !IsSpotFree(position)
-            ) {
-                // a taken ambush spot falls back to random spots
-                bananaLocal = null;
-                continue;
-            }
-
-            cobra.transform.SetPositionAndRotation(
-                position,
-                segmentXfm.rotation
-            );
+            BoxCollider branch = candidates[Random.Range(0, candidates.Count)];
+            Vector3 branchCenter = branch.transform.TransformPoint(branch.center);
+            Vector3 outward = branchCenter - segment.transform.position;
+            outward.y = 0f; outward.Normalize();
+            Vector3 position = new Vector3(segment.transform.position.x, branchCenter.y, segment.transform.position.z) + outward * spawnRadiusU;
+            cobra.transform.SetPositionAndRotation(position, segment.transform.rotation);
             Physics.SyncTransforms();
-            cobra.Initialize(cobraBalanceConfig, segmentXfm.position);
+            cobra.Initialize(cobraBalanceConfig, segment.transform.position);
+            if (!cobra.AttachToBranch(branch) || !IsSpotFree(cobra.transform.position)) continue;
+            RampedDifficultyManager difficulty = RampedDifficultyManager.I;
+            if (difficulty != null && (difficulty.IsInBossZoneY(cobra.transform.position.y - cobra.TailBelowPivotU)
+                || difficulty.IsInBossZoneY(cobra.transform.position.y)
+                || difficulty.IsInBossZoneY(cobra.transform.position.y + cobra.LengthU - cobra.TailBelowPivotU))) continue;
             spawnedCobras.Add(cobra);
             return true;
         }
-
+        cobra.gameObject.SetActive(false);
         Destroy(cobra.gameObject);
         return false;
-    }
-
-    // iff the snake's tail, pivot or head lies in the boss zone; false w/o a
-    // service
-    private static bool IsSnakeInBossZone(
-        Vector3 pivot,
-        float tailBelowPivotU,
-        float lengthU
-    ) {
-        RampedDifficultyManager difficulty = RampedDifficultyManager.I;
-        return difficulty != null
-            && (
-                difficulty.IsInBossZoneY(pivot.y - tailBelowPivotU)
-                || difficulty.IsInBossZoneY(pivot.y)
-                || difficulty.IsInBossZoneY(
-                    pivot.y + lengthU - tailBelowPivotU
-                )
-            );
-    }
-
-    // a random banana still shown on the segment, in segment-local space,
-    // or null when the segment bears none
-    private static Vector3? PickBananaLocal(Transform segmentXfm) {
-        List<Vector3> bananas = new();
-        foreach (
-            Collider fruit in segmentXfm.GetComponentsInChildren<Collider>()
-        ) {
-            if (fruit.CompareTag(FRUIT_TAG) && fruit.enabled) {
-                // transform, not bounds: a just-placed branch has no
-                // synced physics bounds yet
-                bananas.Add(
-                    segmentXfm.InverseTransformPoint(
-                        fruit.transform.position
-                    )
-                );
-            }
-        }
-        if (bananas.Count == 0) {
-            return null;
-        }
-        return bananas[Random.Range(0, bananas.Count)];
-    }
-
-    // a spot on the cobra ring at the banana's angle, a random height above
-    // it, iff that height keeps the snake inside the segment
-    private bool TryAmbushLocal(
-        Vector3 bananaLocal,
-        float minLocalY,
-        float maxLocalY,
-        out Vector3 localPosition
-    ) {
-        localPosition = Vector3.zero;
-        Vector3 flat = new Vector3(bananaLocal.x, 0f, bananaLocal.z);
-        if (flat.sqrMagnitude < 0.0001f) {
-            return false;
-        }
-
-        float lowY = Mathf.Max(
-            minLocalY,
-            bananaLocal.y + ambushMinAboveBananaU
-        );
-        float highY = Mathf.Min(
-            maxLocalY,
-            bananaLocal.y + ambushMaxAboveBananaU
-        );
-        if (highY < lowY) {
-            return false;
-        }
-
-        localPosition =
-            flat.normalized * spawnRadiusU
-            + Vector3.up * Random.Range(lowY, highY);
-        return true;
     }
 
     private bool IsSpotFree(Vector3 position) {
