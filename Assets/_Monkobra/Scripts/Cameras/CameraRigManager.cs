@@ -325,7 +325,7 @@ public class CameraRigManager: MonoBehaviour {
         if (config == null || cobra == null || cobra.IsGuarding) {
             return;
         }
-        RequestShot(ShotKind.CobraAlert, config.CobraAlertShot.DurationS);
+        if (RequestShot(ShotKind.CobraAlert, config.CobraAlertShot.DurationS)) cobra.PlayChaseAlertHiss();
     }
 
     private CameraConfig.ShotSettings GetSettings(ShotKind kind) {

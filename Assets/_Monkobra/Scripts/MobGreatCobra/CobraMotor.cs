@@ -334,7 +334,8 @@ public class CobraMotor: MonoBehaviour {
     [SerializeField, Range(.1f,2f)] private float hissPitch = .82f;
     [SerializeField, Min(.1f)] private float hissMinDistanceU = 3f;
     [SerializeField, Min(.1f)] private float hissMaxDistanceU = 35f;
-    private AudioSource proximityHissSource;
+    [SerializeField, Range(0f,1f)] private float chaseAlertHissVolume = .85f;
+    private AudioSource proximityHissSource,chaseAlertHissSource;
     private CapsuleCollider[] hissBodyShapes;
     private float nextProximityHissTime;
     private bool wasInHissRange;
@@ -358,10 +359,29 @@ public class CobraMotor: MonoBehaviour {
         proximityHissSource.rolloffMode=AudioRolloffMode.Linear;
         proximityHissSource.minDistance=hissMinDistanceU;
         proximityHissSource.maxDistance=Mathf.Max(hissMinDistanceU,hissMaxDistanceU);
+        var alert=new GameObject("GreatCobraChaseAlertHiss");
+        alert.transform.SetParent(transform,false);
+        chaseAlertHissSource=alert.AddComponent<AudioSource>();
+        chaseAlertHissSource.clip=proximityHiss;
+        chaseAlertHissSource.playOnAwake=false;
+        chaseAlertHissSource.loop=false;
+        chaseAlertHissSource.volume=chaseAlertHissVolume;
+        chaseAlertHissSource.pitch=hissPitch;
+        // The introduction shot must be audible while the monkey is still far above the cobra.
+        chaseAlertHissSource.spatialBlend=0f;
+    }
+
+    public void PlayChaseAlertHiss() {
+        if(chaseAlertHissSource==null || !isActiveAndEnabled || isGuarding || isFrozen)return;
+        StopProximityHiss();
+        chaseAlertHissSource.Play();
+        nextProximityHissTime=Time.time+Mathf.Max(hissIntervalS,proximityHiss.length/Mathf.Max(.1f,hissPitch));
     }
 
     private void UpdateProximityHiss(Vector3 headPosition) {
         if (proximityHissSource == null) return;
+        if(chaseAlertHissSource!=null && (isFrozen || isGuarding || (GameController.I!=null && !GameController.I.IsRunLive)))chaseAlertHissSource.Stop();
+        bool alertPlaying=chaseAlertHissSource!=null && chaseAlertHissSource.isPlaying;
         Vector3 nearest=headPosition;
         float distanceSquared=player!=null?(player.position-nearest).sqrMagnitude:float.PositiveInfinity;
         if(player!=null && hissBodyShapes!=null)foreach(var shape in hissBodyShapes) {
@@ -375,9 +395,9 @@ public class CobraMotor: MonoBehaviour {
             && (GameController.I == null || GameController.I.IsRunLive)
             && distanceSquared<=Mathf.Pow(hissStartDistanceU+(wasInHissRange?hissExitPaddingU:0f),2f);
         if (!near) { StopProximityHiss(); return; }
-        if (!wasInHissRange) nextProximityHissTime=Time.time;
+        if (!wasInHissRange && !alertPlaying) nextProximityHissTime=Time.time;
         wasInHissRange=true;
-        if (Time.time>=nextProximityHissTime && !proximityHissSource.isPlaying) {
+        if (!alertPlaying && Time.time>=nextProximityHissTime && !proximityHissSource.isPlaying) {
             proximityHissSource.Play();
             nextProximityHissTime=Time.time+Mathf.Max(hissIntervalS,proximityHiss.length/Mathf.Max(.1f,hissPitch));
         }
@@ -388,7 +408,10 @@ public class CobraMotor: MonoBehaviour {
         if (proximityHissSource!=null && proximityHissSource.isPlaying) proximityHissSource.Stop();
     }
 
-    private void OnDisable() { StopProximityHiss(); }
+    private void OnDisable() {
+        StopProximityHiss();
+        if(chaseAlertHissSource!=null)chaseAlertHissSource.Stop();
+    }
 
     private Quaternion cartoonHeadRotation;
     private bool cartoonHeadRotationInitialized;
