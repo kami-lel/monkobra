@@ -1,6 +1,7 @@
 # Monkobra CHANGELOG
 
 <!--
+BUG cobra king boss fight 1st watermelon tutorial, be popup like
 bug make leaderboard works
 fixme mpv ramping during normal gameplay
 todo lighting improvement
